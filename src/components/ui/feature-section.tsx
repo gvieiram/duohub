@@ -88,12 +88,14 @@ function StackedCard({
 	const cardRef = useRef<HTMLDivElement>(null);
 	const scale = useTransform(progress, range, [1, targetScale]);
 
-	const scaleY = useTransform(
+	const clipBottom = useTransform(
 		progress,
 		shrinkRange
 			? [shrinkRange[0] - 0.05, shrinkRange[0], shrinkRange[1]]
 			: [0, 0.5, 1],
-		shrinkRange ? [1, 1, 0.8] : [1, 1, 1],
+		shrinkRange
+			? ["inset(0 0 0% 0)", "inset(0 0 0% 0)", "inset(0 0 20% 0)"]
+			: ["inset(0 0 0% 0)", "inset(0 0 0% 0)", "inset(0 0 0% 0)"],
 	);
 
 	return (
@@ -104,14 +106,14 @@ function StackedCard({
 			<motion.div
 				style={{
 					scale,
-					scaleY,
 					top: `calc(${index * 30}px)`,
 				}}
-				className="relative mx-auto w-full max-w-5xl origin-top px-4"
+				className="relative mx-auto w-full max-w-5xl origin-top px-4 drop-shadow-lg"
 			>
-				<div
+				<motion.div
+					style={{ clipPath: clipBottom }}
 					className={cn(
-						"flex min-h-[calc(100vh-15rem)] flex-col justify-between gap-8 rounded-2xl border p-10 shadow-lg md:p-16",
+						"flex min-h-[calc(100vh-15rem)] flex-col justify-between gap-8 rounded-2xl border p-10 md:p-16",
 						feature.accentClassName || "bg-background",
 					)}
 				>
@@ -151,7 +153,7 @@ function StackedCard({
 							<a href={feature.cta.href}>{feature.cta.label}</a>
 						</Button>
 					</div>
-				</div>
+				</motion.div>
 			</motion.div>
 		</div>
 	);
