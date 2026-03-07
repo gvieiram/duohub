@@ -1,4 +1,5 @@
 import { AboutSection } from "@/components/ui/about-section";
+import { CampaignSection } from "@/components/ui/campaign-section";
 import type { FeatureCardData } from "@/components/ui/feature-section";
 import { StackedFeatures } from "@/components/ui/feature-section";
 import { Footer } from "@/components/ui/footer";
@@ -106,6 +107,7 @@ export default function Home() {
 				<StackedFeatures features={features} />
 				<AboutSection />
 				<TestimonialsSection />
+				<CampaignSection />
 			</main>
 			<Footer />
 		</div>
