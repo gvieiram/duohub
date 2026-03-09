@@ -5,6 +5,7 @@ import type { FeatureCardData } from "@/components/ui/feature-section";
 import { StackedFeatures } from "@/components/ui/feature-section";
 import { Footer } from "@/components/ui/footer";
 import { HeroSection, LogosSection } from "@/components/ui/hero";
+import { TestimonialsSection } from "@/components/ui/testimonials-section";
 
 const features: FeatureCardData[] = [
 	{
@@ -106,7 +107,7 @@ export default function Home() {
 				<LogosSection />
 				<StackedFeatures features={features} />
 				<AboutSection />
-				{/* <TestimonialsSection /> */}
+				<TestimonialsSection />
 				<FaqSection />
 				<CtaSection />
 			</main>
