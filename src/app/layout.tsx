@@ -51,7 +51,7 @@ export default function RootLayout({
 							href: "https://wa.me/5511999999999?text=Olá! Gostaria de saber sobre a declaração do IR 2026",
 							external: true,
 						}}
-						position="top"
+						position="bottom"
 					/>
 				</Providers>
 			</body>
