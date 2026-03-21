@@ -179,6 +179,7 @@
 	--font-mono: var(--font-jetbrains-mono);
 	--font-logo: var(--font-playfair);
 	--font-subtitle: var(--font-inter);
+	--font-inter: var(--font-inter);
 }
 
 @layer base {

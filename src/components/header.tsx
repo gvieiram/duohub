@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { AnimatedLogo } from "@/components/animated-logo";
 import { AnimatedThemeToggle } from "@/components/animated-theme-toggle";
+import { Logo } from "@/components/logo";
 import { MenuToggleIcon } from "@/components/menu-toggle-icon";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useScroll } from "@/hooks/use-scroll";
@@ -36,7 +36,7 @@ export function Header() {
 			})}
 		>
 			<nav className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-4">
-				<AnimatedLogo logoSize={28} textClassName="text-lg" />
+				<Logo />
 				<div className="hidden items-center gap-2 md:flex">
 					{links.map((link) => (
 						<a

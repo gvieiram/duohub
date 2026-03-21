@@ -1,7 +1,7 @@
 import { InstagramIcon, LinkedinIcon, MessageCircleIcon } from "lucide-react";
 import Link from "next/link";
+import { Logo } from "@/components/logo";
 import { Separator } from "@/components/ui/separator";
-import { Wordmark } from "@/components/wordmark";
 import { company } from "@/content/company";
 import { messages } from "@/content/messages";
 
@@ -34,12 +34,8 @@ export function Footer() {
 		<footer className="w-full border-t">
 			<div className="mx-auto w-full max-w-5xl px-4 py-8">
 				<div className="flex flex-col items-center gap-6 md:flex-row md:items-center md:justify-between">
-					<Link
-						href="/"
-						className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-						aria-label={messages.home.footer.ariaLabelHome}
-					>
-						<Wordmark />
+					<Link href="/" aria-label={messages.home.footer.ariaLabelHome}>
+						<Logo size="lg" animated={false} />
 					</Link>
 					<nav
 						className="flex flex-wrap justify-center gap-x-6 gap-y-2"

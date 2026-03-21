@@ -85,35 +85,47 @@ const subtitleVariants: Variants = {
 	},
 };
 
-type AnimatedLogoProps = {
+const SIZE_PRESETS = {
+	sm: { logo: 28, text: "text-lg", subtitle: "text-[0.45rem]" },
+	md: { logo: 30, text: "text-xl", subtitle: "text-[0.55rem]" },
+	lg: { logo: 38, text: "text-2xl", subtitle: "text-xs" },
+} as const;
+
+type LogoSize = keyof typeof SIZE_PRESETS;
+
+type LogoProps = {
 	className?: string;
-	logoSize?: number;
-	textClassName?: string;
+	size?: LogoSize;
 	subtitleClassName?: string;
+	showSubtitle?: boolean;
+	animated?: boolean;
 };
 
-export function AnimatedLogo({
+export function Logo({
 	className,
-	logoSize = 40,
-	textClassName,
+	size = "md",
 	subtitleClassName,
-}: AnimatedLogoProps) {
+	showSubtitle = true,
+	animated = true,
+}: LogoProps) {
+	const { logo, text, subtitle } = SIZE_PRESETS[size];
+
 	return (
 		<motion.div
 			className={cn("flex items-center gap-2", className)}
-			initial="hidden"
+			initial={animated ? "hidden" : "visible"}
 			animate="visible"
 			aria-label={company.brand.name}
 		>
 			<motion.div variants={logoVariants}>
-				<LogoIcon size={logoSize} />
+				<LogoIcon size={logo} />
 			</motion.div>
 			<div className="flex flex-col">
 				<motion.div variants={textRevealVariants} className="overflow-hidden">
 					<span
 						className={cn(
-							"flex select-none whitespace-nowrap font-logo font-semibold text-2xl tracking-wide",
-							textClassName,
+							"flex select-none whitespace-nowrap font-logo font-semibold tracking-wide",
+							text,
 						)}
 					>
 						{LETTERS.map((letter, i) => (
@@ -128,17 +140,23 @@ export function AnimatedLogo({
 						))}
 					</span>
 				</motion.div>
-				<motion.div variants={subtitleWrapVariants} className="overflow-hidden">
-					<motion.span
-						variants={subtitleVariants}
-						className={cn(
-							"block select-none font-medium font-subtitle text-[0.55rem] text-primary uppercase tracking-[0.45em]",
-							subtitleClassName,
-						)}
+				{showSubtitle && (
+					<motion.div
+						variants={subtitleWrapVariants}
+						className="overflow-hidden"
 					>
-						Empresarial
-					</motion.span>
-				</motion.div>
+						<motion.span
+							variants={subtitleVariants}
+							className={cn(
+								"block select-none font-medium font-subtitle text-primary uppercase tracking-[0.45em]",
+								subtitle,
+								subtitleClassName,
+							)}
+						>
+							Empresarial
+						</motion.span>
+					</motion.div>
+				)}
 			</div>
 		</motion.div>
 	);

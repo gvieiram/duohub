@@ -12,6 +12,7 @@ export const company = {
 			duo: "Duo",
 			hub: "Hub",
 		},
+		subtitle: "Empresarial",
 	},
 	contacts: {
 		whatsappNumber,
