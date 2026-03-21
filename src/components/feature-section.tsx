@@ -7,8 +7,8 @@ import {
 	useTransform,
 } from "framer-motion";
 import { CheckIcon } from "lucide-react";
+import Image from "next/image";
 import { useRef } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -30,11 +30,78 @@ export type FeatureCardData = {
 	bullets: Bullet[];
 	cta: FeatureSectionCta;
 	accentClassName?: string;
+	illustration?: string;
+	illustrationAlt?: string;
 };
 
 type StackedFeaturesProps = {
 	features: FeatureCardData[];
 };
+
+function FeatureCardContent({ feature }: { feature: FeatureCardData }) {
+	return (
+		<>
+			<div className="flex flex-1 flex-col gap-5 md:gap-8">
+				<div className="flex flex-col gap-3">
+					<span className="inline-flex items-center gap-2 font-medium text-highlight text-sm">
+						<span className="h-px w-4 bg-highlight" aria-hidden="true" />
+						{feature.badge}
+					</span>
+					<h2 className="font-heading text-2xl tracking-tight md:text-4xl lg:text-5xl">
+						{feature.title}
+					</h2>
+				</div>
+
+				<p className="max-w-2xl text-muted-foreground text-sm leading-relaxed md:text-base lg:text-lg">
+					{feature.description}
+				</p>
+
+				<div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-8">
+					{feature.illustration && (
+						<div className="hidden md:block md:w-2/5 md:shrink-0">
+							<div className="relative aspect-4/3 overflow-hidden rounded-xl">
+								<Image
+									src={feature.illustration}
+									alt={feature.illustrationAlt ?? ""}
+									fill
+									className="object-cover"
+								/>
+							</div>
+						</div>
+					)}
+
+					<div className="grid grid-cols-1 gap-y-3 md:flex-1 md:gap-y-4">
+						{feature.bullets.map((bullet) => (
+							<div
+								key={bullet.title}
+								className="flex items-start gap-2.5 md:gap-3"
+							>
+								<CheckIcon className="mt-0.5 size-4 shrink-0 text-highlight" />
+								<div className="flex flex-col gap-0.5">
+									<p className="font-medium text-sm">{bullet.title}</p>
+									<p className="text-muted-foreground text-sm">
+										{bullet.description}
+									</p>
+								</div>
+							</div>
+						))}
+					</div>
+				</div>
+			</div>
+
+			<div className="flex justify-end">
+				<Button
+					variant={feature.cta.variant ?? "default"}
+					size="sm"
+					className="md:h-10 md:px-6 md:text-sm"
+					asChild
+				>
+					<a href={feature.cta.href}>{feature.cta.label}</a>
+				</Button>
+			</div>
+		</>
+	);
+}
 
 export function StackedFeatures({ features }: StackedFeaturesProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -46,7 +113,7 @@ export function StackedFeatures({ features }: StackedFeaturesProps) {
 	const total = features.length;
 
 	return (
-		<section ref={containerRef} className="mt-40 md:mt-52">
+		<section ref={containerRef} className="mt-24 md:mt-52">
 			{features.map((feature, i) => {
 				const targetScale = 1 - (total - i) * 0.05;
 				const isLast = i === total - 1;
@@ -101,7 +168,7 @@ function StackedCard({
 	return (
 		<div
 			ref={cardRef}
-			className="sticky top-18 flex h-screen items-start justify-center pt-8"
+			className="sticky top-18 flex h-screen items-start justify-center pt-6 md:pt-8"
 		>
 			<motion.div
 				style={{
@@ -113,46 +180,11 @@ function StackedCard({
 				<motion.div
 					style={{ clipPath: clipBottom }}
 					className={cn(
-						"flex min-h-[calc(100vh-15rem)] flex-col justify-between gap-8 rounded-2xl border p-10 md:p-16",
+						"flex min-h-[calc(100svh-10rem)] flex-col gap-5 rounded-2xl border p-6 md:min-h-0 md:gap-8 md:p-10 lg:p-16",
 						feature.accentClassName || "bg-background",
 					)}
 				>
-					<div className="flex flex-col gap-3">
-						<Badge variant="secondary" className="w-fit text-foreground">
-							{feature.badge}
-						</Badge>
-						<h2 className="font-heading text-3xl tracking-tight md:text-5xl">
-							{feature.title}
-						</h2>
-					</div>
-
-					<div className="flex flex-col gap-6">
-						<p className="max-w-2xl text-base text-muted-foreground leading-relaxed md:text-lg">
-							{feature.description}
-						</p>
-						<div className="grid gap-4 sm:grid-cols-2 md:pl-1">
-							{feature.bullets.map((bullet) => (
-								<div
-									key={bullet.title}
-									className="flex flex-row items-start gap-3"
-								>
-									<CheckIcon className="mt-1 size-4 shrink-0 text-highlight" />
-									<div className="flex flex-col gap-0.5">
-										<p className="font-medium text-sm">{bullet.title}</p>
-										<p className="text-muted-foreground text-sm">
-											{bullet.description}
-										</p>
-									</div>
-								</div>
-							))}
-						</div>
-					</div>
-
-					<div className="flex justify-end">
-						<Button variant={feature.cta.variant ?? "default"} asChild>
-							<a href={feature.cta.href}>{feature.cta.label}</a>
-						</Button>
-					</div>
+					<FeatureCardContent feature={feature} />
 				</motion.div>
 			</motion.div>
 		</div>

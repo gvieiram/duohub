@@ -52,6 +52,8 @@ export const home = {
 				label: "Conheça nossos serviços",
 				href: "#servicos",
 			},
+			illustration: "/illustrations/services.png",
+			illustrationAlt: "Ilustração de documentos financeiros organizados",
 		},
 		{
 			badge: "Por que nos escolher",
@@ -80,6 +82,9 @@ export const home = {
 				label: "Fale com um especialista",
 				href: "#contato",
 			},
+			illustration: "/illustrations/why-choose-us.png",
+			illustrationAlt:
+				"Ilustração de um computador com um gráfico de satisfação dos clientes",
 		},
 		{
 			badge: "Resultados reais",
@@ -107,6 +112,8 @@ export const home = {
 				label: "Começar agora",
 				href: "#comecar",
 			},
+			illustration: "/illustrations/results.png",
+			illustrationAlt: "Ilustração de um gráfico de resultados financeiros",
 		},
 	] satisfies FeatureCardData[],
 	about: {
