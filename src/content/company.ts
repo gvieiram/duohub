@@ -8,6 +8,10 @@ export const company = {
 	brand: {
 		name: "DuoHub Empresarial",
 		displayName: "DuoHub",
+		displayNameProps: {
+			duo: "Duo",
+			hub: "Hub",
+		},
 	},
 	contacts: {
 		whatsappNumber,

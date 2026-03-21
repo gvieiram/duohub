@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono, Marcellus, Plus_Jakarta_Sans } from "next/font/google";
+import {
+	JetBrains_Mono,
+	Marcellus,
+	Playfair_Display,
+	Plus_Jakarta_Sans,
+} from "next/font/google";
 import { Banner } from "@/components/banner";
 import { Providers } from "@/components/providers";
 import "./globals.css";
@@ -22,6 +27,11 @@ const jetbrainsMono = JetBrains_Mono({
 	subsets: ["latin"],
 });
 
+const playfairDisplay = Playfair_Display({
+	variable: "--font-playfair",
+	subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
 	title: "Accounting",
 	description: "Professional accounting services",
@@ -36,7 +46,7 @@ export default function RootLayout({
 		<html lang="pt-BR" suppressHydrationWarning>
 			<body
 				suppressHydrationWarning
-				className={`${plusJakartaSans.variable} ${marcellus.variable} ${jetbrainsMono.variable} antialiased`}
+				className={`${plusJakartaSans.variable} ${marcellus.variable} ${jetbrainsMono.variable} ${playfairDisplay.variable} antialiased`}
 			>
 				<Providers>
 					<Header />

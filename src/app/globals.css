@@ -177,6 +177,7 @@
 	--font-sans: var(--font-plus-jakarta);
 	--font-heading: var(--font-marcellus);
 	--font-mono: var(--font-jetbrains-mono);
+	--font-logo: var(--font-playfair);
 }
 
 @layer base {
