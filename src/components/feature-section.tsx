@@ -118,7 +118,7 @@ function StackedCard({
 					)}
 				>
 					<div className="flex flex-col gap-3">
-						<Badge variant="outline" className="w-fit">
+						<Badge variant="secondary" className="w-fit text-foreground">
 							{feature.badge}
 						</Badge>
 						<h2 className="font-heading text-3xl tracking-tight md:text-5xl">
@@ -148,7 +148,7 @@ function StackedCard({
 						</div>
 					</div>
 
-					<div>
+					<div className="flex justify-end">
 						<Button variant={feature.cta.variant ?? "default"} asChild>
 							<a href={feature.cta.href}>{feature.cta.label}</a>
 						</Button>

@@ -25,7 +25,7 @@ export const home = {
 			title: "Serviços contábeis completos para o seu negócio",
 			description:
 				"A DuoHub cuida de toda a gestão contábil da sua empresa, desde a escrituração até o planejamento tributário, para que você foque no crescimento do seu negócio.",
-			accentClassName: "bg-stack-1 border-stack-1",
+			// accentClassName: "bg-muted border-muted",
 			bullets: [
 				{
 					title: "Gestão fiscal e tributária",
@@ -58,7 +58,7 @@ export const home = {
 			title: "Tecnologia e proximidade em cada detalhe",
 			description:
 				"Combinamos uma plataforma digital moderna com atendimento humano e próximo. Você acompanha tudo online e conta com especialistas sempre disponíveis.",
-			accentClassName: "bg-stack-2 border-stack-2",
+			// accentClassName: "bg-muted border-muted",
 			bullets: [
 				{
 					title: "Plataforma 100% digital",
@@ -79,7 +79,6 @@ export const home = {
 			cta: {
 				label: "Fale com um especialista",
 				href: "#contato",
-				variant: "secondary",
 			},
 		},
 		{
@@ -87,7 +86,7 @@ export const home = {
 			title: "Foque no que importa, a gente cuida do resto",
 			description:
 				"Deixe a burocracia contábil com quem entende. Liberamos seu tempo para que você possa se dedicar ao que realmente faz o seu negócio crescer.",
-			accentClassName: "bg-stack-3 border-stack-3",
+			// accentClassName: "bg-muted border-muted",
 			bullets: [
 				{
 					title: "Economia de tempo",
