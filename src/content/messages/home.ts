@@ -149,6 +149,7 @@ export const home = {
 				],
 			},
 		],
+		valuesTitle: "O que nos guia",
 		values: [
 			{
 				title: "Tecnologia",

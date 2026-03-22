@@ -167,9 +167,11 @@ function DuoModelBlock({
 }
 
 function ValuesBlock({
+	title,
 	values,
 	shouldReduceMotion,
 }: {
+	title: string;
 	values: readonly AboutValue[];
 	shouldReduceMotion: boolean;
 }) {
@@ -192,34 +194,51 @@ function ValuesBlock({
 	};
 
 	return (
-		<motion.div
-			className="mt-16 grid grid-cols-2 gap-6 md:mt-20 md:grid-cols-4"
-			initial="hidden"
-			variants={containerVariants}
-			viewport={{ once: true }}
-			whileInView="visible"
-		>
-			{values.map((value) => {
-				const Icon = iconMap[value.icon as keyof typeof iconMap];
-				return (
-					<motion.div
-						key={value.title}
-						className="flex flex-col items-center gap-3 text-center"
-						variants={itemVariants}
-					>
-						<div className="flex size-12 items-center justify-center rounded-lg bg-primary/10">
-							{Icon ? (
-								<Icon aria-hidden className="size-8 text-primary" />
-							) : null}
-						</div>
-						<h3 className="font-medium text-sm">{value.title}</h3>
-						<p className="text-muted-foreground text-xs md:text-sm">
-							{value.description}
-						</p>
-					</motion.div>
-				);
-			})}
-		</motion.div>
+		<div className="mt-16 md:mt-20">
+			<motion.h2
+				className="mb-8 text-center font-heading text-2xl tracking-tight md:mb-10 md:text-3xl"
+				initial={
+					shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }
+				}
+				transition={
+					shouldReduceMotion
+						? { duration: 0 }
+						: { duration: 0.5, ease: easeOut }
+				}
+				viewport={{ once: true }}
+				whileInView={{ opacity: 1, y: 0 }}
+			>
+				{title}
+			</motion.h2>
+			<motion.div
+				className="grid grid-cols-2 gap-6 md:grid-cols-4"
+				initial="hidden"
+				variants={containerVariants}
+				viewport={{ once: true }}
+				whileInView="visible"
+			>
+				{values.map((value) => {
+					const Icon = iconMap[value.icon as keyof typeof iconMap];
+					return (
+						<motion.div
+							key={value.title}
+							className="flex flex-col items-center gap-3 text-center"
+							variants={itemVariants}
+						>
+							<div className="flex size-12 items-center justify-center rounded-lg bg-primary/10">
+								{Icon ? (
+									<Icon aria-hidden className="size-8 text-primary" />
+								) : null}
+							</div>
+							<h3 className="font-medium text-sm">{value.title}</h3>
+							<p className="text-muted-foreground text-xs md:text-sm">
+								{value.description}
+							</p>
+						</motion.div>
+					);
+				})}
+			</motion.div>
+		</div>
 	);
 }
 
@@ -246,6 +265,7 @@ export function AboutSection() {
 			/>
 			<ValuesBlock
 				shouldReduceMotion={shouldReduceMotion}
+				title={about.valuesTitle}
 				values={about.values}
 			/>
 		</section>
