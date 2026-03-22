@@ -2,14 +2,29 @@ import type { FeatureCardData } from "@/components/feature-section";
 import { company } from "../company";
 
 export const home = {
+	metadata: {
+		title: `${company.brand.name} — Contabilidade Digital para Micro e Pequenas Empresas`,
+		description:
+			"Gestão contábil, fiscal e tributária com tecnologia e atendimento especializado. Plataforma 100% digital para MEI, ME e startups.",
+	},
+	banner: {
+		title: "Imposto de Renda 2026",
+		description: "Prazo até 30 de maio. Não deixe para a última hora!",
+		storageKey: "ir-2026",
+		cta: {
+			label: "Declarar agora",
+			whatsappText: "Olá! Gostaria de saber sobre a declaração do IR 2026",
+		},
+	},
 	hero: {
 		kicker: "Plataforma 100% digital",
-		kickerHref: "#link",
+		kickerHref: "#servicos",
 		title: "Contabilidade moderna \n para o seu negócio",
 		description:
 			"Gestão fiscal, tributária e financeira \n com tecnologia e atendimento especializado",
 		primaryCta: {
 			label: "Começar agora",
+			href: "#contato",
 		},
 		secondaryCta: {
 			label: "Fale conosco",
@@ -18,6 +33,40 @@ export const home = {
 	logos: {
 		titlePrefix: "Confiança de quem ",
 		titleEmphasis: "entende",
+		clients: [
+			{
+				src: "/logos/clients/nvidia-wordmark.svg",
+				alt: "Logo da Nvidia",
+			},
+			{
+				src: "/logos/clients/supabase-wordmark.svg",
+				alt: "Logo da Supabase",
+			},
+			{
+				src: "/logos/clients/openai-wordmark.svg",
+				alt: "Logo da OpenAI",
+			},
+			{
+				src: "/logos/clients/turso-wordmark.svg",
+				alt: "Logo da Turso",
+			},
+			{
+				src: "/logos/clients/vercel-wordmark.svg",
+				alt: "Logo da Vercel",
+			},
+			{
+				src: "/logos/clients/github-wordmark.svg",
+				alt: "Logo do GitHub",
+			},
+			{
+				src: "/logos/clients/claude-wordmark.svg",
+				alt: "Logo da Claude AI",
+			},
+			{
+				src: "/logos/clients/clerk-wordmark.svg",
+				alt: "Logo da Clerk",
+			},
+		],
 	},
 	features: [
 		{
@@ -50,7 +99,7 @@ export const home = {
 			],
 			cta: {
 				label: "Conheça nossos serviços",
-				href: "#servicos",
+				href: "#contato",
 			},
 			illustration: "/illustrations/services.png",
 			illustrationAlt: "Ilustração de documentos financeiros organizados",
@@ -110,32 +159,68 @@ export const home = {
 			],
 			cta: {
 				label: "Começar agora",
-				href: "#comecar",
+				href: "#contato",
 			},
 			illustration: "/illustrations/results.png",
 			illustrationAlt: "Ilustração de um gráfico de resultados financeiros",
 		},
 	] satisfies FeatureCardData[],
 	about: {
-		title: "Conheça quem cuida do seu negócio",
-		partners: [
+		badge: "Sobre a DuoHub",
+		title: "Duas formas de cuidar do seu negócio",
+		description:
+			"A DuoHub nasceu de uma convicção: contabilidade não precisa ser complicada. Criamos um modelo flexível que se adapta ao momento de cada empreendedor — seja quem precisa de um parceiro de longo prazo ou de uma solução rápida e certeira.",
+		models: [
 			{
-				name: "Franciele",
-				role: "Sócia-fundadora · Contabilidade Estratégica",
-				initials: "FR",
-				image: "/Franciele.png",
-				bio: "Experiência em contabilidade de ponta a ponta: abertura, escrituração, obrigações acessórias e planejamento tributário. Relacionamento próximo com clientes e foco em fidelização de longo prazo.",
+				title: "Contabilidade Contínua",
+				description:
+					"Para quem quer um parceiro de verdade. Acompanhamos o dia a dia do seu negócio, antecipamos problemas e crescemos junto com você. É como ter um braço direito contábil sempre ao seu lado.",
+				icon: "RefreshCw",
+				accentColor: "primary" as const,
+				bullets: [
+					"Parceria de longo prazo",
+					"Acompanhamento mensal dedicado",
+					"Visão estratégica do negócio",
+					"Suporte contínuo e proativo",
+				],
 			},
 			{
-				name: "Samantha",
-				role: "Sócia · Consultoria Sob Demanda",
-				initials: "SA",
-				image: "/Samantha.png",
-				bio: "Especialista em consultoria contábil sob demanda, inovação digital e soluções escaláveis. Atua em serviços pontuais e delimitados para empresas que buscam agilidade.",
+				title: "Consultoria Sob Demanda",
+				description:
+					"Para quem sabe o que precisa e quer resolver rápido. Sem contrato de fidelidade, sem burocracia. Você nos aciona, a gente entrega — simples assim.",
+				icon: "Zap",
+				accentColor: "highlight" as const,
+				bullets: [
+					"Sem compromisso de longo prazo",
+					"Escopo definido e objetivo",
+					"Entrega ágil e direta",
+					"Você no controle do investimento",
+				],
 			},
 		],
-		conclusion:
-			"A DuoHub combina contabilidade contínua e consultoria sob demanda: atendimento recorrente para quem precisa de acompanhamento completo e serviços pontuais para quem busca soluções específicas e ágeis.",
+		valuesTitle: "No que acreditamos",
+		values: [
+			{
+				title: "Parceria real",
+				description: "Seu sucesso é o nosso. Tratamos cada cliente como único",
+				icon: "HeartHandshake",
+			},
+			{
+				title: "Sem complicação",
+				description: "Contabilidade traduzida para a linguagem do empreendedor",
+				icon: "Lightbulb",
+			},
+			{
+				title: "Evolução constante",
+				description: "Sempre buscando formas melhores de entregar resultado",
+				icon: "RefreshCw",
+			},
+			{
+				title: "Honestidade radical",
+				description: "Falamos o que você precisa ouvir, não o que quer ouvir",
+				icon: "Eye",
+			},
+		],
 	},
 	testimonials: {
 		badge: "Depoimentos",
@@ -262,10 +347,10 @@ export const home = {
 			"Entre em contato agora e descubra como podemos ajudar o seu negócio a crescer com tranquilidade.",
 		whatsappText: "Olá! Gostaria de saber mais sobre os serviços da DuoHub.",
 		form: {
-			namePlaceholder: "Nome",
-			emailPlaceholder: "E-mail",
-			phonePlaceholder: "Telefone",
-			messagePlaceholder: "Mensagem (opcional)",
+			nameLabel: "Nome",
+			emailLabel: "E-mail",
+			phoneLabel: "Telefone",
+			messageLabel: "Mensagem (opcional)",
 			submitLabel: "Enviar",
 		},
 	},
@@ -275,14 +360,10 @@ export const home = {
 	},
 	header: {
 		links: [
-			{ label: "Serviços", href: "#" },
-			{ label: "Planos", href: "#" },
-			{ label: "Sobre", href: "#" },
+			{ label: "Serviços", href: "#servicos" },
+			{ label: "Sobre", href: "#sobre" },
+			{ label: "Contato", href: "#contato" },
 		],
-		desktopCtas: {
-			login: "Entrar",
-			start: "Começar",
-		},
 	},
 } as const;
 
