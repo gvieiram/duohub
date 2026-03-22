@@ -9,8 +9,9 @@ import {
 	ShieldCheck,
 	Zap,
 } from "lucide-react";
-import { messages } from "@/content/messages";
+import type { messages } from "@/content/messages";
 import { cn } from "@/lib/utils";
+import { useMessages } from "@/stores/use-content-store";
 
 type AboutModel = (typeof messages.home.about.models)[number];
 type AboutValue = (typeof messages.home.about.values)[number];
@@ -64,6 +65,7 @@ function MissionBlock({
 			</motion.div>
 			<motion.h2
 				className="text-center font-heading text-3xl tracking-tight md:text-4xl lg:text-5xl"
+				id="about-heading"
 				initial={hidden}
 				transition={baseTransition(1)}
 				viewport={{ once: true }}
@@ -210,7 +212,7 @@ function ValuesBlock({
 								<Icon aria-hidden className="size-8 text-primary" />
 							) : null}
 						</div>
-						<p className="font-medium text-sm">{value.title}</p>
+						<h3 className="font-medium text-sm">{value.title}</h3>
 						<p className="text-muted-foreground text-xs md:text-sm">
 							{value.description}
 						</p>
@@ -222,11 +224,13 @@ function ValuesBlock({
 }
 
 export function AboutSection() {
+	const messages = useMessages();
 	const about = messages.home.about;
 	const shouldReduceMotion = useReducedMotion() ?? false;
 
 	return (
 		<section
+			aria-labelledby="about-heading"
 			className="mx-auto w-full max-w-5xl px-4 py-24 md:py-32"
 			id="about"
 		>
