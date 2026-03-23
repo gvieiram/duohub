@@ -72,7 +72,7 @@ export function Header() {
 			const prefersReducedMotion = window.matchMedia(
 				"(prefers-reduced-motion: reduce)",
 			).matches;
-			smoothScrollTo(target, prefersReducedMotion ? 0 : 800);
+			smoothScrollTo(target, prefersReducedMotion ? 0 : 1300);
 			history.pushState(null, "", href);
 			if (target instanceof HTMLElement) {
 				target.focus({ preventScroll: true });
