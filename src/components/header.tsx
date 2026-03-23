@@ -72,7 +72,7 @@ export function Header() {
 								buttonVariants({ variant: "ghost" }),
 								link.href.startsWith("#") &&
 									activeSection === link.href.slice(1) &&
-									"bg-accent text-accent-foreground",
+									"font-semibold",
 							)}
 							href={link.href}
 							onClick={(e) => handleAnchorClick(e, link.href)}
@@ -107,7 +107,7 @@ export function Header() {
 									"justify-start",
 									link.href.startsWith("#") &&
 										activeSection === link.href.slice(1) &&
-										"bg-accent text-accent-foreground",
+										"font-semibold",
 								),
 							})}
 							href={link.href}
