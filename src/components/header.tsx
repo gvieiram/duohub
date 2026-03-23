@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import type { MouseEvent } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { Logo } from "@/components/logo";
 import { MenuToggleIcon } from "@/components/menu-toggle-icon";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { useActiveSection } from "@/hooks/use-active-section";
 import { useScroll } from "@/hooks/use-scroll";
 import { cn } from "@/lib/utils";
 import { useMessages } from "@/stores/use-content-store";
@@ -15,6 +17,24 @@ export function Header() {
 	const scrolled = useScroll(10);
 
 	const links = messages.home.header.links;
+
+	const sectionIds = useMemo(
+		() =>
+			links.filter((l) => l.href.startsWith("#")).map((l) => l.href.slice(1)),
+		[links],
+	);
+	const activeSection = useActiveSection(sectionIds);
+
+	function handleAnchorClick(e: MouseEvent<HTMLAnchorElement>, href: string) {
+		if (!href.startsWith("#")) return;
+		e.preventDefault();
+		const target = document.querySelector(href);
+		if (target) {
+			target.scrollIntoView({ behavior: "smooth" });
+			history.pushState(null, "", href);
+		}
+		setOpen(false);
+	}
 
 	useEffect(() => {
 		if (open) {
@@ -40,8 +60,14 @@ export function Header() {
 					{links.map((link) => (
 						<a
 							key={link.label}
-							className={buttonVariants({ variant: "ghost" })}
+							className={cn(
+								buttonVariants({ variant: "ghost" }),
+								link.href.startsWith("#") &&
+									activeSection === link.href.slice(1) &&
+									"bg-accent text-accent-foreground",
+							)}
 							href={link.href}
+							onClick={(e) => handleAnchorClick(e, link.href)}
 						>
 							{link.label}
 						</a>
@@ -69,9 +95,15 @@ export function Header() {
 							key={link.label}
 							className={buttonVariants({
 								variant: "ghost",
-								className: "justify-start",
+								className: cn(
+									"justify-start",
+									link.href.startsWith("#") &&
+										activeSection === link.href.slice(1) &&
+										"bg-accent text-accent-foreground",
+								),
 							})}
 							href={link.href}
+							onClick={(e) => handleAnchorClick(e, link.href)}
 						>
 							{link.label}
 						</a>
