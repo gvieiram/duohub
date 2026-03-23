@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import type { MouseEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
+import { HomeLink } from "@/components/home-link";
 import { Logo } from "@/components/logo";
 import { MenuToggleIcon } from "@/components/menu-toggle-icon";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 import { useMessages } from "@/stores/use-content-store";
 
 const SCROLL_PADDING = 56;
+
+const SCROLL_DURATION = 1300;
 
 function easeInOutCubic(t: number): number {
 	return t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
@@ -73,7 +75,7 @@ export function Header() {
 			const prefersReducedMotion = window.matchMedia(
 				"(prefers-reduced-motion: reduce)",
 			).matches;
-			smoothScrollTo(target, prefersReducedMotion ? 0 : 1300);
+			smoothScrollTo(target, prefersReducedMotion ? 0 : SCROLL_DURATION);
 			history.pushState(null, "", href);
 			if (target instanceof HTMLElement) {
 				target.focus({ preventScroll: true });
@@ -101,9 +103,9 @@ export function Header() {
 			})}
 		>
 			<nav className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-4">
-				<Link href="/">
+				<HomeLink>
 					<Logo />
-				</Link>
+				</HomeLink>
 				<div className="hidden items-center gap-2 md:flex">
 					{links.map((link) => (
 						<a
