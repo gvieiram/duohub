@@ -25,7 +25,7 @@ No test runner is configured. If one is added, use **Jest** with tests co-locate
 - **Framer Motion** for animations
 - **Zustand** for client state
 - **Biome** for linting and formatting (source of truth — not ESLint/Prettier)
-- Deployed on **Vercel**
+- Deployed on **Dokploy** (Nixpacks build, Traefik routing)
 
 ## Code Conventions
 
