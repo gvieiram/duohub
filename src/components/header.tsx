@@ -11,6 +11,40 @@ import { useScroll } from "@/hooks/use-scroll";
 import { cn } from "@/lib/utils";
 import { useMessages } from "@/stores/use-content-store";
 
+const SCROLL_PADDING = 56;
+
+function easeInOutCubic(t: number): number {
+	return t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
+}
+
+function smoothScrollTo(target: Element, duration: number) {
+	const targetTop =
+		target.getBoundingClientRect().top + window.scrollY - SCROLL_PADDING;
+
+	if (duration <= 0) {
+		window.scrollTo(0, targetTop);
+		return;
+	}
+
+	const start = window.scrollY;
+	const distance = targetTop - start;
+	let startTime: number | null = null;
+
+	function step(timestamp: number) {
+		if (!startTime) startTime = timestamp;
+		const elapsed = timestamp - startTime;
+		const progress = Math.min(elapsed / duration, 1);
+
+		window.scrollTo(0, start + distance * easeInOutCubic(progress));
+
+		if (progress < 1) {
+			requestAnimationFrame(step);
+		}
+	}
+
+	requestAnimationFrame(step);
+}
+
 export function Header() {
 	const messages = useMessages();
 	const [open, setOpen] = useState(false);
@@ -33,9 +67,7 @@ export function Header() {
 			const prefersReducedMotion = window.matchMedia(
 				"(prefers-reduced-motion: reduce)",
 			).matches;
-			target.scrollIntoView({
-				behavior: prefersReducedMotion ? "auto" : "smooth",
-			});
+			smoothScrollTo(target, prefersReducedMotion ? 0 : 1000);
 			history.pushState(null, "", href);
 			if (target instanceof HTMLElement) {
 				target.focus({ preventScroll: true });
