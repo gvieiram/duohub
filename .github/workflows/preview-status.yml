@@ -3,69 +3,71 @@ name: Preview Status
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created, edited]
+
+permissions:
+  statuses: write
 
 jobs:
-  preview-status:
+  set-pending:
     name: Dokploy Preview
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for preview deployment
+      - name: Set pending commit status
         uses: actions/github-script@v7
-        env:
-          DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
-          DOKPLOY_TOKEN: ${{ secrets.DOKPLOY_TOKEN }}
-          DOKPLOY_APP_ID: ${{ secrets.DOKPLOY_APP_ID }}
         with:
           script: |
-            const PR = context.payload.pull_request.number;
-            const API = `${process.env.DOKPLOY_URL}/api`;
-            const headers = { "x-api-key": process.env.DOKPLOY_TOKEN };
-            const appId = process.env.DOKPLOY_APP_ID;
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.payload.pull_request.head.sha,
+              state: "pending",
+              context: "Dokploy Preview",
+              description: "Waiting for preview deployment...",
+            });
 
-            if (!process.env.DOKPLOY_URL || !headers["x-api-key"] || !appId) {
-              core.warning("Missing DOKPLOY_URL, DOKPLOY_TOKEN, or DOKPLOY_APP_ID secrets");
-              return;
+  check-comment:
+    name: Dokploy Preview Gate
+    if: |
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      contains(github.event.comment.user.login, 'dokploy')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Parse Dokploy comment and update status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.comment.body || "";
+
+            if (!body.includes("Preview Deployment")) return;
+
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.issue.number,
+            });
+
+            let state = "pending";
+            let description = "Preview deployment in progress...";
+
+            if (body.includes("✅")) {
+              state = "success";
+              description = "Preview deployment ready";
+            } else if (body.includes("❌")) {
+              state = "failure";
+              description = "Preview deployment failed";
             }
 
-            const maxAttempts = 30;
-            const interval = 15_000;
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: pr.head.sha,
+              state,
+              context: "Dokploy Preview",
+              description,
+            });
 
-            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-              await new Promise((r) => setTimeout(r, interval));
-
-              try {
-                const res = await fetch(`${API}/previewDeployment.all?applicationId=${appId}`, { headers });
-                if (!res.ok) {
-                  core.warning(`Attempt ${attempt}/${maxAttempts}: API returned ${res.status}`);
-                  continue;
-                }
-
-                const previews = await res.json();
-                if (!Array.isArray(previews)) {
-                  core.warning(`Attempt ${attempt}/${maxAttempts}: unexpected response format`);
-                  continue;
-                }
-
-                const preview = previews.find(
-                  (p) => String(p.pullRequestNumber) === String(PR)
-                );
-
-                if (!preview) {
-                  core.info(`Attempt ${attempt}/${maxAttempts}: no preview for PR #${PR} yet`);
-                  continue;
-                }
-
-                const status = preview.previewStatus;
-                core.info(`Attempt ${attempt}/${maxAttempts}: status=${status}`);
-
-                if (status === "done") return;
-                if (status === "error") {
-                  core.setFailed("Preview deployment failed");
-                  return;
-                }
-              } catch (err) {
-                core.warning(`Attempt ${attempt}/${maxAttempts}: ${err.message}`);
-              }
-            }
-
-            core.setFailed("Preview deployment timed out after 7.5 minutes");
+            core.info(`Set commit status to ${state} for ${pr.head.sha.slice(0, 7)}`);
