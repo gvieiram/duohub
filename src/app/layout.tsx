@@ -1,3 +1,4 @@
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import {
 	Inter,
@@ -78,6 +79,7 @@ export default function RootLayout({
 						position="bottom"
 					/>
 				</Providers>
+				<SpeedInsights />
 			</body>
 		</html>
 	);
