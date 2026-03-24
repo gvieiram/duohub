@@ -1,3 +1,4 @@
+import { VercelToolbar } from "@vercel/toolbar/next";
 import type { Metadata } from "next";
 import {
 	Inter,
@@ -13,6 +14,7 @@ import { LandmarkIcon } from "lucide-react";
 import { Header } from "@/components/header";
 import { company } from "@/content/company";
 import { messages } from "@/content/messages";
+import { resolveAll } from "@/lib/flags";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
 	variable: "--font-plus-jakarta",
@@ -48,18 +50,22 @@ export const metadata: Metadata = {
 	description: siteMetadata.description,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+	const shouldInjectToolbar = process.env.NODE_ENV === "development";
+
+	const flagValues = await resolveAll();
+
 	return (
 		<html lang="pt-BR" suppressHydrationWarning>
 			<body
 				suppressHydrationWarning
 				className={`${plusJakartaSans.variable} ${marcellus.variable} ${jetbrainsMono.variable} ${playfairDisplay.variable} ${inter.variable} antialiased`}
 			>
-				<Providers>
+				<Providers flags={flagValues}>
 					<Header />
 					{children}
 					<Banner
@@ -78,6 +84,7 @@ export default function RootLayout({
 						position="bottom"
 					/>
 				</Providers>
+				{shouldInjectToolbar && <VercelToolbar />}
 			</body>
 		</html>
 	);
