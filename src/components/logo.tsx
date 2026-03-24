@@ -149,7 +149,7 @@ export function Logo({
 						<motion.span
 							variants={subtitleVariants}
 							className={cn(
-								"block select-none font-medium font-subtitle text-primary uppercase tracking-[0.45em]",
+								"block select-none font-medium font-subtitle text-primary uppercase tracking-[0.28em]",
 								subtitle,
 								subtitleClassName,
 							)}
