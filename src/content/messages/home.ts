@@ -30,43 +30,31 @@ export const home = {
 			label: "Fale conosco",
 		},
 	},
-	logos: {
-		titlePrefix: "Confiança de quem ",
-		titleEmphasis: "entende",
-		clients: [
-			{
-				src: "/logos/clients/nvidia-wordmark.svg",
-				alt: "Logo da Nvidia",
-			},
-			{
-				src: "/logos/clients/supabase-wordmark.svg",
-				alt: "Logo da Supabase",
-			},
-			{
-				src: "/logos/clients/openai-wordmark.svg",
-				alt: "Logo da OpenAI",
-			},
-			{
-				src: "/logos/clients/turso-wordmark.svg",
-				alt: "Logo da Turso",
-			},
-			{
-				src: "/logos/clients/vercel-wordmark.svg",
-				alt: "Logo da Vercel",
-			},
-			{
-				src: "/logos/clients/github-wordmark.svg",
-				alt: "Logo do GitHub",
-			},
-			{
-				src: "/logos/clients/claude-wordmark.svg",
-				alt: "Logo da Claude AI",
-			},
-			{
-				src: "/logos/clients/clerk-wordmark.svg",
-				alt: "Logo da Clerk",
-			},
-		],
+	socialProof: {
+		clients: {
+			title: "Quem confia na DuoHub",
+			names: ["Mabela", "Naturalles", "Doce Menina"],
+			separator: "·",
+		},
+		credentials: {
+			items: [
+				{
+					icon: "shieldCheck" as const,
+					label: "CRC Ativo",
+				},
+				{
+					icon: "calendar" as const,
+					label: "Desde 2025",
+				},
+				{
+					icon: "monitor" as const,
+					label: "100% Digital",
+				},
+			],
+		},
+		statement: {
+			quote: "Cada empresa é única. Nosso atendimento também.",
+		},
 	},
 	features: [
 		{

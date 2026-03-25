@@ -1,5 +1,4 @@
 import { ArrowRightIcon, SparklesIcon } from "lucide-react";
-import { LogoCloud } from "@/components/logo-cloud";
 import { Button } from "@/components/ui/button";
 import { company } from "@/content/company";
 import { messages } from "@/content/messages";
@@ -80,22 +79,6 @@ export function HeroSection() {
 						</a>
 					</Button>
 				</div>
-			</div>
-		</section>
-	);
-}
-
-export function LogosSection() {
-	return (
-		<section className="relative space-y-4 border-t pt-6 pb-10">
-			<h2 className="text-center font-medium text-lg text-muted-foreground tracking-tight md:text-xl">
-				{messages.home.logos.titlePrefix}
-				<span className="text-foreground">
-					{messages.home.logos.titleEmphasis}
-				</span>
-			</h2>
-			<div className="relative z-10 mx-auto max-w-4xl">
-				<LogoCloud logos={messages.home.logos.clients} />
 			</div>
 		</section>
 	);
