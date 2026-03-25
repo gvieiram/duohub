@@ -4,17 +4,21 @@ import { FaqSection } from "@/components/faq-section";
 import { StackedFeatures } from "@/components/feature-section";
 import { Footer } from "@/components/footer";
 import { HeroSection } from "@/components/hero";
+import type { SocialProofVariant } from "@/components/social-proof-section";
 import { SocialProofSection } from "@/components/social-proof-section";
 import { messages } from "@/content/messages";
+import { socialProofType } from "@/lib/flags";
 
 const features = messages.home.features;
 
-export default function Home() {
+export default async function Home() {
+	const variant = (await socialProofType()) as SocialProofVariant;
+
 	return (
 		<div className="flex w-full flex-col">
 			<main className="grow">
 				<HeroSection />
-				<SocialProofSection variant="credentials" />
+				<SocialProofSection variant={variant} />
 				<StackedFeatures features={features} />
 				<AboutSection />
 				<FaqSection />

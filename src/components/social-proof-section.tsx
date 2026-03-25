@@ -5,7 +5,7 @@ import { InfiniteSlider } from "@/components/infinite-slider";
 import { messages } from "@/content/messages";
 import { cn } from "@/lib/utils";
 
-type SocialProofVariant = "clients" | "credentials" | "statement";
+export type SocialProofVariant = "clients" | "credentials" | "statement";
 
 type SocialProofSectionProps = {
 	variant?: SocialProofVariant;
@@ -93,12 +93,15 @@ const variants: Record<SocialProofVariant, () => React.ReactNode> = {
 	statement: StatementVariant,
 };
 
+const DEFAULT_VARIANT: SocialProofVariant = "credentials";
+
 export function SocialProofSection({
-	variant = "clients",
+	variant = DEFAULT_VARIANT,
 }: SocialProofSectionProps) {
-	const Variant = variants[variant];
+	const safeVariant = variant in variants ? variant : DEFAULT_VARIANT;
+	const Variant = variants[safeVariant];
 	const title =
-		variant === "clients" ? messages.home.socialProof.clients.title : null;
+		safeVariant === "clients" ? messages.home.socialProof.clients.title : null;
 
 	return (
 		<section className="relative space-y-4 border-t pt-6 pb-10">
