@@ -24,7 +24,7 @@ Feature branch → PR → CI (lint + typecheck) + Vercel Preview → Merge to ma
 
 ## Pipeline de CI
 
-**Workflow:** `.github/workflows/ci.yml`
+**Workflow:** `.github/workflows/ci.yml`  
 **Dispara em:** PRs para `main` e pushes para `main`
 
 Passos:
@@ -60,6 +60,8 @@ O job **Lint & Type Check** é um status check obrigatório — PRs não podem s
    - Criação da tag `v<versão>` e push (commit + tags)
    - Criação da **GitHub Release** com notas geradas automaticamente
    - Deploy em produção na Vercel via CLI: `vercel pull`, `vercel build --prod` e `vercel deploy --prebuilt --prod` (usando `VERCEL_TOKEN`)
+
+**Secrets obrigatórios no repositório:** `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`.
 
 ## Proteção da branch `main`
 
@@ -110,3 +112,6 @@ Deploys de **produção** ocorrem somente via Vercel CLI no GitHub Actions (work
 | `VERCEL_PROJECT_ID` | ID do projeto na Vercel (Settings → General) |
 
 Usados pelo workflow Release para fazer deploy via Vercel CLI.
+- A branch de **produção** do projeto está definida como `release` (branch “fantasma”, não usada para integração contínua).
+- Com isso, pushes em `main` geram deploys de **Preview** — o ambiente de desenvolvimento (`duohub-dev.vercel.app`) aponta para esses previews a partir de `main`.
+- Deploys de **produção** ocorrem somente via Vercel CLI no GitHub Actions (workflow Release), não por push de branch.
