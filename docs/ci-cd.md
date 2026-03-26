@@ -24,7 +24,7 @@ Feature branch → PR → CI (lint + typecheck) + Vercel Preview → Merge to ma
 
 ## Pipeline de CI
 
-**Workflow:** `.github/workflows/ci.yml`  
+**Workflow:** `.github/workflows/ci.yml`
 **Dispara em:** PRs para `main` e pushes para `main`
 
 Passos:
@@ -44,24 +44,65 @@ O job **Lint & Type Check** é um status check obrigatório — PRs não podem s
 
 ## Criando uma release (deploy em produção)
 
-1. Acesse **Actions** → **Release** → **Run workflow**.
-2. Escolha o tipo de bump de versão:
+### Passo a passo
 
-| Tipo    | Exemplo            | Quando usar                 |
-| ------- | ------------------ | --------------------------- |
-| `patch` | `0.1.0` → `0.1.1`  | Correção de bug, ajuste menor |
-| `minor` | `0.1.0` → `0.2.0`  | Nova funcionalidade         |
-| `major` | `0.1.0` → `1.0.0`  | Breaking change, marco maior |
+1. Acesse **Actions** → **Release** → **Run workflow**
+2. Em "Use workflow from", mantenha **Branch: main**
+3. Escolha o tipo de bump de versão (veja guia abaixo)
+4. Clique em **Run workflow**
 
-3. O workflow executa, nesta ordem:
-   - **CI:** lint, typecheck e `pnpm build`
-   - Bump da versão no `package.json`
-   - Commit `release: v<versão>` em `main`
-   - Criação da tag `v<versão>` e push (commit + tags)
-   - Criação da **GitHub Release** com notas geradas automaticamente
-   - Deploy em produção na Vercel via CLI: `vercel pull`, `vercel build --prod` e `vercel deploy --prebuilt --prod` (usando `VERCEL_TOKEN`)
+### O que o workflow faz automaticamente
+
+1. **CI:** lint e typecheck (validação)
+2. Bump da versão no `package.json`
+3. Commit `release: v<versão>` em `main`
+4. Criação da tag `v<versão>` e push (commit + tags)
+5. Criação da **GitHub Release** com changelog automático
+6. Deploy em produção via Vercel CLI: `vercel pull` → `vercel build --prod` → `vercel deploy --prebuilt --prod`
 
 **Secrets obrigatórios no repositório:** `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`.
+
+### Guia de versionamento (Semantic Versioning)
+
+O projeto segue [semver](https://semver.org/lang/pt-BR/) — `MAJOR.MINOR.PATCH`.
+
+#### `patch` (0.1.0 → 0.1.1)
+
+Correções que **não mudam funcionalidade**:
+
+- Fix de bug visual ou funcional
+- Correção de typo no conteúdo
+- Ajuste de responsividade
+- Fix de link quebrado
+- Mudanças de CI/CD ou infraestrutura
+
+#### `minor` (0.1.0 → 0.2.0)
+
+**Nova funcionalidade** ou melhoria visível para o usuário:
+
+- Nova seção ou página no site
+- Novo componente significativo
+- Melhoria de UX notável
+- Batch de várias features pequenas
+
+#### `major` (0.1.0 → 1.0.0)
+
+**Marco importante** ou breaking change:
+
+- Lançamento oficial do site para clientes (`1.0.0`)
+- Redesign completo
+- Mudança de domínio ou plataforma
+- Algo que invalida a versão anterior
+
+#### Regra prática
+
+Enquanto o projeto estiver em `0.x.x` (pré-lançamento):
+
+| Mudança | Bump |
+| --- | --- |
+| Fix, ajuste, infra | `patch` |
+| Feature(s) nova(s) | `minor` |
+| Lançamento oficial | `major` → `1.0.0` |
 
 ## Proteção da branch `main`
 
@@ -112,6 +153,3 @@ Deploys de **produção** ocorrem somente via Vercel CLI no GitHub Actions (work
 | `VERCEL_PROJECT_ID` | ID do projeto na Vercel (Settings → General) |
 
 Usados pelo workflow Release para fazer deploy via Vercel CLI.
-- A branch de **produção** do projeto está definida como `release` (branch “fantasma”, não usada para integração contínua).
-- Com isso, pushes em `main` geram deploys de **Preview** — o ambiente de desenvolvimento (`duohub-dev.vercel.app`) aponta para esses previews a partir de `main`.
-- Deploys de **produção** ocorrem somente via Vercel CLI no GitHub Actions (workflow Release), não por push de branch.

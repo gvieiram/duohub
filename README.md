@@ -37,7 +37,7 @@ This is not a template. It is a production system built with intentional archite
 | **State** | Zustand |
 | **Linting** | Biome (replaces ESLint + Prettier) |
 | **Fonts** | Plus Jakarta Sans · Marcellus · JetBrains Mono · Playfair Display |
-| **Deploy** | Dokploy (Nixpacks build, Traefik routing) |
+| **Deploy** | Vercel |
 | **CI/CD** | GitHub Actions |
 
 ---
@@ -148,16 +148,19 @@ Adding a new page? Create a new file in `src/content/messages/` — don't extend
 ## CI/CD Pipeline
 
 ```
-Feature branch → PR → CI (lint + typecheck + build) → Merge → Dev deploy
-                                                                  ↓
-                                        Release workflow → Tag → GitHub Release → Prod deploy
+Feature branch → PR → CI (lint + typecheck) + Vercel Preview → Merge to main → Dev deploy
+                                                                                    ↓
+                                                          Release workflow → Tag → Prod deploy
 ```
 
-- **CI** runs on every PR and push to `main` — lint, type check, production build
-- **Preview deployments** are created automatically for every open PR via Dokploy
-- **Releases** are triggered manually via GitHub Actions (patch / minor / major)
+- **CI** runs on every PR and push to `main` — lint and type check
+- **Preview deployments** are created automatically for every open PR via Vercel
+- **Dev deploy** happens automatically on push to `main` (`duohub-dev.vercel.app`)
+- **Prod deploy** is triggered manually via Release workflow (patch / minor / major) using Vercel CLI
 - **Branch protection** enforces PR-only merges with required status checks
 - **Dependabot** keeps dependencies fresh weekly
+
+For the full deployment guide, versioning reference, and infrastructure details, see **[docs/ci-cd.md](docs/ci-cd.md)**.
 
 ---
 
