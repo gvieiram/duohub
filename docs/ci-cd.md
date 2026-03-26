@@ -53,7 +53,7 @@ O job **Lint & Type Check** é um status check obrigatório — PRs não podem s
 
 ### O que o workflow faz automaticamente
 
-1. **CI:** lint, typecheck e `pnpm build` (validação)
+1. **CI:** lint e typecheck (validação)
 2. Bump da versão no `package.json`
 3. Commit `release: v<versão>` em `main`
 4. Criação da tag `v<versão>` e push (commit + tags)
