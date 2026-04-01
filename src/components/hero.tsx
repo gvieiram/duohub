@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 export function HeroSection({
 	disableKicker = true,
 }: {
-	disableKicker: boolean;
+	disableKicker?: boolean;
 }) {
 	const titleLines = messages.home.hero.title.split("\n");
 	const descriptionLines = messages.home.hero.description.split("\n");
