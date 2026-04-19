@@ -330,9 +330,14 @@ export const home = {
 	},
 	header: {
 		links: [
-			{ label: "Serviços", href: "#servicos" },
-			{ label: "Sobre", href: "#sobre" },
-			{ label: "Contato", href: "#contato" },
+			{ label: "Serviços", href: "/#servicos" },
+			{ label: "Sobre", href: "/#sobre" },
+			{ label: "Contato", href: "/#contato" },
+			{
+				label: "Imposto de Renda",
+				href: "/imposto-de-renda",
+				badge: "2026",
+			},
 		],
 	},
 } as const;
