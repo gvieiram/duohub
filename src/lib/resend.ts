@@ -12,3 +12,6 @@ export const resend = globalForResend.resend ?? new Resend(env.RESEND_API_KEY);
 if (process.env.NODE_ENV !== "production") {
 	globalForResend.resend = resend;
 }
+
+export const LEAD_FROM_ADDRESS = "DuoHub <contato@duohubcontabil.com.br>";
+export const LEAD_REPLY_TO = "contato@duohubcontabil.com.br";
