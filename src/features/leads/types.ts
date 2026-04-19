@@ -1,3 +1,4 @@
+// biome-ignore-all lint/style/useNamingConvention: keys mirror the Prisma LeadSituation enum
 import type { LeadSituation } from "./schemas";
 
 export type CreateLeadResult =
