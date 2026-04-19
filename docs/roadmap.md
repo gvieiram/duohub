@@ -64,8 +64,8 @@ faz sentido atrasar a F1a por causa disso.
 **Escopo (Nível A — cofre digital, sem integração programática com a Receita):**
 
 - **Provisionamento do cofre de chaves** (Infisical, free tier) com KEK da aplicação.
-- **Provisionamento do storage** para arquivos criptografados (provedor decidido
-  durante essa fase, ver `architecture.md`).
+- **Provisionamento do storage** (**Cloudflare R2**, provedor primário oficial
+  da aplicação) para arquivos criptografados. Ver `architecture.md`.
 - **Upload de certificado pelo admin** — validação do `.pfx`, extração de metadata
   (CN, serial, validade), criptografia do arquivo e da senha via envelope encryption.
 - **Download seguro** sob demanda por admins autorizados (para uso local pelo contador
@@ -156,9 +156,10 @@ para justificar o esforço, e a fundação admin precisa estar madura.
 **Dependências:** F1a (auth + Client model), F1b (cofre de certificados), F2
 (Cliente ativo).
 
-**Decisão aberta:** provedor de storage para **documentos gerais** do cliente
-(notas, extratos). O storage de **certificados** já terá sido decidido na F1b.
-Ver `architecture.md`.
+**Storage:** reaproveita o **Cloudflare R2** consolidado na F1b como provedor
+primário oficial da aplicação. Documentos gerais usam SSE + access control por
+cliente + presigned URLs; sem envelope encryption (reservado só para
+certificados). Ver `architecture.md#storage-cloudflare-r2-como-padrão-oficial`.
 
 **Saída:** DuoHub deixa de ser "site institucional" e passa a ser "aplicação
 com produto real de valor contínuo ao cliente".

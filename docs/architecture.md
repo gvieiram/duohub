@@ -23,8 +23,7 @@ A partir da F1, vira **aplicação com estado** com área administrativa interna
 | E-mail transacional            | F0       | Captura de leads, notificações, alertas de vencimento.              |
 | Geração de PDF                 | F2       | Propostas exportáveis.                                              |
 | **Cofre de chaves (KMS)**      | **F1b**  | KEK para envelope encryption do certificado digital. **Infisical.** |
-| **Storage (certificados)**     | **F1b**  | Arquivos `.pfx` criptografados. Provedor decidido durante F1b.      |
-| Storage (documentos gerais)    | F4       | Notas fiscais, extratos, etc. **Decisão aberta.**                   |
+| **Storage de arquivos**        | **F1b / F4** | Provedor **único** para toda a aplicação: **Cloudflare R2**. F1b = `.pfx` criptografados via envelope encryption. F4 = documentos gerais (notas, extratos). |
 
 
 ## Stack tecnológica
@@ -38,44 +37,80 @@ A partir da F1, vira **aplicação com estado** com área administrativa interna
 | **E-mail**                   | **Resend**                       | Melhor DX para Next.js, suporte a React Email, free tier decente.          |
 | **PDF**                      | **`@react-pdf/renderer`**        | Leve em serverless, template em React, aproveita o HTML existente.         |
 | **Cofre de chaves (KMS)**    | **Infisical** (free tier)        | DX simples, free tier generoso (3 usuários, projetos ilimitados, 10k secret ops/mês), self-hostable se precisar. Migrar para AWS KMS só se justificar. |
-| **Storage (certificados)**   | *Decisão na F1b* (ver abaixo)    | Provedor confiável + SSE + presigned URLs. Shortlist: Cloudflare R2, Backblaze B2, AWS S3. |
-| **Storage (documentos F4)**  | *Decisão aberta* (ver abaixo)    | Pode ser o mesmo da F1b ou diferente.                                      |
+| **Storage**                  | **Cloudflare R2**                | Provedor primário oficial para F1b e F4. S3-compatible, zero egress, SSE automática. Ver seção abaixo. |
 | **Validação**                | **Zod**                          | Padrão Next 16, integra com Server Actions.                                |
 | **Env vars**                 | **`@t3-oss/env-nextjs`**         | Separação server/client, validação runtime, impede leak em bundle.         |
 | **Rate limiting**            | **Upstash Redis + `ratelimit`**  | Edge-compatible, pay-per-request, essencial em endpoints públicos.         |
 | **Observabilidade**          | **Sentry** + Vercel Analytics    | Erros + spikes de 401/403 + performance.                                   |
 
 
-### Storage — estado das decisões
+### Storage: Cloudflare R2 como padrão oficial
 
-O roadmap tem **dois usos distintos** de storage, com calendários diferentes:
+**Decisão consolidada:** **Cloudflare R2** é o provedor de storage primário único
+da aplicação, atendendo tanto F1b (certificados criptografados) quanto F4
+(documentos gerais do cliente). A distinção entre as fases não é de provedor —
+é de **camadas aplicadas sobre o R2**.
 
-#### Storage de certificados digitais (F1b) — decisão exigida **antes** da F1b
+#### Por que R2
 
-Requisitos obrigatórios para o provedor:
+- **S3-compatible** — qualquer SDK compatível com S3 (AWS SDK, `@aws-sdk/client-s3`)
+  funciona sem adaptação. Ampla biblioteca de ferramentas e helpers.
+- **Zero egress fee** — crítico para F4, onde clientes baixam documentos com
+  frequência. Em S3 ou Vercel Blob, esse tráfego seria cobrado.
+- **Criptografia em rest** (SSE) automática e obrigatória.
+- **Custo previsível** — $0,015/GB/mês armazenado + operações baratas. Orçamento
+  limitado da DuoHub é compatível.
+- **Presigned URLs** nativas — upload e download diretos sem passar pelo
+  servidor Next.
+- **Free tier** generoso para começar — 10 GB armazenados + 1M Class A ops/mês.
 
-- Criptografia em rest (AES-256 ou equivalente) aplicada pelo provedor.
-- Suporte a presigned URLs (upload e download sem passar pelo servidor Next).
-- Logs de acesso no provedor (complementa nosso audit log).
-- Retenção configurável.
-- Custo previsível (orçamento limitado).
+#### Camadas por tipo de arquivo
 
-**Shortlist e recomendação:**
+| Tipo               | Fase | Provedor | Camadas aplicadas                                                             |
+| ------------------ | ---- | -------- | ----------------------------------------------------------------------------- |
+| Certificados `.pfx` | F1b  | R2       | **Envelope encryption** (KEK no Infisical + DEK + AES-256-GCM) + SSE do R2 + access control por admin + audit log dedicado |
+| Documentos gerais   | F4   | R2       | SSE do R2 + access control por `Client`/`User` + presigned URLs com expiração |
 
-- **Cloudflare R2** — recomendado. S3-compatible, zero egress fee, criptografia
-  em rest automática, free tier de 10 GB + 1M classe A ops/mês. Custo previsível
-  mesmo com crescimento.
-- **Backblaze B2** — alternativa viável, custo similar, maturidade boa.
-- **Vercel Blob** — integração superior mas custo mais alto (egress pago).
-- **AWS S3** — funcional mas overhead operacional desproporcional para o porte.
+A camada de envelope encryption só se justifica para certificados (sensibilidade
+extrema). Para documentos gerais, a SSE do R2 + controle de acesso + audit log
+são suficientes.
 
-Decidir entre R2 e B2 no início da F1b com base em facilidade de integração
-(R2 tem tooling S3-compatible excelente e é provável escolha).
+#### Organização de buckets e prefixos
 
-#### Storage de documentos gerais do cliente (F4) — decisão aberta
+A decidir no início de cada fase (detalhe operacional, não arquitetural):
 
-Pode ser o mesmo provedor do F1b (simplifica operação) ou diferente se o volume
-de documentos justificar um provedor dedicado. Revisar ao aproximar a F4.
+- **Opção A** — um bucket único com prefixos (`certificates/`, `documents/`).
+- **Opção B** — buckets separados (`duohub-certificates`, `duohub-documents`).
+
+Preferência provável: buckets separados, porque permitem políticas de retenção,
+logs e CORS distintos sem interferir entre si.
+
+#### Requisitos operacionais
+
+Válidos para **qualquer** uso de storage na aplicação:
+
+- Bucket com acesso privado por padrão (nunca público).
+- Credenciais via IAM do Cloudflare, armazenadas no Infisical (não em `.env`
+  direto — passa pelo carregamento de secrets).
+- Nomes de arquivo randomizados server-side (nunca confiar no nome original).
+- Presigned URLs com **expiração curta** (recomendação: 15 minutos para upload,
+  15 minutos para download comum, 1 hora para cenários específicos).
+- Log de cada operação sensível (upload, download, delete) em `AuditLog` ou
+  `CertificateAccessLog` conforme o tipo de arquivo.
+- Backup/versionamento do bucket habilitado (R2 suporta versioning).
+
+#### Quando reavaliar
+
+Trocar de provedor é caro. Revisitar a decisão apenas se:
+
+- Surgir requisito legal ou contratual de **residência estrita** de dados em
+  território brasileiro. R2 tem múltiplas regiões mas não garante BR.
+- Escala tornar o custo desvantajoso (improvável no médio prazo).
+- Cliente ou regulador específico exigir outro provedor.
+- Incidente significativo de segurança/disponibilidade no R2.
+
+Nesse caso, **fallback natural é Backblaze B2** (também S3-compatible, perfil
+de custo similar).
 
 ## Estrutura de rotas (App Router)
 
@@ -156,7 +191,7 @@ src/
 │   ├── auth/           # Better Auth config (server + client)
 │   ├── db/             # Prisma client singleton
 │   ├── email/          # Resend + React Email templates
-│   ├── storage/        # Cliente do provedor de storage (F4)
+│   ├── storage/        # Cliente R2 (F1b + F4)
 │   ├── pdf/            # Componentes @react-pdf (F2)
 │   ├── env.ts          # Env vars validados
 │   └── utils.ts

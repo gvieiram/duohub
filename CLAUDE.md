@@ -41,7 +41,7 @@ No test runner is configured. If one is added, use **Jest** with tests co-locate
 - **Better Auth** (auth, admin + client roles) — F1a
 - **Resend** (transactional email) — F0
 - **Infisical** (KMS / key vault, envelope encryption for digital certificates) — F1b
-- **Cloudflare R2** (or Backblaze B2) for encrypted certificate storage — F1b
+- **Cloudflare R2** as the primary storage provider — F1b (encrypted certificates) and F4 (general client documents)
 - **`@react-pdf/renderer`** (PDF generation) — F2
 - **Zod** + **`@t3-oss/env-nextjs`** (validation, env vars) — F1a
 - **Upstash Redis** + `@upstash/ratelimit` (rate limiting) — F0
