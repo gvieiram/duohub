@@ -2,6 +2,7 @@
 
 import { ThemeProvider } from "next-themes";
 import { useRef } from "react";
+import { Toaster } from "@/components/ui/sonner";
 import type { FlagsState } from "@/lib/flags";
 import { useFlagsStore } from "@/stores/use-flags-store";
 
@@ -25,6 +26,7 @@ export function Providers({ children, flags }: ProvidersProps) {
 			disableTransitionOnChange
 		>
 			{children}
+			<Toaster position="bottom-right" richColors closeButton />
 		</ThemeProvider>
 	);
 }
