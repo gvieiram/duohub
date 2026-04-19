@@ -1,6 +1,7 @@
 "use client";
 
 import { XIcon } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useScroll } from "@/hooks/use-scroll";
@@ -132,13 +133,13 @@ function BannerBody({
 			</div>
 			{cta && (
 				<Button asChild variant="outline" className="w-full shrink-0 sm:w-auto">
-					<a
-						href={cta.href}
-						target={cta.external ? "_blank" : undefined}
-						rel={cta.external ? "noopener noreferrer" : undefined}
-					>
-						{cta.label}
-					</a>
+					{cta.external ? (
+						<a href={cta.href} target="_blank" rel="noopener noreferrer">
+							{cta.label}
+						</a>
+					) : (
+						<Link href={cta.href}>{cta.label}</Link>
+					)}
 				</Button>
 			)}
 		</div>
