@@ -8,24 +8,15 @@ export const common = {
 		scheduleConsultation: "Agendar consulta",
 		send: "Enviar",
 		talkOnWhatsapp: "Falar no WhatsApp",
+		seeMore: "Ver mais",
+		seeLess: "Ver menos",
 	},
 	nav: {
-		home: {
-			label: "Início",
-			href: "/",
-		},
-		services: {
-			label: "Serviços",
-			href: "#servicos",
-		},
-		about: {
-			label: "Sobre",
-			href: "#sobre",
-		},
-		contact: {
-			label: "Contato",
-			href: "#contato",
-		},
+		home: { label: "Início", href: "/" },
+		services: { label: "Serviços", href: "/#servicos" },
+		about: { label: "Sobre", href: "/#sobre" },
+		contact: { label: "Contato", href: "/#contato" },
+		ir: { label: "Imposto de Renda", href: "/imposto-de-renda", badge: "2026" },
 	},
 	forms: {
 		labels: {
@@ -33,6 +24,10 @@ export const common = {
 			email: "E-mail",
 			phone: "Telefone",
 			message: "Mensagem (opcional)",
+		},
+		errors: {
+			required: "Campo obrigatório",
+			invalidEmail: "E-mail inválido",
 		},
 	},
 	banner: {
@@ -46,5 +41,7 @@ export const common = {
 		footerNav: "Links do rodapé",
 		testimonialsScroll: "Depoimentos em rolagem",
 		photoOf: (name: string) => `Foto de ${name}`,
+		scrollToForm: "Ir para o formulário de contato",
+		toggleAccordion: "Expandir ou recolher conteúdo",
 	},
 } as const;
