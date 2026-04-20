@@ -8,6 +8,7 @@
 	},
 	"scripts": {
 		"dev": "next dev",
+		"prebuild": "prisma generate && prisma migrate deploy",
 		"build": "next build",
 		"start": "next start",
 		"lint": "biome check --write",
@@ -15,7 +16,13 @@
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"test:coverage": "vitest run --coverage",
-		"email:dev": "email dev --dir src/features/leads/emails --port 3001"
+		"email:dev": "email dev --dir src/features/leads/emails --port 3333",
+		"db:generate": "prisma generate",
+		"db:push": "prisma db push",
+		"db:migrate": "prisma migrate dev",
+		"db:seed": "npx tsx prisma/seed.ts",
+		"db:studio": "prisma studio",
+		"db:reset": "prisma migrate reset"
 	},
 	"dependencies": {
 		"@flags-sdk/vercel": "^1.2.1",
