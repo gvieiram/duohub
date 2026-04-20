@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Footer } from "@/components/footer";
 import { company } from "@/content/company";
 import { messages } from "@/content/messages";
 import { getSiteUrl } from "@/lib/site-url";
@@ -77,6 +78,7 @@ export default async function IrPage({
 			<InlineCta />
 			<Faq />
 			<FinalCta />
+			<Footer />
 		</>
 	);
 }
