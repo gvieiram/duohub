@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { useShallow } from "zustand/react/shallow";
 import type {
 	LeadComplexity,
 	LeadMoment,
@@ -96,12 +97,14 @@ export function useIrpfModalSubmitted() {
 }
 
 export function useIrpfModalActions() {
-	return useIrpfModalStore((s) => ({
-		open: s.open,
-		close: s.close,
-		setStep: s.setStep,
-		updateFormData: s.updateFormData,
-		markSubmitted: s.markSubmitted,
-		reset: s.reset,
-	}));
+	return useIrpfModalStore(
+		useShallow((s) => ({
+			open: s.open,
+			close: s.close,
+			setStep: s.setStep,
+			updateFormData: s.updateFormData,
+			markSubmitted: s.markSubmitted,
+			reset: s.reset,
+		})),
+	);
 }
