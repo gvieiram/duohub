@@ -1,26 +1,33 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useState } from "react";
 import { ScrollableDialog } from "@/components/scrollable-dialog";
 import { Button } from "@/components/ui/button";
 import { useMessages } from "@/stores/use-content-store";
 
-export function PrivacyDialog() {
+type PrivacyDialogProps = {
+	trigger?: ReactNode;
+};
+
+export function PrivacyDialog({ trigger }: PrivacyDialogProps = {}) {
 	const m = useMessages().ir.form.privacy;
 	const [open, setOpen] = useState(false);
+
+	const fallbackTrigger = (
+		<button
+			type="button"
+			className="text-left underline underline-offset-2 transition-colors hover:text-foreground"
+		>
+			{m.trigger}
+		</button>
+	);
 
 	return (
 		<ScrollableDialog
 			open={open}
 			onOpenChange={setOpen}
-			trigger={
-				<button
-					type="button"
-					className="text-left underline underline-offset-2 transition-colors hover:text-foreground"
-				>
-					{m.trigger}
-				</button>
-			}
+			trigger={trigger ?? fallbackTrigger}
 			title={m.title}
 			description={m.lastUpdated}
 			footer={
