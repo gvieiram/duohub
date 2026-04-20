@@ -2,13 +2,10 @@ import { z } from "zod";
 
 const WHATSAPP_DIGITS = /^\d{10,11}$/;
 
-export const leadSituationSchema = z.enum([
-	"CLT",
-	"AUTONOMO",
-	"INVESTIDOR",
-	"MEI_COM_PF",
-	"OUTROS",
-]);
+export const leadSituationSchema = z.enum(
+	["CLT", "AUTONOMO", "INVESTIDOR", "MEI_COM_PF", "OUTROS"],
+	{ error: "Selecione uma situação" },
+);
 
 export type LeadSituation = z.infer<typeof leadSituationSchema>;
 
