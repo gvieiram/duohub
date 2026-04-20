@@ -114,9 +114,7 @@ export function LeadForm({ variant = "hero", className, utm }: Props) {
 			</div>
 
 			<div className="grid gap-2">
-				<Label htmlFor={`whatsapp-${variant}`}>
-					{m.fields.whatsapp.label}
-				</Label>
+				<Label htmlFor={`whatsapp-${variant}`}>{m.fields.whatsapp.label}</Label>
 				<Input
 					id={`whatsapp-${variant}`}
 					name="whatsapp"
@@ -145,9 +143,17 @@ export function LeadForm({ variant = "hero", className, utm }: Props) {
 				</Select>
 			</div>
 
-			<label className="flex items-start gap-3 text-muted-foreground text-sm">
-				<Checkbox name="consent" required className="mt-0.5" />
-				<span>
+			<div className="flex items-start gap-3 text-muted-foreground text-sm">
+				<Checkbox
+					id={`consent-${variant}`}
+					name="consent"
+					required
+					className="mt-0.5"
+				/>
+				<Label
+					htmlFor={`consent-${variant}`}
+					className="font-normal text-muted-foreground leading-snug"
+				>
 					{m.fields.consent.label}{" "}
 					<a
 						href={m.fields.consent.linkHref}
@@ -156,8 +162,8 @@ export function LeadForm({ variant = "hero", className, utm }: Props) {
 						{m.fields.consent.linkLabel}
 					</a>
 					.
-				</span>
-			</label>
+				</Label>
+			</div>
 
 			<Button type="submit" disabled={isPending} className="w-full">
 				{isPending ? m.submitting : m.submit}
