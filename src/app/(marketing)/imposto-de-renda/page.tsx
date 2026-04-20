@@ -42,11 +42,13 @@ export const metadata: Metadata = {
 	},
 };
 
+// biome-ignore-start lint/style/useNamingConvention: UTM params follow the standard snake_case convention
 type SearchParams = {
 	utm_source?: string;
 	utm_medium?: string;
 	utm_campaign?: string;
 };
+// biome-ignore-end lint/style/useNamingConvention: UTM params follow the standard snake_case convention
 
 export default async function IrPage({
 	searchParams,
