@@ -24,6 +24,7 @@ import {
 } from "@/features/leads/schemas";
 import { cn } from "@/lib/utils";
 import { useMessages } from "@/stores/use-content-store";
+import { PrivacyDialog } from "./privacy-dialog";
 
 type Props = {
 	variant?: "hero" | "final";
@@ -273,19 +274,15 @@ export function LeadForm({ variant = "hero", className, utm }: Props) {
 							/>
 						)}
 					/>
-					<Label
-						htmlFor={`consent-${variant}`}
-						className="font-normal text-muted-foreground leading-snug"
-					>
-						{m.fields.consent.label}{" "}
-						<a
-							href={m.fields.consent.linkHref}
-							className="underline underline-offset-2 hover:text-foreground"
+					<span className="text-muted-foreground text-sm leading-snug">
+						<Label
+							htmlFor={`consent-${variant}`}
+							className="inline font-normal text-muted-foreground"
 						>
-							{m.fields.consent.linkLabel}
-						</a>
-						.
-					</Label>
+							{m.fields.consent.label}
+						</Label>{" "}
+						<PrivacyDialog />.
+					</span>
 				</div>
 				{errors.consent && (
 					<p
