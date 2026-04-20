@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { track } from "@vercel/analytics";
+import { motion, useReducedMotion } from "framer-motion";
 import { useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { IMaskInput } from "react-imask";
@@ -45,6 +46,7 @@ const inputClasses = cn(
 export function LeadForm({ variant = "hero", className, utm }: Props) {
 	const m = useMessages().ir.form;
 	const [isPending, startTransition] = useTransition();
+	const shouldReduceMotion = useReducedMotion();
 
 	const {
 		register,
@@ -105,199 +107,214 @@ export function LeadForm({ variant = "hero", className, utm }: Props) {
 	}
 
 	return (
-		<form
-			id={formId}
-			onSubmit={handleSubmit(onSubmit)}
-			noValidate
-			className={cn(
-				"flex flex-col gap-4 rounded-xl border bg-card p-6 text-left shadow-sm",
-				variant === "final" && "mx-auto max-w-2xl",
-				className,
-			)}
-			aria-labelledby={titleId}
+		<motion.div
+			initial={
+				shouldReduceMotion ? { opacity: 1 } : { opacity: 0, scale: 0.98 }
+			}
+			whileInView={{ opacity: 1, scale: 1 }}
+			viewport={{ once: true, amount: 0.15 }}
+			transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+			className={cn(variant === "final" && "mx-auto max-w-2xl")}
 		>
-			<header className="space-y-1">
-				<h3 id={titleId} className="font-heading text-xl">
-					{m.title}
-				</h3>
-				<p className="text-muted-foreground text-sm">{m.description}</p>
-			</header>
-
-			<input
-				type="text"
-				tabIndex={-1}
-				autoComplete="off"
-				aria-hidden="true"
-				className="pointer-events-none absolute h-0 w-0 opacity-0"
-				{...register("honeypot")}
-			/>
-
-			<div className="grid gap-2">
-				<Label htmlFor={`name-${variant}`}>{m.fields.name.label}</Label>
-				<Input
-					id={`name-${variant}`}
-					placeholder={m.fields.name.placeholder}
-					maxLength={80}
-					autoComplete="name"
-					aria-invalid={!!errors.name}
-					aria-describedby={errors.name ? `name-${variant}-error` : undefined}
-					{...register("name")}
-				/>
-				{errors.name && (
-					<p
-						id={`name-${variant}-error`}
-						className="text-destructive text-sm"
-						role="alert"
-					>
-						{errors.name.message}
-					</p>
+			<form
+				id={formId}
+				onSubmit={handleSubmit(onSubmit)}
+				noValidate
+				className={cn(
+					"flex flex-col gap-4 rounded-xl border bg-card p-6 text-left shadow-sm",
+					className,
 				)}
-			</div>
+				aria-labelledby={titleId}
+			>
+				<header className="space-y-1">
+					<h3 id={titleId} className="font-heading text-xl">
+						{m.title}
+					</h3>
+					<p className="text-muted-foreground text-sm">{m.description}</p>
+				</header>
 
-			<div className="grid gap-2">
-				<Label htmlFor={`email-${variant}`}>{m.fields.email.label}</Label>
-				<Input
-					id={`email-${variant}`}
-					type="email"
-					placeholder={m.fields.email.placeholder}
-					autoComplete="email"
-					aria-invalid={!!errors.email}
-					aria-describedby={errors.email ? `email-${variant}-error` : undefined}
-					{...register("email")}
+				<input
+					type="text"
+					tabIndex={-1}
+					autoComplete="off"
+					aria-hidden="true"
+					className="pointer-events-none absolute h-0 w-0 opacity-0"
+					{...register("honeypot")}
 				/>
-				{errors.email && (
-					<p
-						id={`email-${variant}-error`}
-						className="text-destructive text-sm"
-						role="alert"
-					>
-						{errors.email.message}
-					</p>
-				)}
-			</div>
 
-			<div className="grid gap-2">
-				<Label htmlFor={`whatsapp-${variant}`}>{m.fields.whatsapp.label}</Label>
-				<Controller
-					control={control}
-					name="whatsapp"
-					render={({ field }) => (
-						<IMaskInput
-							id={`whatsapp-${variant}`}
-							mask="(00) 00000-0000"
-							unmask={true}
-							inputMode="tel"
-							autoComplete="tel"
-							placeholder={m.fields.whatsapp.placeholder}
-							className={inputClasses}
-							value={field.value}
-							inputRef={field.ref}
-							onAccept={(value: string) => field.onChange(value)}
-							onBlur={field.onBlur}
-							aria-invalid={!!errors.whatsapp}
-							aria-describedby={
-								errors.whatsapp ? `whatsapp-${variant}-error` : undefined
-							}
-						/>
+				<div className="grid gap-2">
+					<Label htmlFor={`name-${variant}`}>{m.fields.name.label}</Label>
+					<Input
+						id={`name-${variant}`}
+						placeholder={m.fields.name.placeholder}
+						maxLength={80}
+						autoComplete="name"
+						aria-invalid={!!errors.name}
+						aria-describedby={errors.name ? `name-${variant}-error` : undefined}
+						{...register("name")}
+					/>
+					{errors.name && (
+						<p
+							id={`name-${variant}-error`}
+							className="text-destructive text-sm"
+							role="alert"
+						>
+							{errors.name.message}
+						</p>
 					)}
-				/>
-				{errors.whatsapp && (
-					<p
-						id={`whatsapp-${variant}-error`}
-						className="text-destructive text-sm"
-						role="alert"
-					>
-						{errors.whatsapp.message}
-					</p>
-				)}
-			</div>
+				</div>
 
-			<div className="grid gap-2">
-				<Label htmlFor={`situation-${variant}`}>
-					{m.fields.situation.label}
-				</Label>
-				<Controller
-					control={control}
-					name="situation"
-					render={({ field }) => (
-						<Select onValueChange={field.onChange} value={field.value}>
-							<SelectTrigger
-								id={`situation-${variant}`}
-								ref={field.ref}
-								onBlur={field.onBlur}
-								className="w-full"
-								aria-invalid={!!errors.situation}
-								aria-describedby={
-									errors.situation ? `situation-${variant}-error` : undefined
-								}
-							>
-								<SelectValue placeholder={m.fields.situation.placeholder} />
-							</SelectTrigger>
-							<SelectContent>
-								{m.fields.situation.options.map((opt) => (
-									<SelectItem key={opt.value} value={opt.value}>
-										{opt.label}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
+				<div className="grid gap-2">
+					<Label htmlFor={`email-${variant}`}>{m.fields.email.label}</Label>
+					<Input
+						id={`email-${variant}`}
+						type="email"
+						placeholder={m.fields.email.placeholder}
+						autoComplete="email"
+						aria-invalid={!!errors.email}
+						aria-describedby={
+							errors.email ? `email-${variant}-error` : undefined
+						}
+						{...register("email")}
+					/>
+					{errors.email && (
+						<p
+							id={`email-${variant}-error`}
+							className="text-destructive text-sm"
+							role="alert"
+						>
+							{errors.email.message}
+						</p>
 					)}
-				/>
-				{errors.situation && (
-					<p
-						id={`situation-${variant}-error`}
-						className="text-destructive text-sm"
-						role="alert"
-					>
-						{errors.situation.message}
-					</p>
-				)}
-			</div>
+				</div>
 
-			<div className="grid gap-2">
-				<div className="flex items-start gap-3 text-muted-foreground text-sm">
+				<div className="grid gap-2">
+					<Label htmlFor={`whatsapp-${variant}`}>
+						{m.fields.whatsapp.label}
+					</Label>
 					<Controller
 						control={control}
-						name="consent"
+						name="whatsapp"
 						render={({ field }) => (
-							<Checkbox
-								id={`consent-${variant}`}
-								checked={field.value}
-								onCheckedChange={(checked) => field.onChange(checked === true)}
+							<IMaskInput
+								id={`whatsapp-${variant}`}
+								mask="(00) 00000-0000"
+								unmask={true}
+								inputMode="tel"
+								autoComplete="tel"
+								placeholder={m.fields.whatsapp.placeholder}
+								className={inputClasses}
+								value={field.value}
+								inputRef={field.ref}
+								onAccept={(value: string) => field.onChange(value)}
 								onBlur={field.onBlur}
-								ref={field.ref}
-								className="mt-0.5"
-								aria-invalid={!!errors.consent}
+								aria-invalid={!!errors.whatsapp}
 								aria-describedby={
-									errors.consent ? `consent-${variant}-error` : undefined
+									errors.whatsapp ? `whatsapp-${variant}-error` : undefined
 								}
 							/>
 						)}
 					/>
-					<span className="text-muted-foreground text-sm leading-snug">
-						<Label
-							htmlFor={`consent-${variant}`}
-							className="inline font-normal text-muted-foreground"
+					{errors.whatsapp && (
+						<p
+							id={`whatsapp-${variant}-error`}
+							className="text-destructive text-sm"
+							role="alert"
 						>
-							{m.fields.consent.label}
-						</Label>{" "}
-						<PrivacyDialog />.
-					</span>
+							{errors.whatsapp.message}
+						</p>
+					)}
 				</div>
-				{errors.consent && (
-					<p
-						id={`consent-${variant}-error`}
-						className="text-destructive text-sm"
-						role="alert"
-					>
-						{errors.consent.message}
-					</p>
-				)}
-			</div>
 
-			<Button type="submit" disabled={isPending} className="w-full">
-				{isPending ? m.submitting : m.submit}
-			</Button>
-		</form>
+				<div className="grid gap-2">
+					<Label htmlFor={`situation-${variant}`}>
+						{m.fields.situation.label}
+					</Label>
+					<Controller
+						control={control}
+						name="situation"
+						render={({ field }) => (
+							<Select onValueChange={field.onChange} value={field.value}>
+								<SelectTrigger
+									id={`situation-${variant}`}
+									ref={field.ref}
+									onBlur={field.onBlur}
+									className="w-full"
+									aria-invalid={!!errors.situation}
+									aria-describedby={
+										errors.situation ? `situation-${variant}-error` : undefined
+									}
+								>
+									<SelectValue placeholder={m.fields.situation.placeholder} />
+								</SelectTrigger>
+								<SelectContent>
+									{m.fields.situation.options.map((opt) => (
+										<SelectItem key={opt.value} value={opt.value}>
+											{opt.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						)}
+					/>
+					{errors.situation && (
+						<p
+							id={`situation-${variant}-error`}
+							className="text-destructive text-sm"
+							role="alert"
+						>
+							{errors.situation.message}
+						</p>
+					)}
+				</div>
+
+				<div className="grid gap-2">
+					<div className="flex items-start gap-3 text-muted-foreground text-sm">
+						<Controller
+							control={control}
+							name="consent"
+							render={({ field }) => (
+								<Checkbox
+									id={`consent-${variant}`}
+									checked={field.value}
+									onCheckedChange={(checked) =>
+										field.onChange(checked === true)
+									}
+									onBlur={field.onBlur}
+									ref={field.ref}
+									className="mt-0.5"
+									aria-invalid={!!errors.consent}
+									aria-describedby={
+										errors.consent ? `consent-${variant}-error` : undefined
+									}
+								/>
+							)}
+						/>
+						<span className="text-muted-foreground text-sm leading-snug">
+							<Label
+								htmlFor={`consent-${variant}`}
+								className="inline font-normal text-muted-foreground"
+							>
+								{m.fields.consent.label}
+							</Label>{" "}
+							<PrivacyDialog />.
+						</span>
+					</div>
+					{errors.consent && (
+						<p
+							id={`consent-${variant}-error`}
+							className="text-destructive text-sm"
+							role="alert"
+						>
+							{errors.consent.message}
+						</p>
+					)}
+				</div>
+
+				<Button type="submit" disabled={isPending} className="w-full">
+					{isPending ? m.submitting : m.submit}
+				</Button>
+			</form>
+		</motion.div>
 	);
 }

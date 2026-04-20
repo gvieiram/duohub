@@ -1,6 +1,7 @@
 "use client";
 
 import { useMessages } from "@/stores/use-content-store";
+import { FadeIn } from "./_animations";
 import { LeadForm } from "./lead-form";
 
 export function FinalCta() {
@@ -9,19 +10,21 @@ export function FinalCta() {
 	return (
 		<section id="formulario-contato" className="py-16 md:py-24">
 			<div className="mx-auto max-w-3xl px-4 text-center">
-				<span className="inline-block border-primary/40 border-l-2 pl-3 text-highlight text-sm">
-					{m.badge}
-				</span>
-				<h2 className="mt-3 font-heading text-3xl tracking-tight md:text-4xl">
-					{m.title}
-				</h2>
-				<p className="mt-3 text-muted-foreground leading-relaxed">
-					{m.description}
-				</p>
+				<FadeIn>
+					<span className="inline-block border-primary/40 border-l-2 pl-3 text-highlight text-sm">
+						{m.badge}
+					</span>
+					<h2 className="mt-3 font-heading text-3xl tracking-tight md:text-4xl">
+						{m.title}
+					</h2>
+					<p className="mt-3 text-muted-foreground leading-relaxed">
+						{m.description}
+					</p>
+				</FadeIn>
 
-				<div className="mt-10">
+				<FadeIn className="mt-10" delay={0.15}>
 					<LeadForm variant="final" />
-				</div>
+				</FadeIn>
 			</div>
 		</section>
 	);

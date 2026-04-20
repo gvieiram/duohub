@@ -1,32 +1,41 @@
 "use client";
 
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useMessages } from "@/stores/use-content-store";
+import { FadeIn, fadeUpItemVariants, StaggerGroup } from "./_animations";
 
 export function WhoDeclares() {
 	const m = useMessages().ir.whoDeclares;
 	const [open, setOpen] = useState(false);
+	const shouldReduceMotion = useReducedMotion();
 
 	return (
 		<section id="quem-declara" className="border-b py-16 md:py-24">
 			<div className="mx-auto max-w-4xl px-4">
-				<SectionHeader badge={m.badge} title={m.title} intro={m.intro} />
+				<FadeIn>
+					<SectionHeader badge={m.badge} title={m.title} intro={m.intro} />
+				</FadeIn>
 
-				<div className="mt-10 grid gap-4 md:grid-cols-3">
+				<StaggerGroup className="mt-10 grid gap-4 md:grid-cols-3">
 					{m.primary.map((c) => (
-						<div key={c.title} className="rounded-xl border bg-card p-6">
+						<motion.div
+							key={c.title}
+							variants={fadeUpItemVariants}
+							className="rounded-xl border bg-card p-6"
+						>
 							<h3 className="font-semibold text-base">{c.title}</h3>
 							<p className="mt-2 text-muted-foreground text-sm leading-relaxed">
 								{c.description}
 							</p>
-						</div>
+						</motion.div>
 					))}
-				</div>
+				</StaggerGroup>
 
-				<div className="mt-8">
+				<FadeIn className="mt-8" delay={0.05}>
 					<Button
 						variant="outline"
 						size="sm"
@@ -43,17 +52,41 @@ export function WhoDeclares() {
 						/>
 					</Button>
 
-					{open && (
-						<ul className="mt-6 grid gap-2 text-muted-foreground text-sm">
-							{m.secondary.map((s) => (
-								<li key={s} className="flex gap-2">
-									<span aria-hidden>•</span>
-									<span>{s}</span>
-								</li>
-							))}
-						</ul>
-					)}
-				</div>
+					<AnimatePresence initial={false}>
+						{open && (
+							<motion.ul
+								key="secondary-list"
+								initial={
+									shouldReduceMotion
+										? { opacity: 0 }
+										: { opacity: 0, height: 0 }
+								}
+								animate={
+									shouldReduceMotion
+										? { opacity: 1 }
+										: { opacity: 1, height: "auto" }
+								}
+								exit={
+									shouldReduceMotion
+										? { opacity: 0 }
+										: { opacity: 0, height: 0 }
+								}
+								transition={{
+									duration: 0.35,
+									ease: [0.16, 1, 0.3, 1],
+								}}
+								className="mt-6 grid gap-2 overflow-hidden text-muted-foreground text-sm"
+							>
+								{m.secondary.map((s) => (
+									<li key={s} className="flex gap-2">
+										<span aria-hidden>•</span>
+										<span>{s}</span>
+									</li>
+								))}
+							</motion.ul>
+						)}
+					</AnimatePresence>
+				</FadeIn>
 			</div>
 		</section>
 	);

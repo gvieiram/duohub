@@ -1,7 +1,9 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { AlertTriangle, Calendar, CheckCircle2 } from "lucide-react";
 import { useMessages } from "@/stores/use-content-store";
+import { FadeIn, fadeUpItemVariants, StaggerGroup } from "./_animations";
 
 export function Deadlines() {
 	const m = useMessages().ir.deadlines;
@@ -9,25 +11,33 @@ export function Deadlines() {
 	return (
 		<section id="prazos" className="border-b py-16 md:py-24">
 			<div className="mx-auto max-w-4xl px-4">
-				<div className="max-w-2xl">
-					<span className="inline-block border-primary/40 border-l-2 pl-3 text-highlight text-sm">
-						{m.badge}
-					</span>
-					<h2 className="mt-3 font-heading text-3xl tracking-tight md:text-4xl">
-						{m.title}
-					</h2>
-				</div>
+				<FadeIn>
+					<div className="max-w-2xl">
+						<span className="inline-block border-primary/40 border-l-2 pl-3 text-highlight text-sm">
+							{m.badge}
+						</span>
+						<h2 className="mt-3 font-heading text-3xl tracking-tight md:text-4xl">
+							{m.title}
+						</h2>
+					</div>
+				</FadeIn>
 
-				<div className="mt-10 grid gap-4 md:grid-cols-2">
-					<div className="rounded-xl border bg-card p-6">
+				<StaggerGroup className="mt-10 grid gap-4 md:grid-cols-2">
+					<motion.div
+						variants={fadeUpItemVariants}
+						className="rounded-xl border bg-card p-6"
+					>
 						<Calendar className="size-6 text-primary" aria-hidden />
 						<h3 className="mt-3 font-semibold text-base">{m.window.title}</h3>
 						<p className="mt-2 text-muted-foreground text-sm">
 							{m.window.description}
 						</p>
-					</div>
+					</motion.div>
 
-					<div className="rounded-xl border bg-card p-6">
+					<motion.div
+						variants={fadeUpItemVariants}
+						className="rounded-xl border bg-card p-6"
+					>
 						<CheckCircle2 className="size-6 text-highlight" aria-hidden />
 						<h3 className="mt-3 font-semibold text-base">
 							{m.refundBatches.title}
@@ -42,10 +52,13 @@ export function Deadlines() {
 						<p className="mt-2 text-muted-foreground text-xs">
 							{m.refundBatches.caption}
 						</p>
-					</div>
-				</div>
+					</motion.div>
+				</StaggerGroup>
 
-				<div className="mt-6 rounded-xl border bg-destructive/5 p-6">
+				<FadeIn
+					className="mt-6 rounded-xl border bg-destructive/5 p-6"
+					delay={0.1}
+				>
 					<div className="flex items-start gap-3">
 						<AlertTriangle
 							className="size-6 shrink-0 text-destructive"
@@ -66,7 +79,7 @@ export function Deadlines() {
 							</p>
 						</div>
 					</div>
-				</div>
+				</FadeIn>
 			</div>
 		</section>
 	);

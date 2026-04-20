@@ -1,7 +1,9 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { Receipt, Sparkles, Wallet } from "lucide-react";
 import { useMessages } from "@/stores/use-content-store";
+import { FadeIn, fadeUpItemVariants, StaggerGroup } from "./_animations";
 
 const ICONS = [Sparkles, Wallet, Receipt] as const;
 
@@ -11,12 +13,20 @@ export function Changes2026() {
 	return (
 		<section id="mudancas-2026" className="border-b bg-muted/30 py-16 md:py-24">
 			<div className="mx-auto max-w-4xl px-4">
-				<SectionHeader badge={m.badge} title={m.title} />
-				<div className="mt-10 grid gap-4 md:grid-cols-3">
+				<FadeIn>
+					<SectionHeader badge={m.badge} title={m.title} />
+				</FadeIn>
+				<StaggerGroup className="mt-10 grid gap-4 md:grid-cols-3">
 					{m.items.map((item, idx) => {
 						const Icon = ICONS[idx] ?? Sparkles;
 						return (
-							<div key={item.title} className="rounded-xl border bg-card p-6">
+							<motion.div
+								key={item.title}
+								variants={fadeUpItemVariants}
+								whileHover={{ y: -4 }}
+								transition={{ duration: 0.2, ease: "easeOut" }}
+								className="rounded-xl border bg-card p-6"
+							>
 								<div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
 									<Icon className="size-5 text-primary" aria-hidden />
 								</div>
@@ -24,10 +34,10 @@ export function Changes2026() {
 								<p className="mt-2 text-muted-foreground text-sm leading-relaxed">
 									{item.description}
 								</p>
-							</div>
+							</motion.div>
 						);
 					})}
-				</div>
+				</StaggerGroup>
 			</div>
 		</section>
 	);
