@@ -3,11 +3,36 @@ import { z } from "zod";
 const WHATSAPP_DIGITS = /^\d{10,11}$/;
 
 export const leadSituationSchema = z.enum(
-	["CLT", "AUTONOMO", "INVESTIDOR", "MEI_COM_PF", "OUTROS"],
+	["CLT", "AUTONOMO", "INVESTIDOR", "MEI", "APOSENTADO", "MULTIPLO", "NAO_SEI"],
 	{ error: "Selecione uma situação" },
 );
 
 export type LeadSituation = z.infer<typeof leadSituationSchema>;
+
+export const leadComplexitySchema = z.enum([
+	"ALUGUEL",
+	"VENDA_IMOVEL",
+	"DEPENDENTES",
+	"RENDA_VARIAVEL",
+	"CRIPTOATIVOS",
+	"EXTERIOR",
+	"PENSAO",
+	"PREVIDENCIA",
+	"NENHUMA",
+	"NAO_SEI",
+]);
+
+export type LeadComplexity = z.infer<typeof leadComplexitySchema>;
+
+export const leadMomentSchema = z.enum([
+	"PRIMEIRO_ANO",
+	"DECLARA_SOZINHO",
+	"TROCAR_CONTADOR",
+	"MALHA_FINA",
+	"PESQUISANDO",
+]);
+
+export type LeadMoment = z.infer<typeof leadMomentSchema>;
 
 export const createLeadSchema = z.object({
 	name: z
@@ -25,7 +50,11 @@ export const createLeadSchema = z.object({
 			message: "WhatsApp inválido",
 		}),
 
-	situation: leadSituationSchema,
+	situation: leadSituationSchema.nullish(),
+
+	complexity: z.array(leadComplexitySchema).default([]),
+
+	moment: leadMomentSchema.nullish(),
 
 	consent: z.boolean().refine((v) => v === true, {
 		message: "É necessário aceitar a política de privacidade",
@@ -38,4 +67,5 @@ export const createLeadSchema = z.object({
 	utmCampaign: z.string().max(80).nullable().optional(),
 });
 
-export type CreateLeadInput = z.infer<typeof createLeadSchema>;
+export type CreateLeadInput = z.input<typeof createLeadSchema>;
+export type CreateLeadOutput = z.output<typeof createLeadSchema>;

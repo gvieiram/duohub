@@ -132,4 +132,83 @@ describe("createLead action", () => {
 		expect(args.create.utmMedium).toBe("bio");
 		expect(args.create.utmCampaign).toBe("ir-2026");
 	});
+
+	it("persists step-1-only submission with null qualification fields", async () => {
+		const fd = new FormData();
+		fd.set("name", "Maria Souza");
+		fd.set("email", "maria@example.com");
+		fd.set("whatsapp", "(48) 99999-0000");
+		fd.set("consent", "on");
+		fd.set("honeypot", "");
+
+		const { createLead } = await import("./actions");
+		const result = await createLead(fd);
+
+		expect(result).toEqual({ success: true });
+		const args = leadUpsertMock.mock.calls[0][0];
+		expect(args.create.situation).toBeNull();
+		expect(args.create.moment).toBeNull();
+		expect(args.create.complexity).toEqual([]);
+	});
+
+	it("collects multiple complexity values from formData", async () => {
+		const fd = validFormData();
+		fd.append("complexity", "ALUGUEL");
+		fd.append("complexity", "DEPENDENTES");
+		fd.append("complexity", "RENDA_VARIAVEL");
+		fd.set("moment", "DECLARA_SOZINHO");
+
+		const { createLead } = await import("./actions");
+		const result = await createLead(fd);
+
+		expect(result).toEqual({ success: true });
+		const args = leadUpsertMock.mock.calls[0][0];
+		expect(args.create.complexity).toEqual([
+			"ALUGUEL",
+			"DEPENDENTES",
+			"RENDA_VARIAVEL",
+		]);
+		expect(args.create.moment).toBe("DECLARA_SOZINHO");
+	});
+
+	it("filters out invalid complexity values silently", async () => {
+		const fd = validFormData();
+		fd.append("complexity", "ALUGUEL");
+		fd.append("complexity", "NOT_A_VALID_VALUE");
+		fd.append("complexity", "DEPENDENTES");
+
+		const { createLead } = await import("./actions");
+		const result = await createLead(fd);
+
+		expect(result).toEqual({ success: true });
+		const args = leadUpsertMock.mock.calls[0][0];
+		expect(args.create.complexity).toEqual(["ALUGUEL", "DEPENDENTES"]);
+	});
+
+	it("accepts the new MEI enum value (renamed from MEI_COM_PF)", async () => {
+		const fd = validFormData();
+		fd.set("situation", "MEI");
+
+		const { createLead } = await import("./actions");
+		const result = await createLead(fd);
+
+		expect(result).toEqual({ success: true });
+		const args = leadUpsertMock.mock.calls[0][0];
+		expect(args.create.situation).toBe("MEI");
+	});
+
+	it("accepts new APOSENTADO, MULTIPLO and NAO_SEI situation values", async () => {
+		const { createLead } = await import("./actions");
+
+		for (const situation of ["APOSENTADO", "MULTIPLO", "NAO_SEI"]) {
+			leadUpsertMock.mockClear();
+			const fd = validFormData();
+			fd.set("situation", situation);
+			fd.set("email", `${situation.toLowerCase()}@example.com`);
+
+			const result = await createLead(fd);
+			expect(result).toEqual({ success: true });
+			expect(leadUpsertMock.mock.calls[0][0].create.situation).toBe(situation);
+		}
+	});
 });

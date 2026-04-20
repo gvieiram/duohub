@@ -6,6 +6,8 @@ const validInput: CreateLeadInput = {
 	email: "joao@example.com",
 	whatsapp: "(48) 99246-7107",
 	situation: "CLT",
+	complexity: [],
+	moment: null,
 	consent: true,
 	honeypot: "",
 	utmSource: null,
@@ -61,8 +63,10 @@ describe("createLeadSchema", () => {
 			"CLT",
 			"AUTONOMO",
 			"INVESTIDOR",
-			"MEI_COM_PF",
-			"OUTROS",
+			"MEI",
+			"APOSENTADO",
+			"MULTIPLO",
+			"NAO_SEI",
 		] as const;
 		for (const situation of situations) {
 			expect(() =>
@@ -71,10 +75,76 @@ describe("createLeadSchema", () => {
 		}
 	});
 
-	it("rejects invalid situation", () => {
+	it("accepts null situation (user skipped step 2)", () => {
+		expect(() =>
+			createLeadSchema.parse({ ...validInput, situation: null }),
+		).not.toThrow();
+	});
+
+	it("accepts undefined situation (user skipped step 2)", () => {
+		const { situation: _s, ...rest } = validInput;
+		expect(() => createLeadSchema.parse(rest)).not.toThrow();
+	});
+
+	it("rejects invalid situation value", () => {
 		expect(() =>
 			// biome-ignore lint/suspicious/noExplicitAny: test-only
 			createLeadSchema.parse({ ...validInput, situation: "PJ" as any }),
+		).toThrow();
+	});
+
+	it("accepts empty complexity array (default)", () => {
+		const parsed = createLeadSchema.parse(validInput);
+		expect(parsed.complexity).toEqual([]);
+	});
+
+	it("accepts multiple complexity values", () => {
+		const parsed = createLeadSchema.parse({
+			...validInput,
+			complexity: ["ALUGUEL", "DEPENDENTES", "RENDA_VARIAVEL"],
+		});
+		expect(parsed.complexity).toEqual([
+			"ALUGUEL",
+			"DEPENDENTES",
+			"RENDA_VARIAVEL",
+		]);
+	});
+
+	it("rejects invalid complexity value", () => {
+		expect(() =>
+			createLeadSchema.parse({
+				...validInput,
+				// biome-ignore lint/suspicious/noExplicitAny: test-only
+				complexity: ["ALUGUEL", "INVALID"] as any,
+			}),
+		).toThrow();
+	});
+
+	it("accepts all moment enum values", () => {
+		const moments = [
+			"PRIMEIRO_ANO",
+			"DECLARA_SOZINHO",
+			"TROCAR_CONTADOR",
+			"MALHA_FINA",
+			"PESQUISANDO",
+		] as const;
+		for (const moment of moments) {
+			expect(() =>
+				createLeadSchema.parse({ ...validInput, moment }),
+			).not.toThrow();
+		}
+	});
+
+	it("accepts null moment (user skipped step 2)", () => {
+		expect(() =>
+			createLeadSchema.parse({ ...validInput, moment: null }),
+		).not.toThrow();
+	});
+
+	it("rejects invalid moment value", () => {
+		expect(() =>
+			// biome-ignore lint/suspicious/noExplicitAny: test-only
+			createLeadSchema.parse({ ...validInput, moment: "WRONG" as any }),
 		).toThrow();
 	});
 
@@ -98,5 +168,13 @@ describe("createLeadSchema", () => {
 			utmCampaign: "ir-2026",
 		});
 		expect(parsed.utmSource).toBe("instagram");
+	});
+
+	it("accepts a minimal step-1-only submission (all qualification null)", () => {
+		const { situation: _s, moment: _m, ...rest } = validInput;
+		const parsed = createLeadSchema.parse(rest);
+		expect(parsed.situation ?? null).toBeNull();
+		expect(parsed.moment ?? null).toBeNull();
+		expect(parsed.complexity).toEqual([]);
 	});
 });

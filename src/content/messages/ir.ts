@@ -344,10 +344,12 @@ export const ir = {
 				placeholder: "Selecione uma opção",
 				options: [
 					{ value: "CLT", label: "CLT" },
-					{ value: "AUTONOMO", label: "Autônomo" },
+					{ value: "AUTONOMO", label: "Autônomo ou PJ" },
 					{ value: "INVESTIDOR", label: "Investidor" },
-					{ value: "MEI_COM_PF", label: "MEI com PF" },
-					{ value: "OUTROS", label: "Outros" },
+					{ value: "MEI", label: "MEI" },
+					{ value: "APOSENTADO", label: "Aposentado" },
+					{ value: "MULTIPLO", label: "Mais de uma situação" },
+					{ value: "NAO_SEI", label: "Não sei" },
 				],
 			},
 			consent: {
@@ -363,7 +365,7 @@ export const ir = {
 			sections: [
 				{
 					heading: "1. Dados que coletamos",
-					body: "Ao preencher o formulário, coletamos seu nome, e-mail, WhatsApp e a situação informada (CLT, autônomo, investidor, MEI com PF ou outros). Também registramos a data e hora do seu consentimento e, quando aplicável, parâmetros de origem do acesso (UTMs) para fins analíticos.",
+					body: "Ao preencher o formulário, coletamos seu nome, e-mail, WhatsApp e, quando informado, dados de qualificação (situação, complexidade fiscal e momento atual). Também registramos a data e hora do seu consentimento e, quando aplicável, parâmetros de origem do acesso (UTMs) para fins analíticos.",
 				},
 				{
 					heading: "2. Como usamos seus dados",

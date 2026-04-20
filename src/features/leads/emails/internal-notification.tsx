@@ -9,14 +9,16 @@ import {
 	Section,
 	Text,
 } from "@react-email/components";
-import type { LeadSituation } from "../schemas";
-import { SITUATION_LABELS } from "../types";
+import type { LeadComplexity, LeadMoment, LeadSituation } from "../schemas";
+import { COMPLEXITY_LABELS, MOMENT_LABELS, SITUATION_LABELS } from "../types";
 
 type Props = {
 	name: string;
 	email: string;
 	whatsapp: string;
-	situation: LeadSituation;
+	situation: LeadSituation | null;
+	complexity: LeadComplexity[];
+	moment: LeadMoment | null;
 	whatsappHref: string;
 	utmSource?: string | null;
 	utmMedium?: string | null;
@@ -30,8 +32,18 @@ const row = {
 	lineHeight: 1.6,
 };
 
+const muted = {
+	...row,
+	color: "#6b7280",
+};
+
 export function InternalNotificationEmail(props: Props) {
 	const hasUtm = props.utmSource || props.utmMedium || props.utmCampaign;
+	const hasQualification =
+		props.situation || props.complexity.length > 0 || props.moment;
+	const complexityLabels = props.complexity.map(
+		(item) => COMPLEXITY_LABELS[item],
+	);
 
 	return (
 		<Html lang="pt-BR">
@@ -67,10 +79,40 @@ export function InternalNotificationEmail(props: Props) {
 						<Text style={row}>
 							<strong>WhatsApp:</strong> {props.whatsapp}
 						</Text>
-						<Text style={row}>
-							<strong>Situação:</strong> {SITUATION_LABELS[props.situation]}
-						</Text>
 					</Section>
+
+					{hasQualification ? (
+						<Section style={{ marginTop: 16 }}>
+							<Heading
+								as="h2"
+								style={{ fontSize: 15, color: "#111", marginBottom: 8 }}
+							>
+								Qualificação
+							</Heading>
+							<Text style={row}>
+								<strong>Situação:</strong>{" "}
+								{props.situation
+									? SITUATION_LABELS[props.situation]
+									: "Não informado"}
+							</Text>
+							<Text style={row}>
+								<strong>Complexidade:</strong>{" "}
+								{complexityLabels.length > 0
+									? complexityLabels.join(", ")
+									: "Não informado"}
+							</Text>
+							<Text style={row}>
+								<strong>Momento:</strong>{" "}
+								{props.moment ? MOMENT_LABELS[props.moment] : "Não informado"}
+							</Text>
+						</Section>
+					) : (
+						<Section style={{ marginTop: 16 }}>
+							<Text style={muted}>
+								O lead não preencheu as perguntas de qualificação.
+							</Text>
+						</Section>
+					)}
 
 					{hasUtm && (
 						<Section style={{ marginTop: 16 }}>

@@ -7,7 +7,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { leadRatelimit } from "@/lib/ratelimit";
 import { sendLeadEmails } from "./emails/dispatch";
-import { createLeadSchema } from "./schemas";
+import { createLeadSchema, leadComplexitySchema } from "./schemas";
 import type { CreateLeadResult, LeadPayload } from "./types";
 import { normalizeWhatsapp } from "./utils";
 
@@ -17,12 +17,29 @@ function getClientIp(h: Headers): string {
 	return h.get("x-real-ip") ?? "anonymous";
 }
 
+function parseComplexity(formData: FormData) {
+	const values = formData.getAll("complexity").map((v) => String(v));
+	if (values.length === 0) return [];
+	return values
+		.map((v) => leadComplexitySchema.safeParse(v))
+		.filter((r) => r.success)
+		.map((r) => r.data);
+}
+
+function toNullable(value: FormDataEntryValue | null): string | null {
+	if (value === null) return null;
+	const str = String(value).trim();
+	return str.length > 0 ? str : null;
+}
+
 function formDataToInput(formData: FormData) {
 	return {
 		name: String(formData.get("name") ?? ""),
 		email: String(formData.get("email") ?? ""),
 		whatsapp: String(formData.get("whatsapp") ?? ""),
-		situation: String(formData.get("situation") ?? ""),
+		situation: toNullable(formData.get("situation")),
+		complexity: parseComplexity(formData),
+		moment: toNullable(formData.get("moment")),
 		consent:
 			formData.get("consent") === "on" || formData.get("consent") === "true",
 		honeypot: String(formData.get("honeypot") ?? ""),
@@ -60,6 +77,8 @@ export async function createLead(
 
 		const input = parsed.data;
 		const normalizedWhatsapp = normalizeWhatsapp(input.whatsapp);
+		const situation = input.situation ?? null;
+		const moment = input.moment ?? null;
 
 		const lead = await db.lead.upsert({
 			where: { email: input.email },
@@ -67,7 +86,9 @@ export async function createLead(
 				name: input.name,
 				email: input.email,
 				whatsapp: normalizedWhatsapp,
-				situation: input.situation,
+				situation,
+				complexity: input.complexity,
+				moment,
 				source: "ir-page",
 				utmSource: input.utmSource ?? null,
 				utmMedium: input.utmMedium ?? null,
@@ -77,7 +98,9 @@ export async function createLead(
 			update: {
 				name: input.name,
 				whatsapp: normalizedWhatsapp,
-				situation: input.situation,
+				situation,
+				complexity: input.complexity,
+				moment,
 				utmSource: input.utmSource ?? null,
 				utmMedium: input.utmMedium ?? null,
 				utmCampaign: input.utmCampaign ?? null,
@@ -88,7 +111,9 @@ export async function createLead(
 			name: input.name,
 			email: input.email,
 			whatsapp: normalizedWhatsapp,
-			situation: input.situation,
+			situation,
+			complexity: input.complexity,
+			moment,
 			utmSource: input.utmSource ?? null,
 			utmMedium: input.utmMedium ?? null,
 			utmCampaign: input.utmCampaign ?? null,

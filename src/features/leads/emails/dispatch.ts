@@ -41,6 +41,8 @@ export async function sendLeadEmails(payload: LeadPayload): Promise<void> {
 				email: payload.email,
 				whatsapp: payload.whatsapp,
 				situation: payload.situation,
+				complexity: payload.complexity,
+				moment: payload.moment,
 				whatsappHref: internalWhatsappHref,
 				utmSource: payload.utmSource,
 				utmMedium: payload.utmMedium,

@@ -60,7 +60,9 @@ export function LeadForm({ variant = "hero", className, utm }: Props) {
 			name: "",
 			email: "",
 			whatsapp: "",
-			situation: undefined,
+			situation: null,
+			complexity: [],
+			moment: null,
 			consent: false,
 			honeypot: "",
 			utmSource: utm?.source ?? null,
@@ -77,7 +79,7 @@ export function LeadForm({ variant = "hero", className, utm }: Props) {
 		fd.set("name", data.name);
 		fd.set("email", data.email);
 		fd.set("whatsapp", data.whatsapp);
-		fd.set("situation", data.situation);
+		if (data.situation) fd.set("situation", data.situation);
 		fd.set("consent", data.consent ? "true" : "false");
 		fd.set("honeypot", data.honeypot);
 		if (data.utmSource) fd.set("utmSource", data.utmSource);
@@ -234,7 +236,10 @@ export function LeadForm({ variant = "hero", className, utm }: Props) {
 						control={control}
 						name="situation"
 						render={({ field }) => (
-							<Select onValueChange={field.onChange} value={field.value}>
+							<Select
+								onValueChange={field.onChange}
+								value={field.value ?? undefined}
+							>
 								<SelectTrigger
 									id={`situation-${variant}`}
 									ref={field.ref}

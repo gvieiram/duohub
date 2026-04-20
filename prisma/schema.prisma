@@ -8,20 +8,22 @@ datasource db {
 }
 
 model Lead {
-  id          String        @id @default(cuid())
+  id          String           @id @default(cuid())
   name        String
-  email       String        @unique
+  email       String           @unique
   whatsapp    String
-  situation   LeadSituation
-  source      String        @default("ir-page")
+  situation   LeadSituation?
+  complexity  LeadComplexity[]
+  moment      LeadMoment?
+  source      String           @default("ir-page")
   utmSource   String?
   utmMedium   String?
   utmCampaign String?
-  status      LeadStatus    @default(NEW)
+  status      LeadStatus       @default(NEW)
   notes       String?
   consentAt   DateTime
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 
   @@index([status])
   @@index([createdAt])
@@ -31,8 +33,31 @@ enum LeadSituation {
   CLT
   AUTONOMO
   INVESTIDOR
-  MEI_COM_PF
-  OUTROS
+  MEI
+  APOSENTADO
+  MULTIPLO
+  NAO_SEI
+}
+
+enum LeadComplexity {
+  ALUGUEL
+  VENDA_IMOVEL
+  DEPENDENTES
+  RENDA_VARIAVEL
+  CRIPTOATIVOS
+  EXTERIOR
+  PENSAO
+  PREVIDENCIA
+  NENHUMA
+  NAO_SEI
+}
+
+enum LeadMoment {
+  PRIMEIRO_ANO
+  DECLARA_SOZINHO
+  TROCAR_CONTADOR
+  MALHA_FINA
+  PESQUISANDO
 }
 
 enum LeadStatus {
