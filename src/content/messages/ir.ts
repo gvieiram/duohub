@@ -402,6 +402,127 @@ export const ir = {
 	mobileCta: {
 		label: "Quero ajuda com meu IR",
 	},
+
+	modal: {
+		trigger: {
+			primary: "Falar com especialista",
+			secondary: "Começar agora",
+			mobile: "Quero ajuda com meu IR",
+		},
+		stepLabels: {
+			contact: "Contato",
+			qualification: "Sobre você",
+			optionalBadge: "opcional",
+		},
+		step1: {
+			title: "Seus dados de contato",
+			description: "Responderemos em até 24h úteis no WhatsApp informado.",
+			fields: {
+				name: { label: "Nome completo", placeholder: "Seu nome" },
+				email: { label: "E-mail", placeholder: "voce@email.com" },
+				whatsapp: { label: "WhatsApp", placeholder: "(48) 99246-7107" },
+			},
+		},
+		step2: {
+			title: "Conte mais sobre seu caso",
+			description:
+				"Com essas respostas, o especialista chega preparado. Se preferir, é só pular e conversamos no contato.",
+			skipHint:
+				"Todas as perguntas abaixo são opcionais. Você pode enviar sem responder ou pular pergunta por pergunta.",
+			situation: {
+				label: "Como você se enquadra hoje?",
+				placeholder: "Selecione sua situação",
+				options: [
+					{ value: "CLT", label: "CLT" },
+					{ value: "AUTONOMO", label: "Autônomo ou PJ" },
+					{ value: "INVESTIDOR", label: "Investidor" },
+					{ value: "MEI", label: "MEI" },
+					{ value: "APOSENTADO", label: "Aposentado" },
+					{ value: "MULTIPLO", label: "Mais de uma situação" },
+					{ value: "NAO_SEI", label: "Não sei" },
+				],
+			},
+			complexity: {
+				label: "Você teve alguma dessas situações em 2025?",
+				helper: "Pode marcar mais de uma.",
+				options: [
+					{ value: "ALUGUEL", label: "Recebeu aluguel" },
+					{ value: "VENDA_IMOVEL", label: "Comprou ou vendeu imóvel" },
+					{ value: "DEPENDENTES", label: "Tem dependentes" },
+					{ value: "RENDA_VARIAVEL", label: "Ações, FIIs ou renda variável" },
+					{ value: "CRIPTOATIVOS", label: "Criptoativos" },
+					{ value: "EXTERIOR", label: "Bens ou rendas no exterior" },
+					{
+						value: "PENSAO",
+						label: "Pensão alimentícia (paga ou recebida)",
+					},
+					{ value: "PREVIDENCIA", label: "Previdência privada" },
+					{ value: "NENHUMA", label: "Nenhuma dessas" },
+					{ value: "NAO_SEI", label: "Não sei / prefiro conversar" },
+				],
+			},
+			moment: {
+				label: "Qual é sua situação com o IR hoje?",
+				placeholder: "Selecione o momento",
+				options: [
+					{
+						value: "PRIMEIRO_ANO",
+						label: "Nunca declarei — primeiro ano obrigatório",
+					},
+					{
+						value: "DECLARA_SOZINHO",
+						label: "Já declarei sozinho(a) e quero ajuda",
+					},
+					{
+						value: "TROCAR_CONTADOR",
+						label: "Já tenho contador, quero trocar",
+					},
+					{
+						value: "MALHA_FINA",
+						label: "Estou com pendência ou na malha fina",
+					},
+					{
+						value: "PESQUISANDO",
+						label: "Só quero orçamento / ainda pesquisando",
+					},
+				],
+			},
+		},
+		consentFooter: {
+			prefix: "Ao enviar, aceito a",
+			linkLabel: "política de privacidade",
+			suffix: "da DuoHub.",
+		},
+		buttons: {
+			continue: "Continuar",
+			back: "Voltar",
+			skipAndSubmit: "Enviar sem responder",
+			submit: "Enviar",
+			submitting: "Enviando…",
+			close: "Fechar",
+		},
+		errors: {
+			rateLimit: "Muitas tentativas, aguarde alguns minutos e tente novamente.",
+			server: "Não foi possível enviar agora. Tente novamente em instantes.",
+		},
+		success: {
+			title: "Recebemos seu contato!",
+			description:
+				"Um especialista dedicado vai responder em até 24 horas úteis no WhatsApp informado.",
+			whatsappCta: "Falar agora no WhatsApp",
+			whatsappMessage:
+				"Olá! Acabei de enviar meus dados pela página de IR 2026 da DuoHub e gostaria de adiantar a conversa.",
+			secondaryTitle: "Enquanto isso, dá uma olhada",
+			secondaryLinks: [
+				{
+					href: "#prazos",
+					label: "Prazos e riscos de entregar fora do prazo",
+				},
+				{ href: "#quem-declara", label: "Quem precisa declarar em 2026" },
+			],
+			closeLabel: "Fechar",
+		},
+	},
 } as const;
 
 export type IrMessages = typeof ir;
