@@ -353,8 +353,40 @@ export const ir = {
 			consent: {
 				label: "Aceito a",
 				linkLabel: "política de privacidade",
-				linkHref: "/privacidade",
 			},
+		},
+
+		privacy: {
+			trigger: "política de privacidade",
+			title: "Política de Privacidade",
+			lastUpdated: "Última atualização: abril de 2026",
+			sections: [
+				{
+					heading: "1. Dados que coletamos",
+					body: "Ao preencher o formulário, coletamos seu nome, e-mail, WhatsApp e a situação informada (CLT, autônomo, investidor, MEI com PF ou outros). Também registramos a data e hora do seu consentimento e, quando aplicável, parâmetros de origem do acesso (UTMs) para fins analíticos.",
+				},
+				{
+					heading: "2. Como usamos seus dados",
+					body: "Usamos seus dados exclusivamente para retornar o contato em até 24 horas úteis, entender sua situação e oferecer o serviço de declaração de Imposto de Renda. Não vendemos, alugamos nem compartilhamos seus dados com terceiros para fins de marketing.",
+				},
+				{
+					heading: "3. Base legal (LGPD)",
+					body: "O tratamento dos seus dados se baseia no seu consentimento (art. 7º, I da Lei 13.709/2018 — LGPD) e, quando houver contratação, na execução do contrato entre você e a DuoHub (art. 7º, V).",
+				},
+				{
+					heading: "4. Retenção e segurança",
+					body: "Mantemos seus dados enquanto houver relacionamento comercial ativo ou pelo prazo exigido pela legislação fiscal e contábil brasileira. Utilizamos provedores de infraestrutura em nuvem (Neon, Resend e Upstash) que aplicam criptografia em trânsito e em repouso.",
+				},
+				{
+					heading: "5. Seus direitos",
+					body: "Você pode, a qualquer momento, solicitar acesso, correção, portabilidade, anonimização ou exclusão dos seus dados, bem como revogar o consentimento. Para isso, envie um e-mail para contato@duohubcontabil.com.br.",
+				},
+				{
+					heading: "6. Contato do controlador",
+					body: "DuoHub Gestão Contábil — Florianópolis/SC. E-mail: contato@duohubcontabil.com.br. WhatsApp: (48) 99246-7107.",
+				},
+			],
+			closeLabel: "Fechar",
 		},
 		submit: "Quero ajuda com meu IR",
 		submitting: "Enviando…",
