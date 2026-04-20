@@ -109,7 +109,7 @@ export function LeadForm({ variant = "hero", className, utm }: Props) {
 			onSubmit={handleSubmit(onSubmit)}
 			noValidate
 			className={cn(
-				"flex flex-col gap-4 rounded-xl border bg-card p-6 shadow-sm",
+				"flex flex-col gap-4 rounded-xl border bg-card p-6 text-left shadow-sm",
 				variant === "final" && "mx-auto max-w-2xl",
 				className,
 			)}
