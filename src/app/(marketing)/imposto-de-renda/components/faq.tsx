@@ -26,7 +26,7 @@ export function Faq() {
 				<Accordion type="single" collapsible className="mt-8">
 					{m.items.map((q, idx) => (
 						<AccordionItem key={q.question} value={`q-${idx}`}>
-							<AccordionTrigger className="text-left text-base font-medium">
+							<AccordionTrigger className="text-left font-medium text-base">
 								{q.question}
 							</AccordionTrigger>
 							<AccordionContent className="text-muted-foreground leading-relaxed">

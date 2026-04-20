@@ -36,7 +36,10 @@ export function WhoDeclares() {
 					>
 						{m.showAllLabel}
 						<ChevronDown
-							className={cn("size-4 transition-transform", open && "rotate-180")}
+							className={cn(
+								"size-4 transition-transform",
+								open && "rotate-180",
+							)}
 						/>
 					</Button>
 

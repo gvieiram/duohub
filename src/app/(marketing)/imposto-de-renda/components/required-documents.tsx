@@ -29,7 +29,7 @@ export function RequiredDocuments() {
 				<Accordion type="multiple" className="mt-8">
 					{m.groups.map((group) => (
 						<AccordionItem key={group.title} value={group.title}>
-							<AccordionTrigger className="text-base font-medium">
+							<AccordionTrigger className="font-medium text-base">
 								{group.title}
 							</AccordionTrigger>
 							<AccordionContent>
