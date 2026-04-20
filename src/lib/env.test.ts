@@ -48,4 +48,25 @@ describe("env", () => {
 
 		process.env = original;
 	});
+
+	it("loads when NEXT_PUBLIC_SITE_URL is not set", async () => {
+		vi.resetModules();
+		const original = process.env;
+		process.env = {
+			...original,
+			DATABASE_URL: "postgresql://u:p@h/d?sslmode=require",
+			DIRECT_URL: "postgresql://u:p@h/d?sslmode=require",
+			RESEND_API_KEY: "re_test_key",
+			INTERNAL_LEADS_EMAIL: "lead@example.com",
+			UPSTASH_REDIS_REST_URL: "https://example.upstash.io",
+			UPSTASH_REDIS_REST_TOKEN: "token",
+			NEXT_PUBLIC_SITE_URL: undefined,
+			SKIP_ENV_VALIDATION: undefined,
+		};
+
+		const mod = await import("./env");
+		expect(mod.env.NEXT_PUBLIC_SITE_URL).toBeUndefined();
+
+		process.env = original;
+	});
 });

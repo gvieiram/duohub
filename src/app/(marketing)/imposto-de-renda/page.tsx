@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { company } from "@/content/company";
 import { messages } from "@/content/messages";
-import { env } from "@/lib/env";
+import { getSiteUrl } from "@/lib/site-url";
 import { Changes2026 } from "./components/changes-2026";
 import { Deadlines } from "./components/deadlines";
 import { Faq } from "./components/faq";
@@ -64,7 +64,7 @@ export default async function IrPage({
 
 	return (
 		<>
-			<IrJsonLd siteUrl={env.NEXT_PUBLIC_SITE_URL} />
+			<IrJsonLd siteUrl={getSiteUrl()} />
 			<Hero utm={utm} />
 			<WhoDeclares />
 			<Changes2026 />
