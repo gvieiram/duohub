@@ -246,7 +246,7 @@ export const ir = {
 
 	deadlines: {
 		badge: "Prazos e riscos",
-		title: "Prazo oficial e o que acontece se errar",
+		title: "Prazo oficial",
 		window: {
 			title: "Prazo de entrega",
 			description: "De 23/03/2026 a 29/05/2026.",
