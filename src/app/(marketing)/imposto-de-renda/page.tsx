@@ -10,6 +10,7 @@ import { FinalCta } from "./components/final-cta";
 import { Hero } from "./components/hero";
 import { HowItWorks } from "./components/how-it-works";
 import { InlineCta } from "./components/inline-cta";
+import { IrpfModal } from "./components/irpf-modal";
 import { RequiredDocuments } from "./components/required-documents";
 import { Situations } from "./components/situations";
 import { WhoDeclares } from "./components/who-declares";
@@ -66,7 +67,7 @@ export default async function IrPage({
 	return (
 		<>
 			<IrJsonLd siteUrl={getSiteUrl()} />
-			<Hero utm={utm} />
+			<Hero />
 			<WhoDeclares />
 			<Changes2026 />
 			<Situations />
@@ -79,6 +80,7 @@ export default async function IrPage({
 			<Faq />
 			<FinalCta />
 			<Footer />
+			<IrpfModal utm={utm} />
 		</>
 	);
 }

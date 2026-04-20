@@ -1,29 +1,36 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
 import { useMessages } from "@/stores/use-content-store";
 import { FadeIn } from "./_animations";
-import { LeadForm } from "./lead-form";
+import { IrpfModalTrigger } from "./irpf-modal/trigger-button";
 
 export function FinalCta() {
-	const m = useMessages().ir.finalCta;
+	const { finalCta, modal } = useMessages().ir;
 
 	return (
 		<section id="formulario-contato" className="py-16 md:py-24">
 			<div className="mx-auto max-w-3xl px-4 text-center">
 				<FadeIn>
 					<span className="inline-block border-primary/40 border-l-2 pl-3 text-highlight text-sm">
-						{m.badge}
+						{finalCta.badge}
 					</span>
 					<h2 className="mt-3 font-heading text-3xl tracking-tight md:text-4xl">
-						{m.title}
+						{finalCta.title}
 					</h2>
 					<p className="mt-3 text-muted-foreground leading-relaxed">
-						{m.description}
+						{finalCta.description}
 					</p>
 				</FadeIn>
 
 				<FadeIn className="mt-10" delay={0.15}>
-					<LeadForm variant="final" />
+					<IrpfModalTrigger size="lg" className="gap-2">
+						{modal.trigger.primary}
+						<ArrowRight aria-hidden className="size-4" />
+					</IrpfModalTrigger>
+					<p className="mt-3 text-muted-foreground text-xs">
+						Resposta em até 24h úteis — sem compromisso.
+					</p>
 				</FadeIn>
 			</div>
 		</section>
