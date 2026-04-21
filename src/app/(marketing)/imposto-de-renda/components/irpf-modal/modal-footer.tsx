@@ -33,12 +33,47 @@ export function ModalFooter({
 
 	const consentId = "irpf-modal-consent";
 
+	if (step === 2) {
+		return (
+			<div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end">
+				<Button
+					type="button"
+					variant="ghost"
+					onClick={onBack}
+					disabled={isPending}
+					className="sm:mr-auto"
+				>
+					<ArrowLeft aria-hidden className="size-4" />
+					{modal.buttons.back}
+				</Button>
+				<Button
+					type="button"
+					variant="outline"
+					onClick={onSubmit}
+					disabled={isPending}
+				>
+					{modal.buttons.skipAndSubmit}
+				</Button>
+				<Button type="button" onClick={onSubmit} disabled={isPending}>
+					{isPending ? (
+						<>
+							<Loader2 aria-hidden className="size-4 animate-spin" />
+							{modal.buttons.submitting}
+						</>
+					) : (
+						modal.buttons.submit
+					)}
+				</Button>
+			</div>
+		);
+	}
+
 	return (
-		<div className="flex flex-col gap-4">
-			<div className="flex flex-col gap-2">
+		<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+			<div className="flex flex-col gap-1">
 				<label
 					htmlFor={consentId}
-					className="flex cursor-pointer items-start gap-2 text-muted-foreground text-xs leading-snug"
+					className="flex cursor-pointer items-center gap-2 text-muted-foreground text-xs leading-snug"
 				>
 					<Checkbox
 						id={consentId}
@@ -48,7 +83,6 @@ export function ModalFooter({
 						}
 						aria-invalid={!!consentError}
 						aria-describedby={consentError ? "irpf-consent-error" : undefined}
-						className="mt-0.5"
 					/>
 					<span>
 						{modal.consentFooter.prefix}{" "}
@@ -76,50 +110,15 @@ export function ModalFooter({
 				) : null}
 			</div>
 
-			<div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end">
-				{step === 2 ? (
-					<>
-						<Button
-							type="button"
-							variant="ghost"
-							onClick={onBack}
-							disabled={isPending}
-							className="sm:mr-auto"
-						>
-							<ArrowLeft aria-hidden className="size-4" />
-							{modal.buttons.back}
-						</Button>
-						<Button
-							type="button"
-							variant="outline"
-							onClick={onSubmit}
-							disabled={isPending}
-						>
-							{modal.buttons.skipAndSubmit}
-						</Button>
-						<Button type="button" onClick={onSubmit} disabled={isPending}>
-							{isPending ? (
-								<>
-									<Loader2 aria-hidden className="size-4 animate-spin" />
-									{modal.buttons.submitting}
-								</>
-							) : (
-								modal.buttons.submit
-							)}
-						</Button>
-					</>
-				) : (
-					<Button
-						type="button"
-						onClick={onContinue}
-						disabled={isPending}
-						className="sm:min-w-[140px]"
-					>
-						{modal.buttons.continue}
-						<ArrowRight aria-hidden className="size-4" />
-					</Button>
-				)}
-			</div>
+			<Button
+				type="button"
+				onClick={onContinue}
+				disabled={isPending}
+				className="sm:min-w-[140px] sm:shrink-0"
+			>
+				{modal.buttons.continue}
+				<ArrowRight aria-hidden className="size-4" />
+			</Button>
 		</div>
 	);
 }

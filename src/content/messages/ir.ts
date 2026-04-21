@@ -430,7 +430,7 @@ export const ir = {
 			skipHint:
 				"Todas as perguntas abaixo são opcionais. Você pode enviar sem responder ou pular pergunta por pergunta.",
 			situation: {
-				label: "Como você se enquadra hoje?",
+				label: "Qual era sua situação em 2025?",
 				placeholder: "Selecione sua situação",
 				options: [
 					{ value: "CLT", label: "CLT" },
@@ -470,20 +470,12 @@ export const ir = {
 						label: "Nunca declarei — primeiro ano obrigatório",
 					},
 					{
-						value: "DECLARA_SOZINHO",
-						label: "Já declarei sozinho(a) e quero ajuda",
-					},
-					{
-						value: "TROCAR_CONTADOR",
-						label: "Já tenho contador, quero trocar",
+						value: "JA_DECLAREI",
+						label: "Já declarei em anos anteriores",
 					},
 					{
 						value: "MALHA_FINA",
 						label: "Estou com pendência ou na malha fina",
-					},
-					{
-						value: "PESQUISANDO",
-						label: "Só quero orçamento / ainda pesquisando",
 					},
 				],
 			},
