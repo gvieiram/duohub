@@ -264,7 +264,7 @@ export const irpf = {
 			{
 				question: "Quem precisa declarar IR em 2026?",
 				answer:
-					"Todo mundo que teve rendimentos tributáveis acima de R$ 35.584, outros rendimentos acima de R$ 200 mil, ganho de capital, bens acima de R$ 800 mil ou se encaixa em outros critérios da Receita. Em dúvida, a gente confirma junto com você em até 24h úteis.",
+					"Todo mundo que teve rendimentos tributáveis acima de R$ 35.584, outros rendimentos acima de R$ 200 mil, ganho de capital, bens acima de R$ 800 mil ou se encaixa em outros critérios da Receita Federal. Em dúvida, a gente confirma junto com você em até 24h úteis.",
 			},
 			{
 				question: "Qual o prazo de entrega da declaração?",
@@ -304,7 +304,7 @@ export const irpf = {
 			{
 				question: "Posso declarar junto com meu cônjuge?",
 				answer:
-					"Sim, é possível declarar em conjunto ou separadamente. A escolha depende do total de rendimentos, dependentes e dedutíveis de cada um. Fazemos a simulação junto pra escolher o caminho mais vantajoso.",
+					"Sim, é possível declarar em conjunto ou separadamente. A escolha depende do total de rendimentos, dependentes e dedutíveis de cada um.",
 			},
 			{
 				question: "Como funciona o atendimento da DuoHub?",
