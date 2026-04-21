@@ -44,8 +44,6 @@ export const COMPLEXITY_LABELS: Record<LeadComplexity, string> = {
 
 export const MOMENT_LABELS: Record<LeadMoment, string> = {
 	PRIMEIRO_ANO: "Nunca declarei — primeiro ano obrigatório",
-	DECLARA_SOZINHO: "Já declarei sozinho(a) e quero ajuda",
-	TROCAR_CONTADOR: "Já tenho contador, quero trocar",
 	MALHA_FINA: "Estou com pendência ou na malha fina",
-	PESQUISANDO: "Só quero orçamento / ainda pesquisando",
+	JA_DECLAREI: "Já declarei em anos anteriores",
 };

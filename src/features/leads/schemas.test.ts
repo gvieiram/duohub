@@ -121,13 +121,7 @@ describe("createLeadSchema", () => {
 	});
 
 	it("accepts all moment enum values", () => {
-		const moments = [
-			"PRIMEIRO_ANO",
-			"DECLARA_SOZINHO",
-			"TROCAR_CONTADOR",
-			"MALHA_FINA",
-			"PESQUISANDO",
-		] as const;
+		const moments = ["PRIMEIRO_ANO", "MALHA_FINA", "JA_DECLAREI"] as const;
 		for (const moment of moments) {
 			expect(() =>
 				createLeadSchema.parse({ ...validInput, moment }),

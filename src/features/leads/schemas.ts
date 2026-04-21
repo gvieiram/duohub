@@ -26,10 +26,8 @@ export type LeadComplexity = z.infer<typeof leadComplexitySchema>;
 
 export const leadMomentSchema = z.enum([
 	"PRIMEIRO_ANO",
-	"DECLARA_SOZINHO",
-	"TROCAR_CONTADOR",
 	"MALHA_FINA",
-	"PESQUISANDO",
+	"JA_DECLAREI",
 ]);
 
 export type LeadMoment = z.infer<typeof leadMomentSchema>;

@@ -156,7 +156,7 @@ describe("createLead action", () => {
 		fd.append("complexity", "ALUGUEL");
 		fd.append("complexity", "DEPENDENTES");
 		fd.append("complexity", "RENDA_VARIAVEL");
-		fd.set("moment", "DECLARA_SOZINHO");
+		fd.set("moment", "JA_DECLAREI");
 
 		const { createLead } = await import("./actions");
 		const result = await createLead(fd);
@@ -168,7 +168,7 @@ describe("createLead action", () => {
 			"DEPENDENTES",
 			"RENDA_VARIAVEL",
 		]);
-		expect(args.create.moment).toBe("DECLARA_SOZINHO");
+		expect(args.create.moment).toBe("JA_DECLAREI");
 	});
 
 	it("filters out invalid complexity values silently", async () => {

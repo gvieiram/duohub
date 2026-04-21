@@ -54,10 +54,8 @@ enum LeadComplexity {
 
 enum LeadMoment {
   PRIMEIRO_ANO
-  DECLARA_SOZINHO
-  TROCAR_CONTADOR
   MALHA_FINA
-  PESQUISANDO
+  JA_DECLAREI
 }
 
 enum LeadStatus {
