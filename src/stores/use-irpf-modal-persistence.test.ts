@@ -95,7 +95,7 @@ describe("useIrpfModalPersistence", () => {
 		expect(parsed.formData.email).toBe("written@example.com");
 	});
 
-	it("clears the draft when the form is submitted", () => {
+	it("replaces the stored draft with a submitted marker after submission", () => {
 		renderHook(() => useIrpfModalPersistence());
 
 		act(() => {
@@ -110,7 +110,24 @@ describe("useIrpfModalPersistence", () => {
 			useIrpfModalStore.getState().markSubmitted();
 		});
 
-		expect(window.sessionStorage.getItem(IRPF_MODAL_STORAGE_KEY)).toBeNull();
+		const raw = window.sessionStorage.getItem(IRPF_MODAL_STORAGE_KEY);
+		expect(raw).not.toBeNull();
+		const parsed = JSON.parse(raw ?? "{}");
+		expect(parsed.submitted).toBe(true);
+		expect(parsed.formData).toBeUndefined();
+	});
+
+	it("restores submittedInSession when reopening the page", () => {
+		window.sessionStorage.setItem(
+			IRPF_MODAL_STORAGE_KEY,
+			JSON.stringify({ version: 1, submitted: true }),
+		);
+
+		renderHook(() => useIrpfModalPersistence());
+
+		const state = useIrpfModalStore.getState();
+		expect(state.hydratedFromStorage).toBe(true);
+		expect(state.submittedInSession).toBe(true);
 	});
 
 	it("clears the draft when the form becomes empty after hydration", () => {

@@ -42,7 +42,12 @@ type IrpfModalState = {
 	updateFormData: (patch: Partial<IrpfModalFormData>) => void;
 	markSubmitted: () => void;
 	reset: () => void;
-	hydrateFromStorage: (data: Partial<IrpfModalFormData> | null) => void;
+	hydrateFromStorage: (
+		data: {
+			formData?: Partial<IrpfModalFormData>;
+			submitted?: boolean;
+		} | null,
+	) => void;
 };
 
 export const useIrpfModalStore = create<IrpfModalState>((set) => ({
@@ -75,7 +80,10 @@ export const useIrpfModalStore = create<IrpfModalState>((set) => ({
 		}
 		set((state) => ({
 			hydratedFromStorage: true,
-			formData: { ...state.formData, ...data },
+			formData: data.formData
+				? { ...state.formData, ...data.formData }
+				: state.formData,
+			submittedInSession: data.submitted ?? state.submittedInSession,
 		}));
 	},
 }));

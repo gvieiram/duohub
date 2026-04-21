@@ -34,7 +34,7 @@ export function IrpfModal({ utm }: Props) {
 	const step = useIrpfModalStore((s) => s.step);
 	const submitted = useIrpfModalStore((s) => s.submittedInSession);
 	const formData = useIrpfModalStore((s) => s.formData);
-	const { close, setStep, markSubmitted, reset } = useIrpfModalActions();
+	const { close, setStep, markSubmitted } = useIrpfModalActions();
 
 	const [isPending, startTransition] = useTransition();
 	const [consentError, setConsentError] = useState<string>();
@@ -46,13 +46,6 @@ export function IrpfModal({ utm }: Props) {
 	useEffect(() => {
 		if (!isOpen) setConsentError(undefined);
 	}, [isOpen]);
-
-	useEffect(() => {
-		if (!isOpen && submitted) {
-			const timeout = window.setTimeout(() => reset(), 400);
-			return () => window.clearTimeout(timeout);
-		}
-	}, [isOpen, submitted, reset]);
 
 	const handleOpenChange = (nextOpen: boolean) => {
 		if (!nextOpen) close();

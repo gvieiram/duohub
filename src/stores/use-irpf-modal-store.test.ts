@@ -109,8 +109,10 @@ describe("useIrpfModalStore", () => {
 
 	it("hydrateFromStorage(data) merges the stored partial into formData", () => {
 		useIrpfModalStore.getState().hydrateFromStorage({
-			name: "Persisted",
-			complexity: ["ALUGUEL"],
+			formData: {
+				name: "Persisted",
+				complexity: ["ALUGUEL"],
+			},
 		});
 
 		const state = useIrpfModalStore.getState();
@@ -118,5 +120,13 @@ describe("useIrpfModalStore", () => {
 		expect(state.formData.name).toBe("Persisted");
 		expect(state.formData.complexity).toEqual(["ALUGUEL"]);
 		expect(state.formData.email).toBe("");
+	});
+
+	it("hydrateFromStorage() restores submittedInSession when stored", () => {
+		useIrpfModalStore.getState().hydrateFromStorage({ submitted: true });
+
+		const state = useIrpfModalStore.getState();
+		expect(state.hydratedFromStorage).toBe(true);
+		expect(state.submittedInSession).toBe(true);
 	});
 });

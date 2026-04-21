@@ -11,26 +11,31 @@ const STORAGE_KEY = "irpf:lead-draft:v1";
 
 type StoredDraft = {
 	version: 1;
-	formData: Partial<IrpfModalFormData>;
+	formData?: Partial<IrpfModalFormData>;
+	submitted?: boolean;
 };
 
-function readDraft(): Partial<IrpfModalFormData> | null {
+type HydrationPayload = {
+	formData?: Partial<IrpfModalFormData>;
+	submitted?: boolean;
+};
+
+function readDraft(): HydrationPayload | null {
 	if (typeof window === "undefined") return null;
 	try {
 		const raw = window.sessionStorage.getItem(STORAGE_KEY);
 		if (!raw) return null;
 		const parsed = JSON.parse(raw) as StoredDraft;
 		if (parsed.version !== 1) return null;
-		return parsed.formData;
+		return { formData: parsed.formData, submitted: parsed.submitted };
 	} catch {
 		return null;
 	}
 }
 
-function writeDraft(formData: IrpfModalFormData) {
+function writeDraft(payload: StoredDraft) {
 	if (typeof window === "undefined") return;
 	try {
-		const payload: StoredDraft = { version: 1, formData };
 		window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
 	} catch {
 		// storage may be full or disabled; fail silently
@@ -71,15 +76,18 @@ export function useIrpfModalPersistence() {
 
 	useEffect(() => {
 		if (!hydrated) return;
+
 		if (submitted) {
-			clearDraft();
+			writeDraft({ version: 1, submitted: true });
 			return;
 		}
+
 		if (isEmptyFormData(formData)) {
 			clearDraft();
 			return;
 		}
-		writeDraft(formData);
+
+		writeDraft({ version: 1, formData });
 	}, [formData, hydrated, submitted]);
 }
 
