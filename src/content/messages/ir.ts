@@ -488,7 +488,6 @@ export const ir = {
 		buttons: {
 			continue: "Continuar",
 			back: "Voltar",
-			skipAndSubmit: "Enviar sem responder",
 			submit: "Enviar",
 			submitting: "Enviando…",
 			close: "Fechar",

@@ -46,14 +46,6 @@ export function ModalFooter({
 					<ArrowLeft aria-hidden className="size-4" />
 					{modal.buttons.back}
 				</Button>
-				<Button
-					type="button"
-					variant="outline"
-					onClick={onSubmit}
-					disabled={isPending}
-				>
-					{modal.buttons.skipAndSubmit}
-				</Button>
 				<Button type="button" onClick={onSubmit} disabled={isPending}>
 					{isPending ? (
 						<>
