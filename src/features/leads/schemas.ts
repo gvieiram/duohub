@@ -32,14 +32,23 @@ export const leadMomentSchema = z.enum([
 
 export type LeadMoment = z.infer<typeof leadMomentSchema>;
 
+// biome-ignore lint/suspicious/noControlCharactersInRegex: guarding against email header injection requires matching control chars explicitly
+const noControlChars = (v: string) => !/[\r\n\u0000-\u001f\u007f]/.test(v);
+
 export const createLeadSchema = z.object({
 	name: z
 		.string()
 		.trim()
 		.min(2, "Nome muito curto")
-		.max(80, "Nome muito longo"),
+		.max(80, "Nome muito longo")
+		.refine(noControlChars, "Nome inválido"),
 
-	email: z.string().trim().toLowerCase().email("E-mail inválido"),
+	email: z
+		.string()
+		.trim()
+		.toLowerCase()
+		.email("E-mail inválido")
+		.refine(noControlChars, "E-mail inválido"),
 
 	whatsapp: z
 		.string()
@@ -57,8 +66,6 @@ export const createLeadSchema = z.object({
 	consent: z.boolean().refine((v) => v === true, {
 		message: "É necessário aceitar a política de privacidade",
 	}),
-
-	honeypot: z.string().max(0, "Submissão bloqueada"),
 
 	utmSource: z.string().max(80).nullable().optional(),
 	utmMedium: z.string().max(80).nullable().optional(),

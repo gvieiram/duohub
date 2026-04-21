@@ -9,7 +9,6 @@ const validInput: CreateLeadInput = {
 	complexity: [],
 	moment: null,
 	consent: true,
-	honeypot: "",
 	utmSource: null,
 	utmMedium: null,
 	utmCampaign: null,
@@ -29,6 +28,24 @@ describe("createLeadSchema", () => {
 	it("rejects name longer than 80 chars", () => {
 		expect(() =>
 			createLeadSchema.parse({ ...validInput, name: "x".repeat(81) }),
+		).toThrow();
+	});
+
+	it("rejects name with CRLF (email header injection guard)", () => {
+		expect(() =>
+			createLeadSchema.parse({
+				...validInput,
+				name: "Atacante\r\nBcc: victim@example.com",
+			}),
+		).toThrow();
+	});
+
+	it("rejects name with ASCII control chars", () => {
+		expect(() =>
+			createLeadSchema.parse({
+				...validInput,
+				name: "Foo\u0000Bar",
+			}),
 		).toThrow();
 	});
 
@@ -145,12 +162,6 @@ describe("createLeadSchema", () => {
 	it("rejects when consent is false", () => {
 		expect(() =>
 			createLeadSchema.parse({ ...validInput, consent: false }),
-		).toThrow();
-	});
-
-	it("rejects when honeypot has content (bot detected)", () => {
-		expect(() =>
-			createLeadSchema.parse({ ...validInput, honeypot: "bot-filled-this" }),
 		).toThrow();
 	});
 

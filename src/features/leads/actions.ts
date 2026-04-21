@@ -12,9 +12,16 @@ import type { CreateLeadResult, LeadPayload } from "./types";
 import { normalizeWhatsapp } from "./utils";
 
 function getClientIp(h: Headers): string {
+	const realIp = h.get("x-real-ip");
+	if (realIp) return realIp.trim();
+
 	const forwarded = h.get("x-forwarded-for");
-	if (forwarded) return forwarded.split(",")[0].trim();
-	return h.get("x-real-ip") ?? "anonymous";
+	if (forwarded) {
+		const first = forwarded.split(",")[0]?.trim();
+		if (first) return first;
+	}
+
+	return "anonymous";
 }
 
 function parseComplexity(formData: FormData) {
@@ -26,27 +33,93 @@ function parseComplexity(formData: FormData) {
 		.map((r) => r.data);
 }
 
+const RAW_MAX_LEN = 500;
+
+function readRawString(
+	formData: FormData,
+	field: string,
+	maxLen = RAW_MAX_LEN,
+): string {
+	return String(formData.get(field) ?? "").slice(0, maxLen);
+}
+
 function toNullable(value: FormDataEntryValue | null): string | null {
 	if (value === null) return null;
-	const str = String(value).trim();
+	const str = String(value).slice(0, RAW_MAX_LEN).trim();
 	return str.length > 0 ? str : null;
 }
 
 function formDataToInput(formData: FormData) {
 	return {
-		name: String(formData.get("name") ?? ""),
-		email: String(formData.get("email") ?? ""),
-		whatsapp: String(formData.get("whatsapp") ?? ""),
+		name: readRawString(formData, "name"),
+		email: readRawString(formData, "email"),
+		whatsapp: readRawString(formData, "whatsapp"),
 		situation: toNullable(formData.get("situation")),
 		complexity: parseComplexity(formData),
 		moment: toNullable(formData.get("moment")),
 		consent:
 			formData.get("consent") === "on" || formData.get("consent") === "true",
-		honeypot: String(formData.get("honeypot") ?? ""),
-		utmSource: (formData.get("utmSource") as string | null) || null,
-		utmMedium: (formData.get("utmMedium") as string | null) || null,
-		utmCampaign: (formData.get("utmCampaign") as string | null) || null,
+		honeypot: readRawString(formData, "honeypot"),
+		utmSource: readRawString(formData, "utmSource") || null,
+		utmMedium: readRawString(formData, "utmMedium") || null,
+		utmCampaign: readRawString(formData, "utmCampaign") || null,
 	};
+}
+
+async function persistAndNotify(
+	input: z.output<typeof createLeadSchema>,
+): Promise<void> {
+	const normalizedWhatsapp = normalizeWhatsapp(input.whatsapp);
+	const situation = input.situation ?? null;
+	const moment = input.moment ?? null;
+
+	const lead = await db.lead.upsert({
+		where: { email: input.email },
+		create: {
+			name: input.name,
+			email: input.email,
+			whatsapp: normalizedWhatsapp,
+			situation,
+			complexity: input.complexity,
+			moment,
+			source: "ir-page",
+			utmSource: input.utmSource ?? null,
+			utmMedium: input.utmMedium ?? null,
+			utmCampaign: input.utmCampaign ?? null,
+			consentAt: new Date(),
+		},
+		update: {
+			name: input.name,
+			whatsapp: normalizedWhatsapp,
+			situation,
+			complexity: input.complexity,
+			moment,
+			utmSource: input.utmSource ?? null,
+			utmMedium: input.utmMedium ?? null,
+			utmCampaign: input.utmCampaign ?? null,
+		},
+	});
+
+	const payload: LeadPayload = {
+		name: input.name,
+		email: input.email,
+		whatsapp: normalizedWhatsapp,
+		situation,
+		complexity: input.complexity,
+		moment,
+		utmSource: input.utmSource ?? null,
+		utmMedium: input.utmMedium ?? null,
+		utmCampaign: input.utmCampaign ?? null,
+	};
+
+	try {
+		await sendLeadEmails(payload);
+	} catch (err) {
+		console.error("[createLead] email dispatch failed", {
+			leadId: lead.id,
+			err,
+		});
+	}
 }
 
 export async function createLead(
@@ -62,6 +135,12 @@ export async function createLead(
 		}
 
 		const raw = formDataToInput(formData);
+
+		if (raw.honeypot.length > 0) {
+			console.warn("[createLead] honeypot triggered", { ip });
+			return { success: true };
+		}
+
 		const parsed = createLeadSchema.safeParse(raw);
 
 		if (!parsed.success) {
@@ -75,59 +154,7 @@ export async function createLead(
 			};
 		}
 
-		const input = parsed.data;
-		const normalizedWhatsapp = normalizeWhatsapp(input.whatsapp);
-		const situation = input.situation ?? null;
-		const moment = input.moment ?? null;
-
-		const lead = await db.lead.upsert({
-			where: { email: input.email },
-			create: {
-				name: input.name,
-				email: input.email,
-				whatsapp: normalizedWhatsapp,
-				situation,
-				complexity: input.complexity,
-				moment,
-				source: "ir-page",
-				utmSource: input.utmSource ?? null,
-				utmMedium: input.utmMedium ?? null,
-				utmCampaign: input.utmCampaign ?? null,
-				consentAt: new Date(),
-			},
-			update: {
-				name: input.name,
-				whatsapp: normalizedWhatsapp,
-				situation,
-				complexity: input.complexity,
-				moment,
-				utmSource: input.utmSource ?? null,
-				utmMedium: input.utmMedium ?? null,
-				utmCampaign: input.utmCampaign ?? null,
-			},
-		});
-
-		const payload: LeadPayload = {
-			name: input.name,
-			email: input.email,
-			whatsapp: normalizedWhatsapp,
-			situation,
-			complexity: input.complexity,
-			moment,
-			utmSource: input.utmSource ?? null,
-			utmMedium: input.utmMedium ?? null,
-			utmCampaign: input.utmCampaign ?? null,
-		};
-
-		try {
-			await sendLeadEmails(payload);
-		} catch (err) {
-			console.error("[createLead] email dispatch failed", {
-				leadId: lead.id,
-				err,
-			});
-		}
-
+		await persistAndNotify(parsed.data);
 		return { success: true };
 	} catch (err) {
 		console.error("[createLead] unexpected error", err);

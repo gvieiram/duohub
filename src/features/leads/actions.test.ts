@@ -26,8 +26,12 @@ vi.mock("@/lib/env", () => ({
 	env: { INTERNAL_LEADS_EMAIL: "contato@duohubcontabil.com.br" },
 }));
 
+const headersMock = vi.fn(
+	async () => new Headers({ "x-forwarded-for": "1.2.3.4" }),
+);
+
 vi.mock("next/headers", () => ({
-	headers: async () => new Headers({ "x-forwarded-for": "1.2.3.4" }),
+	headers: () => headersMock(),
 }));
 
 const validFormData = () => {
@@ -50,6 +54,9 @@ describe("createLead action", () => {
 
 	afterEach(() => {
 		vi.clearAllMocks();
+		headersMock.mockImplementation(
+			async () => new Headers({ "x-forwarded-for": "1.2.3.4" }),
+		);
 	});
 
 	it("returns success for valid input and persists the lead", async () => {
@@ -86,14 +93,15 @@ describe("createLead action", () => {
 		expect(leadUpsertMock).not.toHaveBeenCalled();
 	});
 
-	it("silently rejects when honeypot is filled (bot)", async () => {
+	it("returns fake success when honeypot is filled (bot detection is silent)", async () => {
 		const fd = validFormData();
 		fd.set("honeypot", "i-am-a-bot");
 		const { createLead } = await import("./actions");
 		const result = await createLead(fd);
 
-		expect(result.success).toBe(false);
+		expect(result).toEqual({ success: true });
 		expect(leadUpsertMock).not.toHaveBeenCalled();
+		expect(emailSendMock).not.toHaveBeenCalled();
 	});
 
 	it("does not fail when email sending errors (lead is still persisted)", async () => {
@@ -209,6 +217,56 @@ describe("createLead action", () => {
 			const result = await createLead(fd);
 			expect(result).toEqual({ success: true });
 			expect(leadUpsertMock.mock.calls[0][0].create.situation).toBe(situation);
+		}
+	});
+
+	it("prefers x-real-ip over x-forwarded-for for rate limiting (spoof guard)", async () => {
+		headersMock.mockImplementationOnce(
+			async () =>
+				new Headers({
+					"x-forwarded-for": "99.99.99.99",
+					"x-real-ip": "7.7.7.7",
+				}),
+		);
+		const { createLead } = await import("./actions");
+		await createLead(validFormData());
+
+		expect(limitMock).toHaveBeenCalledWith("7.7.7.7");
+	});
+
+	it("falls back to first x-forwarded-for when x-real-ip is missing", async () => {
+		headersMock.mockImplementationOnce(
+			async () => new Headers({ "x-forwarded-for": "1.1.1.1, 2.2.2.2" }),
+		);
+		const { createLead } = await import("./actions");
+		await createLead(validFormData());
+
+		expect(limitMock).toHaveBeenCalledWith("1.1.1.1");
+	});
+
+	it("rejects name with CRLF as validation error (email header injection guard)", async () => {
+		const fd = validFormData();
+		fd.set("name", "Atacante\r\nBcc: victim@example.com");
+		const { createLead } = await import("./actions");
+		const result = await createLead(fd);
+
+		expect(result.success).toBe(false);
+		if (!result.success && result.reason === "validation") {
+			expect(result.errors.name).toBeDefined();
+		}
+		expect(leadUpsertMock).not.toHaveBeenCalled();
+		expect(emailSendMock).not.toHaveBeenCalled();
+	});
+
+	it("truncates oversized raw input before zod (big-string guard)", async () => {
+		const fd = validFormData();
+		fd.set("name", "x".repeat(10_000));
+		const { createLead } = await import("./actions");
+		const result = await createLead(fd);
+
+		expect(result.success).toBe(false);
+		if (!result.success && result.reason === "validation") {
+			expect(result.errors.name).toBeDefined();
 		}
 	});
 });
