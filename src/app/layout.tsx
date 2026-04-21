@@ -116,15 +116,22 @@ export default async function RootLayout({
 							description={banner.description}
 							storageKey={banner.storageKey}
 							dismissLabel={messages.common.a11y.closeBanner}
-							cta={{
-								label: banner.cta?.label ?? messages.common.actions.talkToUs,
-								href: company.links.whatsappUrl(
-									banner.cta?.whatsappText ??
-										messages.common.banner.defaultWhatsappText,
-								),
-								external: true,
-							}}
+							ctas={banner.cta?.map((cta) =>
+								cta.whatsappText
+									? {
+											label: cta.label,
+											href: company.links.whatsappUrl(cta.whatsappText),
+											external: true,
+										}
+									: {
+											label: cta.label,
+											// biome-ignore lint/style/noNonNullAssertion: schema guarantees href when whatsappText is absent
+											href: cta.href!,
+											external: false,
+										},
+							)}
 							position={banner.position}
+							enabledOnPaths={banner.enabledOnPaths}
 						/>
 					)}
 				</Providers>

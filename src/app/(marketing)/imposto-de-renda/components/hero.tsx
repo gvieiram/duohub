@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useMessages } from "@/stores/use-content-store";
-import { BriefingCard } from "./briefing-card";
+import { HeroIllustration } from "./hero-illustration";
 import { IrpfModalTrigger } from "./irpf-modal/trigger-button";
 
 export function Hero() {
@@ -71,20 +71,15 @@ export function Hero() {
 							{modal.trigger.primary}
 							<ArrowRight aria-hidden className="size-4" />
 						</IrpfModalTrigger>
-						<span className="text-muted-foreground text-xs">
+						{/* <span className="text-muted-foreground text-xs">
 							Resposta em até 24h úteis — sem compromisso.
-						</span>
+						</span> */}
 					</motion.div>
 				</div>
 
-				<motion.aside
-					initial={{ opacity: 0, y: 30 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-					className="hidden lg:block"
-				>
-					<BriefingCard />
-				</motion.aside>
+				<div className="hidden lg:block">
+					<HeroIllustration />
+				</div>
 			</div>
 		</section>
 	);

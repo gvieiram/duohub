@@ -29,7 +29,7 @@ export function FinalCta() {
 						<ArrowRight aria-hidden className="size-4" />
 					</IrpfModalTrigger>
 					<p className="mt-3 text-muted-foreground text-xs">
-						Resposta em até 24h úteis — sem compromisso.
+						Resposta em até 24h — sem compromisso.
 					</p>
 				</FadeIn>
 			</div>
