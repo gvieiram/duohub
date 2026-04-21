@@ -8,7 +8,7 @@ import { FadeIn, fadeUpItemVariants, StaggerGroup } from "./_animations";
 const ICONS = [Sparkles, Wallet] as const;
 
 export function Changes2026() {
-	const m = useMessages().ir.changes2026;
+	const m = useMessages().irpf.changes2026;
 
 	return (
 		<section id="mudancas-2026" className="border-b bg-muted/30 py-16 md:py-24">

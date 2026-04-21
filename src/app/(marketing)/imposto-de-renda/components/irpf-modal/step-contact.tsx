@@ -46,7 +46,7 @@ type Props = {
 
 export const StepContact = forwardRef<StepContactHandle, Props>(
 	function StepContact({ consentError }, ref) {
-		const { modal } = useMessages().ir;
+		const { modal } = useMessages().irpf;
 		const initial = useIrpfModalStore((s) => s.formData);
 		const updateFormData = useIrpfModalStore((s) => s.updateFormData);
 

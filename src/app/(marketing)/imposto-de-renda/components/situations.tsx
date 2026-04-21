@@ -7,7 +7,7 @@ import { useMessages } from "@/stores/use-content-store";
 const ICONS = [User, Briefcase, LineChart, Building2] as const;
 
 export function Situations() {
-	const m = useMessages().ir.situations;
+	const m = useMessages().irpf.situations;
 
 	return (
 		<section id="situacoes" className="border-b py-16 md:py-24">

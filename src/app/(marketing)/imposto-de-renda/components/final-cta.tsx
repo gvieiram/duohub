@@ -6,7 +6,7 @@ import { FadeIn } from "./_animations";
 import { IrpfModalTrigger } from "./irpf-modal/trigger-button";
 
 export function FinalCta() {
-	const { finalCta, modal } = useMessages().ir;
+	const { finalCta, modal } = useMessages().irpf;
 
 	return (
 		<section id="formulario-contato" className="py-16 md:py-24">

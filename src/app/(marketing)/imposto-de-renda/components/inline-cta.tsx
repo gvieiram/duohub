@@ -6,7 +6,7 @@ import { useMessages } from "@/stores/use-content-store";
 import { IrpfModalTrigger } from "./irpf-modal/trigger-button";
 
 export function InlineCta() {
-	const { modal } = useMessages().ir;
+	const { modal } = useMessages().irpf;
 	const shouldReduceMotion = useReducedMotion();
 
 	return (

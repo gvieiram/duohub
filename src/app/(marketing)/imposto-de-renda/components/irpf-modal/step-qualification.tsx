@@ -23,7 +23,7 @@ import {
 } from "@/stores/use-irpf-modal-store";
 
 export function StepQualification() {
-	const { modal } = useMessages().ir;
+	const { modal } = useMessages().irpf;
 	const formData = useIrpfModalStore((s) => s.formData);
 	const updateFormData = useIrpfModalStore((s) => s.updateFormData);
 

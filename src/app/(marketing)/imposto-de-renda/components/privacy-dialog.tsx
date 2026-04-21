@@ -11,7 +11,7 @@ type PrivacyDialogProps = {
 };
 
 export function PrivacyDialog({ trigger }: PrivacyDialogProps = {}) {
-	const m = useMessages().ir.form.privacy;
+	const m = useMessages().irpf.form.privacy;
 	const [open, setOpen] = useState(false);
 
 	const fallbackTrigger = (

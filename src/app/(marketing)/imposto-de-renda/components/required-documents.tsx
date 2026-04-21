@@ -10,7 +10,7 @@ import { useMessages } from "@/stores/use-content-store";
 import { FadeIn } from "./_animations";
 
 export function RequiredDocuments() {
-	const m = useMessages().ir.documents;
+	const m = useMessages().irpf.documents;
 
 	return (
 		<section id="documentos" className="border-b bg-muted/30 py-16 md:py-24">

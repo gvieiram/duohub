@@ -5,7 +5,7 @@ import { useMessages } from "@/stores/use-content-store";
 import { FadeIn, fadeUpItemVariants, StaggerGroup } from "./_animations";
 
 export function HowItWorks() {
-	const m = useMessages().ir.howItWorks;
+	const m = useMessages().irpf.howItWorks;
 
 	return (
 		<section id="como-funciona" className="border-b py-16 md:py-24">

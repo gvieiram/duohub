@@ -1,11 +1,11 @@
 import { common } from "@/content/messages/common";
 import { home } from "@/content/messages/home";
-import { ir } from "@/content/messages/ir";
+import { irpf } from "@/content/messages/irpf";
 import { notFound } from "@/content/messages/not-found";
 
 export const messages = {
 	common,
 	home,
-	ir,
+	irpf,
 	notFound,
 } as const;

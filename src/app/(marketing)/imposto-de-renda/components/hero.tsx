@@ -7,7 +7,7 @@ import { HeroIllustration } from "./hero-illustration";
 import { IrpfModalTrigger } from "./irpf-modal/trigger-button";
 
 export function Hero() {
-	const { hero, modal } = useMessages().ir;
+	const { hero, modal } = useMessages().irpf;
 
 	return (
 		<section

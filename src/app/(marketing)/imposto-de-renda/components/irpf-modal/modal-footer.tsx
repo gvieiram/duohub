@@ -27,7 +27,7 @@ export function ModalFooter({
 	onBack,
 	onSubmit,
 }: ModalFooterProps) {
-	const { modal } = useMessages().ir;
+	const { modal } = useMessages().irpf;
 	const consent = useIrpfModalStore((s) => s.formData.consent);
 	const { updateFormData } = useIrpfModalActions();
 

@@ -29,7 +29,7 @@ type Props = {
 };
 
 export function IrpfModal({ utm }: Props) {
-	const { modal } = useMessages().ir;
+	const { modal } = useMessages().irpf;
 	const isOpen = useIrpfModalStore((s) => s.isOpen);
 	const step = useIrpfModalStore((s) => s.step);
 	const submitted = useIrpfModalStore((s) => s.submittedInSession);

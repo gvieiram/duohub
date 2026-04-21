@@ -1,4 +1,4 @@
-export const ir = {
+export const irpf = {
 	metadata: {
 		title: "Contador para Imposto de Renda 2026 — DuoHub Gestão Contábil",
 		description:
@@ -505,4 +505,4 @@ export const ir = {
 	},
 } as const;
 
-export type IrMessages = typeof ir;
+export type IrpfMessages = typeof irpf;

@@ -8,7 +8,7 @@ import { FadeIn, fadeUpItemVariants, StaggerGroup } from "./_animations";
 const ICONS = [Users, Search, MessageCircle, HeartHandshake] as const;
 
 export function WhyDuohub() {
-	const m = useMessages().ir.whyDuohub;
+	const m = useMessages().irpf.whyDuohub;
 
 	return (
 		<section

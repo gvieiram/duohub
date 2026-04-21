@@ -9,7 +9,7 @@ import { useMessages } from "@/stores/use-content-store";
 import { FadeIn, fadeUpItemVariants, StaggerGroup } from "./_animations";
 
 export function WhoDeclares() {
-	const m = useMessages().ir.whoDeclares;
+	const m = useMessages().irpf.whoDeclares;
 	const [open, setOpen] = useState(false);
 	const shouldReduceMotion = useReducedMotion();
 

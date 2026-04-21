@@ -17,7 +17,7 @@ import { WhoDeclares } from "./components/who-declares";
 import { WhyDuohub } from "./components/why-duohub";
 import { IrJsonLd } from "./json-ld";
 
-const { title, description } = messages.ir.metadata;
+const { title, description } = messages.irpf.metadata;
 
 export const metadata: Metadata = {
 	title,

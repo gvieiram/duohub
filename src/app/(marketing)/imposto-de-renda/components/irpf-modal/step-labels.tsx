@@ -9,7 +9,7 @@ type StepLabelsProps = {
 };
 
 export function StepLabels({ currentStep }: StepLabelsProps) {
-	const { modal } = useMessages().ir;
+	const { modal } = useMessages().irpf;
 
 	const steps: {
 		step: IrpfModalStep;

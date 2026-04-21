@@ -6,7 +6,7 @@ import { useCompany, useMessages } from "@/stores/use-content-store";
 import { useIrpfModalActions } from "@/stores/use-irpf-modal-store";
 
 export function SuccessView() {
-	const { modal } = useMessages().ir;
+	const { modal } = useMessages().irpf;
 	const company = useCompany();
 	const { close } = useIrpfModalActions();
 

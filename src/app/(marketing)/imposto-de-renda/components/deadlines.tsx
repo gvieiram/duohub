@@ -6,7 +6,7 @@ import { useMessages } from "@/stores/use-content-store";
 import { FadeIn, fadeUpItemVariants, StaggerGroup } from "./_animations";
 
 export function Deadlines() {
-	const m = useMessages().ir.deadlines;
+	const m = useMessages().irpf.deadlines;
 
 	return (
 		<section id="prazos" className="border-b py-16 md:py-24">

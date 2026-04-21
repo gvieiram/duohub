@@ -6,7 +6,7 @@ import { messages } from "@/content/messages";
 type Props = { siteUrl: string };
 
 export function IrJsonLd({ siteUrl }: Props) {
-	const ir = messages.ir;
+	const irpf = messages.irpf;
 
 	const service: WithContext<Service> = {
 		"@context": "https://schema.org",
@@ -26,13 +26,13 @@ export function IrJsonLd({ siteUrl }: Props) {
 			},
 		},
 		areaServed: { "@type": "Country", name: "Brasil" },
-		description: ir.metadata.description,
+		description: irpf.metadata.description,
 	};
 
 	const faqPage: WithContext<FAQPage> = {
 		"@context": "https://schema.org",
 		"@type": "FAQPage",
-		mainEntity: ir.faq.items.map((q) => ({
+		mainEntity: irpf.faq.items.map((q) => ({
 			"@type": "Question",
 			name: q.question,
 			acceptedAnswer: { "@type": "Answer", text: q.answer },

@@ -10,7 +10,7 @@ import { useMessages } from "@/stores/use-content-store";
 import { FadeIn } from "./_animations";
 
 export function Faq() {
-	const m = useMessages().ir.faq;
+	const m = useMessages().irpf.faq;
 
 	return (
 		<section id="faq" className="border-b bg-muted/30 py-16 md:py-24">

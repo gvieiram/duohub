@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import { company } from "@/content/company";
 import { messages } from "@/content/messages";
 
-export const alt = messages.ir.metadata.title;
+export const alt = messages.irpf.metadata.title;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -35,7 +35,7 @@ export default function OgImage() {
 					textTransform: "uppercase",
 				}}
 			>
-				{messages.ir.hero.badge}
+				{messages.irpf.hero.badge}
 			</div>
 
 			<div
@@ -56,7 +56,7 @@ export default function OgImage() {
 						maxWidth: 1000,
 					}}
 				>
-					{messages.ir.hero.title}
+					{messages.irpf.hero.title}
 				</div>
 				<div
 					style={{
@@ -67,7 +67,7 @@ export default function OgImage() {
 						maxWidth: 900,
 					}}
 				>
-					{messages.ir.hero.subtitle}
+					{messages.irpf.hero.subtitle}
 				</div>
 			</div>
 
