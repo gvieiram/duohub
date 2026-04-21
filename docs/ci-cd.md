@@ -58,9 +58,13 @@ O job **Lint & Type Check** é um status check obrigatório — PRs não podem s
 3. Commit `release: v<versão>` em `main`
 4. Criação da tag `v<versão>` e push (commit + tags)
 5. Criação da **GitHub Release** com changelog automático
-6. Deploy em produção via Vercel CLI: `vercel pull` → `vercel build --prod` → `vercel deploy --prebuilt --prod`
+6. Deploy em produção via Vercel CLI:
+   - `vercel pull` — puxa env vars de produção (inclui `DATABASE_URL` de prod)
+   - `prisma migrate deploy` — aplica migrations pendentes no banco de produção
+   - `vercel build --prod`
+   - `vercel deploy --prebuilt --prod`
 
-**Secrets obrigatórios no repositório:** `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`.
+**Secrets obrigatórios no repositório:** `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `GH_PAT`.
 
 ### Guia de versionamento (Semantic Versioning)
 
@@ -109,7 +113,35 @@ Enquanto o projeto estiver em `0.x.x` (pré-lançamento):
 - Push direto bloqueado (ruleset).
 - Status checks obrigatórios: **Lint & Type Check** (GitHub Actions) e **Vercel Preview**.
 - `enforce_admins: false` — administradores podem fazer bypass quando necessário.
+- Bypass actor no ruleset: **Repository Admin** (permite que o workflow Release faça push do commit de version bump via `GH_PAT`).
 - Branches de feature são apagadas automaticamente após o merge.
+
+## Banco de dados e migrations (Prisma)
+
+O projeto usa Prisma com PostgreSQL (Neon). O fluxo de migrations é controlado para evitar alterações acidentais no banco.
+
+### Geração do Prisma Client
+
+- `postinstall` no `package.json` roda `prisma generate` automaticamente após `pnpm install`.
+- Garante que o client tipado está disponível em qualquer ambiente (local, CI, Vercel) sem steps manuais.
+
+### Quando migrations são aplicadas
+
+| Contexto              | Migrations aplicadas? | Como                                                   |
+| --------------------- | --------------------- | ------------------------------------------------------ |
+| Dev local             | Manualmente           | `pnpm db:migrate` ao alterar o schema                  |
+| Preview (PR)          | Nunca                 | Preview só builda, não toca no banco                   |
+| Push em `main` (dev)  | Nunca                 | Vercel só builda e deploya                             |
+| Tag release (prod)    | Automaticamente       | Step no workflow Release antes do `vercel build`       |
+
+### Por que não rodar migrations no `prebuild`
+
+Rodar `prisma migrate deploy` a cada build significaria aplicar migrations em todo preview deployment (uma por PR). Isso poluiria o banco de dev com migrations de features ainda não aprovadas e criaria condições de corrida entre PRs concorrentes.
+
+Migrations acontecem apenas em momentos controlados:
+
+- **Dev**: você aplica conscientemente com `pnpm db:migrate` enquanto desenvolve.
+- **Prod**: o Release workflow puxa o `DATABASE_URL` de produção via `vercel pull` e roda `prisma migrate deploy` antes de buildar — garantindo que o schema de produção está sincronizado antes do código ir para o ar.
 
 ## Dependabot
 
@@ -151,5 +183,6 @@ Deploys de **produção** ocorrem somente via Vercel CLI no GitHub Actions (work
 | `VERCEL_TOKEN` | Token de acesso da Vercel (criado em vercel.com/account/tokens) |
 | `VERCEL_ORG_ID` | ID da organização/conta na Vercel (Settings → General) |
 | `VERCEL_PROJECT_ID` | ID do projeto na Vercel (Settings → General) |
+| `GH_PAT` | Classic PAT com scope `repo` (usado para bypass do ruleset ao pushar o commit de version bump) |
 
-Usados pelo workflow Release para fazer deploy via Vercel CLI.
+Usados pelo workflow Release para fazer deploy via Vercel CLI e pushar o commit de version bump na `main`.

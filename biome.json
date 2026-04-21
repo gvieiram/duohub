@@ -14,7 +14,8 @@
 			"!.next",
 			"!dist",
 			"!build",
-			"!coverage"
+			"!coverage",
+			"!.previews"
 		]
 	},
 	"formatter": {

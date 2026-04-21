@@ -1,6 +1,7 @@
 "use client";
 
 import { SiWhatsapp } from "@icons-pack/react-simple-icons";
+import Link from "next/link";
 import type { MouseEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -65,26 +66,57 @@ export function Header() {
 
 	const sectionIds = useMemo(
 		() =>
-			links.filter((l) => l.href.startsWith("#")).map((l) => l.href.slice(1)),
+			links
+				.filter((l) => l.href.startsWith("#") || l.href.startsWith("/#"))
+				.map((l) => {
+					const hashIdx = l.href.indexOf("#");
+					return l.href.slice(hashIdx + 1);
+				}),
 		[links],
 	);
 	const activeSection = useActiveSection(sectionIds);
 
 	function handleAnchorClick(e: MouseEvent<HTMLAnchorElement>, href: string) {
-		if (!href.startsWith("#")) return;
+		const hashIndex = href.indexOf("#");
+		if (hashIndex < 0) {
+			setOpen(false);
+			return;
+		}
+
+		const targetPath = href.slice(0, hashIndex) || "/";
+		const targetHash = href.slice(hashIndex);
+		const isOnTargetPage =
+			targetPath === "/"
+				? window.location.pathname === "/"
+				: window.location.pathname === targetPath;
+
+		if (!isOnTargetPage) {
+			setOpen(false);
+			return;
+		}
+
 		e.preventDefault();
-		const target = document.querySelector(href);
+		const target = document.querySelector(targetHash);
 		if (target) {
 			const prefersReducedMotion = window.matchMedia(
 				"(prefers-reduced-motion: reduce)",
 			).matches;
 			smoothScrollTo(target, prefersReducedMotion ? 0 : SCROLL_DURATION);
-			history.pushState(null, "", href);
+			history.pushState(null, "", targetHash);
 			if (target instanceof HTMLElement) {
 				target.focus({ preventScroll: true });
 			}
 		}
 		setOpen(false);
+	}
+
+	function isAnchorLink(href: string): boolean {
+		return href.startsWith("#") || href.startsWith("/#");
+	}
+
+	function anchorActiveId(href: string): string | null {
+		if (!isAnchorLink(href)) return null;
+		return href.slice(href.indexOf("#") + 1);
 	}
 
 	useEffect(() => {
@@ -110,21 +142,42 @@ export function Header() {
 					<Logo />
 				</HomeLink>
 				<div className="hidden items-center gap-2 md:flex">
-					{links.map((link) => (
-						<a
-							key={link.label}
-							className={cn(
-								buttonVariants({ variant: "ghost" }),
-								link.href.startsWith("#") &&
-									activeSection === link.href.slice(1) &&
-									"font-semibold",
-							)}
-							href={link.href}
-							onClick={(e) => handleAnchorClick(e, link.href)}
-						>
-							{link.label}
-						</a>
-					))}
+					{links.map((link) => {
+						const activeId = anchorActiveId(link.href);
+						const className = cn(
+							buttonVariants({ variant: "ghost" }),
+							activeId && activeSection === activeId && "font-semibold",
+						);
+						const content = (
+							<>
+								{link.label}
+								{"badge" in link && link.badge && (
+									<span className="ml-2 inline-flex items-center rounded bg-primary/10 px-1.5 py-0.5 font-medium text-[10px] text-primary">
+										{link.badge}
+									</span>
+								)}
+							</>
+						);
+						return isAnchorLink(link.href) ? (
+							<a
+								key={link.label}
+								className={className}
+								href={link.href}
+								onClick={(e) => handleAnchorClick(e, link.href)}
+							>
+								{content}
+							</a>
+						) : (
+							<Link
+								key={link.label}
+								className={className}
+								href={link.href}
+								onClick={() => setOpen(false)}
+							>
+								{content}
+							</Link>
+						);
+					})}
 					<Button asChild>
 						<a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
 							{messages.common.actions.start}
@@ -146,24 +199,45 @@ export function Header() {
 			</nav>
 			<MobileMenu open={open} className="flex flex-col justify-between gap-2">
 				<div className="grid gap-y-2">
-					{links.map((link) => (
-						<a
-							key={link.label}
-							className={buttonVariants({
-								variant: "ghost",
-								className: cn(
-									"justify-start",
-									link.href.startsWith("#") &&
-										activeSection === link.href.slice(1) &&
-										"font-semibold",
-								),
-							})}
-							href={link.href}
-							onClick={(e) => handleAnchorClick(e, link.href)}
-						>
-							{link.label}
-						</a>
-					))}
+					{links.map((link) => {
+						const activeId = anchorActiveId(link.href);
+						const className = buttonVariants({
+							variant: "ghost",
+							className: cn(
+								"justify-start",
+								activeId && activeSection === activeId && "font-semibold",
+							),
+						});
+						const content = (
+							<>
+								{link.label}
+								{"badge" in link && link.badge && (
+									<span className="ml-2 inline-flex items-center rounded bg-primary/10 px-1.5 py-0.5 font-medium text-[10px] text-primary">
+										{link.badge}
+									</span>
+								)}
+							</>
+						);
+						return isAnchorLink(link.href) ? (
+							<a
+								key={link.label}
+								className={className}
+								href={link.href}
+								onClick={(e) => handleAnchorClick(e, link.href)}
+							>
+								{content}
+							</a>
+						) : (
+							<Link
+								key={link.label}
+								className={className}
+								href={link.href}
+								onClick={() => setOpen(false)}
+							>
+								{content}
+							</Link>
+						);
+					})}
 				</div>
 				<Button asChild className="w-full">
 					<a href={whatsappUrl} target="_blank" rel="noopener noreferrer">

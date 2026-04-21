@@ -47,3 +47,5 @@ docs/design/**
 .env*.local
 
 .cursor/previews
+
+/src/generated/prisma
