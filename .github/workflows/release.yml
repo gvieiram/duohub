@@ -89,9 +89,18 @@ jobs:
           node-version: 20
           cache: pnpm
 
+      - run: pnpm install --frozen-lockfile
+
       - run: npm install --global vercel@latest
 
       - run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Apply production migrations
+        run: |
+          set -a
+          source .vercel/.env.production.local
+          set +a
+          pnpm prisma migrate deploy
 
       - run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
