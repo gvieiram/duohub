@@ -44,27 +44,10 @@ export function Hero() {
 						{hero.subtitle}
 					</motion.p>
 
-					<motion.ul
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.4, delay: 0.3 }}
-						className="mt-6 flex flex-col gap-2 text-sm"
-					>
-						{hero.bullets.map((b) => (
-							<li key={b} className="flex items-center gap-2">
-								<span
-									aria-hidden
-									className="h-1.5 w-1.5 rounded-full bg-primary"
-								/>
-								{b}
-							</li>
-						))}
-					</motion.ul>
-
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.4, delay: 0.4 }}
+						transition={{ duration: 0.4, delay: 0.3 }}
 						className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center"
 					>
 						<IrpfModalTrigger size="lg" className="gap-2 sm:w-auto">
@@ -77,7 +60,7 @@ export function Hero() {
 					</motion.div>
 				</div>
 
-				<div className="hidden lg:block">
+				<div className="mx-auto w-full max-w-[320px] sm:max-w-[400px] lg:max-w-none">
 					<HeroIllustration />
 				</div>
 			</div>

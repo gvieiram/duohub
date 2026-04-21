@@ -7,14 +7,9 @@ export const ir = {
 
 	hero: {
 		badge: "IRPF 2026",
-		title: "Imposto de Renda 2026 sem surpresas",
+		title: "Imposto de Renda 2026",
 		subtitle:
 			"Especialistas dedicados ao seu caso. Revisão ativa de todas as deduções. Atendimento por WhatsApp.",
-		bullets: [
-			"Prazo: 23/03 a 29/05/2026",
-			"Para CLT, autônomo, investidor e MEI",
-			"Florianópolis e todo o Brasil",
-		],
 	},
 
 	whoDeclares: {
@@ -42,11 +37,11 @@ export const ir = {
 		showAllLabel: "Ver todos os 11 critérios",
 		secondary: [
 			"Atividade rural com renda acima de R$ 177.920,00.",
-			"Posse de bens acima de R$ 800 mil em 31/12/2025.",
+			"Posse de bens acima de R$ 800 mil.",
 			"Alienação acima de R$ 40 mil em bolsa ou ganhos sujeitos ao imposto.",
 			"Passou à condição de residente no Brasil em 2025.",
 			"Optou por declarar bens de entidade controlada no exterior como pessoa física.",
-			"Titularidade de trust regido por lei estrangeira em 31/12/2025.",
+			"Titularidade de trust regido por lei estrangeira.",
 			"Rendimentos ou perdas em aplicações no exterior.",
 			"Lucros ou dividendos recebidos do exterior.",
 		],
@@ -65,11 +60,6 @@ export const ir = {
 				title: "Restituição em 4 lotes",
 				description:
 					"29/05 · 30/06 · 30/07 · 31/08. Quem entrega mais cedo, recebe mais cedo.",
-			},
-			{
-				title: "Deduções permitidas seguem as mesmas",
-				description:
-					"Despesas médicas, educação, dependentes e previdência privada continuam válidas.",
 			},
 		],
 	},
@@ -98,7 +88,7 @@ export const ir = {
 				description: "Tem posição em bolsa, renda fixa, cripto ou exterior.",
 				triggers: [
 					"Ganho de capital",
-					"Alienação > R$ 40k em bolsa",
+					"Alienação > R$ 40.000 em bolsa",
 					"Aplicações no exterior",
 					"Ganhos em bets",
 				],
@@ -127,7 +117,7 @@ export const ir = {
 			{
 				title: "Revisão ativa das deduções",
 				description:
-					"Perguntamos ativamente sobre plano de saúde, dependentes, previdência e despesas médicas. Mais restituição, menos imposto pago a mais.",
+					"Perguntamos ativamente sobre plano de saúde, dependentes, previdência e despesas médicas.",
 			},
 			{
 				title: "Atendimento por WhatsApp",
@@ -135,9 +125,9 @@ export const ir = {
 					"Canal que você já usa. Resposta em até 24h úteis durante a temporada.",
 			},
 			{
-				title: "Especializados em situações compostas",
+				title: "Especializados em situações complexas",
 				description:
-					"CLT com aluguel, freelancer com PJ + PF, investidor com day trade. Aqui não tem caso esquisito.",
+					"CLT com aluguel, freelancer com PJ + PF, investidor com day trade.",
 			},
 		],
 	},
@@ -153,9 +143,9 @@ export const ir = {
 			},
 			{
 				number: "02",
-				title: "Briefing rápido",
+				title: "Análise rápida",
 				description:
-					"Entendemos sua situação em até 24h úteis e te enviamos a lista de documentos personalizada.",
+					"Entendemos sua situação em até 24h úteis e te enviamos a lista de documentos personalizada e a proposta.",
 			},
 			{
 				number: "03",
@@ -165,9 +155,9 @@ export const ir = {
 			},
 			{
 				number: "04",
-				title: "Declaração e entrega",
+				title: "Declaração",
 				description:
-					"Revisamos cada dedução, enviamos pra Receita e te avisamos quando estiver tudo certo.",
+					"Revisamos cada dedução, enviamos pra Receita Federal e te avisamos quando estiver tudo certo.",
 			},
 		],
 	},
@@ -183,7 +173,6 @@ export const ir = {
 				items: [
 					"CPF e RG",
 					"Comprovante de residência atualizado",
-					"Título de eleitor",
 					"Última declaração entregue (se houver)",
 					"Dados bancários para restituição",
 				],
@@ -191,8 +180,8 @@ export const ir = {
 			{
 				title: "Comprovantes de renda",
 				items: [
-					"Informe de rendimentos do empregador (DIRF)",
-					"Carnê-leão (autônomos)",
+					"Informe de rendimentos do empregador",
+					"Carnê-leão",
 					"Recibos de aluguéis recebidos",
 					"Pró-labore e distribuição de lucros",
 					"Pensão alimentícia",
@@ -300,7 +289,7 @@ export const ir = {
 			{
 				question: "Quais documentos preciso separar?",
 				answer:
-					"Depende do seu caso. Começamos com a lista padrão (documentos pessoais, comprovantes de renda, bancos/investimentos, bens, dívidas, dedutíveis e dependentes) e enviamos a versão personalizada após o briefing.",
+					"Depende do seu caso. Começamos com a lista padrão (documentos pessoais, comprovantes de renda, bancos/investimentos, bens, dívidas, dedutíveis e dependentes) e enviamos a versão personalizada após a análise.",
 			},
 			{
 				question: "O que acontece se eu errar na declaração?",

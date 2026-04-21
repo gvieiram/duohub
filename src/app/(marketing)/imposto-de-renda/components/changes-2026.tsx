@@ -1,11 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Receipt, Sparkles, Wallet } from "lucide-react";
+import { Sparkles, Wallet } from "lucide-react";
 import { useMessages } from "@/stores/use-content-store";
 import { FadeIn, fadeUpItemVariants, StaggerGroup } from "./_animations";
 
-const ICONS = [Sparkles, Wallet, Receipt] as const;
+const ICONS = [Sparkles, Wallet] as const;
 
 export function Changes2026() {
 	const m = useMessages().ir.changes2026;
@@ -16,7 +16,7 @@ export function Changes2026() {
 				<FadeIn>
 					<SectionHeader badge={m.badge} title={m.title} />
 				</FadeIn>
-				<StaggerGroup className="mt-10 grid gap-4 md:grid-cols-3">
+				<StaggerGroup className="mt-10 grid gap-4 md:grid-cols-2">
 					{m.items.map((item, idx) => {
 						const Icon = ICONS[idx] ?? Sparkles;
 						return (
