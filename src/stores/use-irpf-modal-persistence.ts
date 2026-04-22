@@ -7,7 +7,7 @@ import {
 	useIrpfModalStore,
 } from "./use-irpf-modal-store";
 
-const STORAGE_KEY = "irpf:lead-draft:v1";
+const STORAGE_KEY = "irpf:contact-draft:v1";
 
 type StoredDraft = {
 	version: 1;

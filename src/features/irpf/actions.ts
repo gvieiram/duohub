@@ -5,10 +5,10 @@ import "server-only";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { leadRatelimit } from "@/lib/ratelimit";
-import { sendLeadEmails } from "./emails/dispatch";
-import { createLeadSchema, leadComplexitySchema } from "./schemas";
-import type { CreateLeadResult, LeadPayload } from "./types";
+import { contactRatelimit } from "@/lib/ratelimit";
+import { sendIrpfContactEmails } from "./emails/dispatch";
+import { irpfComplexitySchema, submitIrpfContactSchema } from "./schemas";
+import type { IrpfContactPayload, SubmitIrpfContactResult } from "./types";
 import { normalizeWhatsapp } from "./utils";
 
 function getClientIp(h: Headers): string {
@@ -28,7 +28,7 @@ function parseComplexity(formData: FormData) {
 	const values = formData.getAll("complexity").map((v) => String(v));
 	if (values.length === 0) return [];
 	return values
-		.map((v) => leadComplexitySchema.safeParse(v))
+		.map((v) => irpfComplexitySchema.safeParse(v))
 		.filter((r) => r.success)
 		.map((r) => r.data);
 }
@@ -60,32 +60,26 @@ function formDataToInput(formData: FormData) {
 		consent:
 			formData.get("consent") === "on" || formData.get("consent") === "true",
 		honeypot: readRawString(formData, "honeypot"),
-		utmSource: readRawString(formData, "utmSource") || null,
-		utmMedium: readRawString(formData, "utmMedium") || null,
-		utmCampaign: readRawString(formData, "utmCampaign") || null,
 	};
 }
 
 async function persistAndNotify(
-	input: z.output<typeof createLeadSchema>,
+	input: z.output<typeof submitIrpfContactSchema>,
 ): Promise<void> {
 	const normalizedWhatsapp = normalizeWhatsapp(input.whatsapp);
 	const situation = input.situation ?? null;
 	const moment = input.moment ?? null;
 
-	const lead = await db.lead.upsert({
+	const contact = await db.contact.upsert({
 		where: { email: input.email },
 		create: {
 			name: input.name,
 			email: input.email,
 			whatsapp: normalizedWhatsapp,
+			service: "IRPF",
 			situation,
 			complexity: input.complexity,
 			moment,
-			source: "ir-page",
-			utmSource: input.utmSource ?? null,
-			utmMedium: input.utmMedium ?? null,
-			utmCampaign: input.utmCampaign ?? null,
 			consentAt: new Date(),
 		},
 		update: {
@@ -94,42 +88,36 @@ async function persistAndNotify(
 			situation,
 			complexity: input.complexity,
 			moment,
-			utmSource: input.utmSource ?? null,
-			utmMedium: input.utmMedium ?? null,
-			utmCampaign: input.utmCampaign ?? null,
 		},
 	});
 
-	const payload: LeadPayload = {
+	const payload: IrpfContactPayload = {
 		name: input.name,
 		email: input.email,
 		whatsapp: normalizedWhatsapp,
 		situation,
 		complexity: input.complexity,
 		moment,
-		utmSource: input.utmSource ?? null,
-		utmMedium: input.utmMedium ?? null,
-		utmCampaign: input.utmCampaign ?? null,
 	};
 
 	try {
-		await sendLeadEmails(payload);
+		await sendIrpfContactEmails(payload);
 	} catch (err) {
-		console.error("[createLead] email dispatch failed", {
-			leadId: lead.id,
+		console.error("[submitIrpfContact] email dispatch failed", {
+			contactId: contact.id,
 			err,
 		});
 	}
 }
 
-export async function createLead(
+export async function submitIrpfContact(
 	formData: FormData,
-): Promise<CreateLeadResult> {
+): Promise<SubmitIrpfContactResult> {
 	try {
 		const h = await headers();
 		const ip = getClientIp(h);
 
-		const { success: rateOk } = await leadRatelimit.limit(ip);
+		const { success: rateOk } = await contactRatelimit.limit(ip);
 		if (!rateOk) {
 			return { success: false, reason: "rate_limit" };
 		}
@@ -137,11 +125,11 @@ export async function createLead(
 		const raw = formDataToInput(formData);
 
 		if (raw.honeypot.length > 0) {
-			console.warn("[createLead] honeypot triggered", { ip });
+			console.warn("[submitIrpfContact] honeypot triggered", { ip });
 			return { success: true };
 		}
 
-		const parsed = createLeadSchema.safeParse(raw);
+		const parsed = submitIrpfContactSchema.safeParse(raw);
 
 		if (!parsed.success) {
 			return {
@@ -157,7 +145,7 @@ export async function createLead(
 		await persistAndNotify(parsed.data);
 		return { success: true };
 	} catch (err) {
-		console.error("[createLead] unexpected error", err);
+		console.error("[submitIrpfContact] unexpected error", err);
 		return { success: false, reason: "server_error" };
 	}
 }

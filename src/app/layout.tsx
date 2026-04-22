@@ -1,4 +1,3 @@
-import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { VercelToolbar } from "@vercel/toolbar/next";
 
@@ -136,7 +135,6 @@ export default async function RootLayout({
 					)}
 				</Providers>
 				{shouldInjectToolbar && <VercelToolbar />}
-				<Analytics />
 				<SpeedInsights />
 			</body>
 		</html>

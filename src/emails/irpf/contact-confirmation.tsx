@@ -7,7 +7,7 @@ type Props = {
 	whatsappHref: string;
 };
 
-export function LeadConfirmationEmail({ name, whatsappHref }: Props) {
+export function IrpfContactConfirmationEmail({ name, whatsappHref }: Props) {
 	return (
 		<EmailLayout preview="Recebemos seu contato — IRPF 2026">
 			<Heading as="h1" className="m-0 mb-4 font-28 font-sans text-fg">
@@ -49,10 +49,10 @@ export function LeadConfirmationEmail({ name, whatsappHref }: Props) {
 	);
 }
 
-LeadConfirmationEmail.PreviewProps = {
+IrpfContactConfirmationEmail.PreviewProps = {
 	name: "João da Silva",
 	whatsappHref:
 		"https://wa.me/5548992467107?text=Ol%C3%A1!%20Vi%20a%20p%C3%A1gina%20de%20IR%20da%20DuoHub",
 } satisfies Props;
 
-export default LeadConfirmationEmail;
+export default IrpfContactConfirmationEmail;

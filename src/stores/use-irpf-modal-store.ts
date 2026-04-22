@@ -3,10 +3,10 @@
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import type {
-	LeadComplexity,
-	LeadMoment,
-	LeadSituation,
-} from "@/features/leads/schemas";
+	IrpfComplexity,
+	IrpfMoment,
+	IrpfSituation,
+} from "@/features/irpf/schemas";
 
 export type IrpfModalStep = 1 | 2;
 
@@ -14,9 +14,9 @@ export type IrpfModalFormData = {
 	name: string;
 	email: string;
 	whatsapp: string;
-	situation: LeadSituation | null;
-	complexity: LeadComplexity[];
-	moment: LeadMoment | null;
+	situation: IrpfSituation | null;
+	complexity: IrpfComplexity[];
+	moment: IrpfMoment | null;
 	consent: boolean;
 };
 

@@ -13,6 +13,6 @@ if (process.env.NODE_ENV !== "production") {
 	globalForResend.resend = resend;
 }
 
-export const LEAD_FROM_ADDRESS =
+export const EMAIL_FROM_ADDRESS =
 	"DuoHub Gestão Contábil <contato@duohubcontabil.com.br>";
-export const LEAD_REPLY_TO = "contato@duohubcontabil.com.br";
+export const EMAIL_REPLY_TO = "contato@duohubcontabil.com.br";

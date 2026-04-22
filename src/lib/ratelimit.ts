@@ -5,10 +5,10 @@ import { Redis } from "@upstash/redis";
 import { env } from "@/lib/env";
 
 const globalForRatelimit = globalThis as unknown as {
-	leadRatelimit: Ratelimit | undefined;
+	contactRatelimit: Ratelimit | undefined;
 };
 
-function createLeadRatelimit(): Ratelimit {
+function createContactRatelimit(): Ratelimit {
 	const redis = new Redis({
 		url: env.UPSTASH_REDIS_REST_URL,
 		token: env.UPSTASH_REDIS_REST_TOKEN,
@@ -18,13 +18,13 @@ function createLeadRatelimit(): Ratelimit {
 		redis,
 		limiter: Ratelimit.slidingWindow(5, "1 h"),
 		analytics: true,
-		prefix: "ratelimit:lead",
+		prefix: "ratelimit:contact",
 	});
 }
 
-export const leadRatelimit =
-	globalForRatelimit.leadRatelimit ?? createLeadRatelimit();
+export const contactRatelimit =
+	globalForRatelimit.contactRatelimit ?? createContactRatelimit();
 
 if (process.env.NODE_ENV !== "production") {
-	globalForRatelimit.leadRatelimit = leadRatelimit;
+	globalForRatelimit.contactRatelimit = contactRatelimit;
 }

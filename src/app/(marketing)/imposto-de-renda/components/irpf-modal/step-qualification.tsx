@@ -11,10 +11,10 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import type {
-	LeadComplexity,
-	LeadMoment,
-	LeadSituation,
-} from "@/features/leads/schemas";
+	IrpfComplexity,
+	IrpfMoment,
+	IrpfSituation,
+} from "@/features/irpf/schemas";
 import { cn } from "@/lib/utils";
 import { useMessages } from "@/stores/use-content-store";
 import {
@@ -35,7 +35,7 @@ export function StepQualification() {
 		updateFormData({ moment: value as IrpfModalFormData["moment"] });
 	};
 
-	const toggleComplexity = (value: LeadComplexity, checked: boolean) => {
+	const toggleComplexity = (value: IrpfComplexity, checked: boolean) => {
 		const current = formData.complexity;
 		const next = checked
 			? Array.from(new Set([...current, value]))
@@ -92,7 +92,7 @@ export function StepQualification() {
 
 				<div className="grid gap-2 sm:grid-cols-2">
 					{modal.step2.complexity.options.map((opt) => {
-						const value = opt.value as LeadComplexity;
+						const value = opt.value as IrpfComplexity;
 						const checked = formData.complexity.includes(value);
 						const id = `irpf-complex-${opt.value.toLowerCase()}`;
 
@@ -147,4 +147,4 @@ export function StepQualification() {
 	);
 }
 
-export type { LeadComplexity, LeadMoment, LeadSituation };
+export type { IrpfComplexity, IrpfMoment, IrpfSituation };

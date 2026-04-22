@@ -1,11 +1,11 @@
 "use client";
 
-import { track } from "@vercel/analytics";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { ResponsiveDialog } from "@/components/responsive-dialog";
-import { createLead } from "@/features/leads/actions";
+import { submitIrpfContact } from "@/features/irpf/actions";
+import { posthog } from "@/lib/posthog";
 import { useMessages } from "@/stores/use-content-store";
 import { useIrpfModalPersistence } from "@/stores/use-irpf-modal-persistence";
 import {
@@ -18,17 +18,7 @@ import { StepLabels } from "./step-labels";
 import { StepQualification } from "./step-qualification";
 import { SuccessView } from "./success-view";
 
-type Utm = {
-	source?: string | null;
-	medium?: string | null;
-	campaign?: string | null;
-};
-
-type Props = {
-	utm?: Utm;
-};
-
-export function IrpfModal({ utm }: Props) {
+export function IrpfModal() {
 	const { modal } = useMessages().irpf;
 	const isOpen = useIrpfModalStore((s) => s.isOpen);
 	const step = useIrpfModalStore((s) => s.step);
@@ -87,15 +77,17 @@ export function IrpfModal({ utm }: Props) {
 		if (formData.moment) fd.set("moment", formData.moment);
 		fd.set("consent", "true");
 		fd.set("honeypot", "");
-		if (utm?.source) fd.set("utmSource", utm.source);
-		if (utm?.medium) fd.set("utmMedium", utm.medium);
-		if (utm?.campaign) fd.set("utmCampaign", utm.campaign);
 
 		startTransition(async () => {
-			const result = await createLead(fd);
+			const result = await submitIrpfContact(fd);
 
 			if (result.success) {
-				track("ir_lead_submitted", {
+				posthog.identify(formData.email, {
+					name: formData.name,
+					whatsapp: formData.whatsapp,
+					service: "IRPF",
+				});
+				posthog.capture("irpf_contact_submitted", {
 					variant: "modal",
 					hadSituation: Boolean(formData.situation),
 					complexityCount: formData.complexity.length,

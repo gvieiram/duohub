@@ -8,7 +8,7 @@ const baseServerEnv = {
 	DATABASE_URL: "postgresql://u:p@h/d?sslmode=require",
 	DIRECT_URL: "postgresql://u:p@h/d?sslmode=require",
 	RESEND_API_KEY: "re_test_key",
-	INTERNAL_LEADS_EMAIL: "lead@example.com",
+	INTERNAL_CONTACT_EMAIL: "contato@example.com",
 	UPSTASH_REDIS_REST_URL: "https://example.upstash.io",
 	UPSTASH_REDIS_REST_TOKEN: "token",
 	SKIP_ENV_VALIDATION: undefined as string | undefined,

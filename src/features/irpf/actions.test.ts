@@ -5,25 +5,25 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const limitMock = vi.fn();
-const leadUpsertMock = vi.fn();
+const contactUpsertMock = vi.fn();
 const emailSendMock = vi.fn();
 
 vi.mock("@/lib/db", () => ({
-	db: { lead: { upsert: leadUpsertMock } },
+	db: { contact: { upsert: contactUpsertMock } },
 }));
 
 vi.mock("@/lib/ratelimit", () => ({
-	leadRatelimit: { limit: limitMock },
+	contactRatelimit: { limit: limitMock },
 }));
 
 vi.mock("@/lib/resend", () => ({
 	resend: { emails: { send: emailSendMock } },
-	LEAD_FROM_ADDRESS: "DuoHub <contato@duohubcontabil.com.br>",
-	LEAD_REPLY_TO: "contato@duohubcontabil.com.br",
+	EMAIL_FROM_ADDRESS: "DuoHub <contato@duohubcontabil.com.br>",
+	EMAIL_REPLY_TO: "contato@duohubcontabil.com.br",
 }));
 
 vi.mock("@/lib/env", () => ({
-	env: { INTERNAL_LEADS_EMAIL: "contato@duohubcontabil.com.br" },
+	env: { INTERNAL_CONTACT_EMAIL: "contato@duohubcontabil.com.br" },
 }));
 
 const headersMock = vi.fn(
@@ -45,10 +45,10 @@ const validFormData = () => {
 	return fd;
 };
 
-describe("createLead action", () => {
+describe("submitIrpfContact action", () => {
 	beforeEach(() => {
 		limitMock.mockResolvedValue({ success: true });
-		leadUpsertMock.mockResolvedValue({ id: "lead_1" });
+		contactUpsertMock.mockResolvedValue({ id: "contact_1" });
 		emailSendMock.mockResolvedValue({ data: { id: "mail_1" }, error: null });
 	});
 
@@ -59,13 +59,13 @@ describe("createLead action", () => {
 		);
 	});
 
-	it("returns success for valid input and persists the lead", async () => {
-		const { createLead } = await import("./actions");
-		const result = await createLead(validFormData());
+	it("returns success for valid input and persists the contact", async () => {
+		const { submitIrpfContact } = await import("./actions");
+		const result = await submitIrpfContact(validFormData());
 
 		expect(result).toEqual({ success: true });
-		expect(leadUpsertMock).toHaveBeenCalledOnce();
-		expect(leadUpsertMock.mock.calls[0][0].where).toEqual({
+		expect(contactUpsertMock).toHaveBeenCalledOnce();
+		expect(contactUpsertMock.mock.calls[0][0].where).toEqual({
 			email: "joao@example.com",
 		});
 		expect(emailSendMock).toHaveBeenCalledTimes(2);
@@ -73,72 +73,58 @@ describe("createLead action", () => {
 
 	it("blocks when rate limit exceeded", async () => {
 		limitMock.mockResolvedValueOnce({ success: false });
-		const { createLead } = await import("./actions");
-		const result = await createLead(validFormData());
+		const { submitIrpfContact } = await import("./actions");
+		const result = await submitIrpfContact(validFormData());
 
 		expect(result).toEqual({ success: false, reason: "rate_limit" });
-		expect(leadUpsertMock).not.toHaveBeenCalled();
+		expect(contactUpsertMock).not.toHaveBeenCalled();
 	});
 
 	it("returns validation errors for invalid email", async () => {
 		const fd = validFormData();
 		fd.set("email", "not-email");
-		const { createLead } = await import("./actions");
-		const result = await createLead(fd);
+		const { submitIrpfContact } = await import("./actions");
+		const result = await submitIrpfContact(fd);
 
 		expect(result.success).toBe(false);
 		if (!result.success && result.reason === "validation") {
 			expect(result.errors.email).toBeDefined();
 		}
-		expect(leadUpsertMock).not.toHaveBeenCalled();
+		expect(contactUpsertMock).not.toHaveBeenCalled();
 	});
 
 	it("returns fake success when honeypot is filled (bot detection is silent)", async () => {
 		const fd = validFormData();
 		fd.set("honeypot", "i-am-a-bot");
-		const { createLead } = await import("./actions");
-		const result = await createLead(fd);
+		const { submitIrpfContact } = await import("./actions");
+		const result = await submitIrpfContact(fd);
 
 		expect(result).toEqual({ success: true });
-		expect(leadUpsertMock).not.toHaveBeenCalled();
+		expect(contactUpsertMock).not.toHaveBeenCalled();
 		expect(emailSendMock).not.toHaveBeenCalled();
 	});
 
-	it("does not fail when email sending errors (lead is still persisted)", async () => {
+	it("does not fail when email sending errors (contact is still persisted)", async () => {
 		emailSendMock.mockRejectedValueOnce(new Error("resend down"));
-		const { createLead } = await import("./actions");
-		const result = await createLead(validFormData());
+		const { submitIrpfContact } = await import("./actions");
+		const result = await submitIrpfContact(validFormData());
 
 		expect(result).toEqual({ success: true });
-		expect(leadUpsertMock).toHaveBeenCalledOnce();
+		expect(contactUpsertMock).toHaveBeenCalledOnce();
 	});
 
 	it("upserts when email already exists (dedupe)", async () => {
-		const { createLead } = await import("./actions");
-		await createLead(validFormData());
+		const { submitIrpfContact } = await import("./actions");
+		await submitIrpfContact(validFormData());
 
-		const upsertArgs = leadUpsertMock.mock.calls[0][0];
+		const upsertArgs = contactUpsertMock.mock.calls[0][0];
 		expect(upsertArgs.where).toEqual({ email: "joao@example.com" });
 		expect(upsertArgs.create).toMatchObject({
 			email: "joao@example.com",
 			situation: "CLT",
-			source: "ir-page",
+			service: "IRPF",
 		});
 		expect(upsertArgs.update).toBeDefined();
-	});
-
-	it("captures utm fields when provided", async () => {
-		const fd = validFormData();
-		fd.set("utmSource", "instagram");
-		fd.set("utmMedium", "bio");
-		fd.set("utmCampaign", "ir-2026");
-		const { createLead } = await import("./actions");
-		await createLead(fd);
-
-		const args = leadUpsertMock.mock.calls[0][0];
-		expect(args.create.utmSource).toBe("instagram");
-		expect(args.create.utmMedium).toBe("bio");
-		expect(args.create.utmCampaign).toBe("ir-2026");
 	});
 
 	it("persists step-1-only submission with null qualification fields", async () => {
@@ -149,11 +135,11 @@ describe("createLead action", () => {
 		fd.set("consent", "on");
 		fd.set("honeypot", "");
 
-		const { createLead } = await import("./actions");
-		const result = await createLead(fd);
+		const { submitIrpfContact } = await import("./actions");
+		const result = await submitIrpfContact(fd);
 
 		expect(result).toEqual({ success: true });
-		const args = leadUpsertMock.mock.calls[0][0];
+		const args = contactUpsertMock.mock.calls[0][0];
 		expect(args.create.situation).toBeNull();
 		expect(args.create.moment).toBeNull();
 		expect(args.create.complexity).toEqual([]);
@@ -166,11 +152,11 @@ describe("createLead action", () => {
 		fd.append("complexity", "RENDA_VARIAVEL");
 		fd.set("moment", "JA_DECLAREI");
 
-		const { createLead } = await import("./actions");
-		const result = await createLead(fd);
+		const { submitIrpfContact } = await import("./actions");
+		const result = await submitIrpfContact(fd);
 
 		expect(result).toEqual({ success: true });
-		const args = leadUpsertMock.mock.calls[0][0];
+		const args = contactUpsertMock.mock.calls[0][0];
 		expect(args.create.complexity).toEqual([
 			"ALUGUEL",
 			"DEPENDENTES",
@@ -185,38 +171,40 @@ describe("createLead action", () => {
 		fd.append("complexity", "NOT_A_VALID_VALUE");
 		fd.append("complexity", "DEPENDENTES");
 
-		const { createLead } = await import("./actions");
-		const result = await createLead(fd);
+		const { submitIrpfContact } = await import("./actions");
+		const result = await submitIrpfContact(fd);
 
 		expect(result).toEqual({ success: true });
-		const args = leadUpsertMock.mock.calls[0][0];
+		const args = contactUpsertMock.mock.calls[0][0];
 		expect(args.create.complexity).toEqual(["ALUGUEL", "DEPENDENTES"]);
 	});
 
-	it("accepts the new MEI enum value (renamed from MEI_COM_PF)", async () => {
+	it("accepts the new MEI enum value", async () => {
 		const fd = validFormData();
 		fd.set("situation", "MEI");
 
-		const { createLead } = await import("./actions");
-		const result = await createLead(fd);
+		const { submitIrpfContact } = await import("./actions");
+		const result = await submitIrpfContact(fd);
 
 		expect(result).toEqual({ success: true });
-		const args = leadUpsertMock.mock.calls[0][0];
+		const args = contactUpsertMock.mock.calls[0][0];
 		expect(args.create.situation).toBe("MEI");
 	});
 
-	it("accepts new APOSENTADO, MULTIPLO and NAO_SEI situation values", async () => {
-		const { createLead } = await import("./actions");
+	it("accepts APOSENTADO, MULTIPLO and NAO_SEI situation values", async () => {
+		const { submitIrpfContact } = await import("./actions");
 
 		for (const situation of ["APOSENTADO", "MULTIPLO", "NAO_SEI"]) {
-			leadUpsertMock.mockClear();
+			contactUpsertMock.mockClear();
 			const fd = validFormData();
 			fd.set("situation", situation);
 			fd.set("email", `${situation.toLowerCase()}@example.com`);
 
-			const result = await createLead(fd);
+			const result = await submitIrpfContact(fd);
 			expect(result).toEqual({ success: true });
-			expect(leadUpsertMock.mock.calls[0][0].create.situation).toBe(situation);
+			expect(contactUpsertMock.mock.calls[0][0].create.situation).toBe(
+				situation,
+			);
 		}
 	});
 
@@ -228,8 +216,8 @@ describe("createLead action", () => {
 					"x-real-ip": "7.7.7.7",
 				}),
 		);
-		const { createLead } = await import("./actions");
-		await createLead(validFormData());
+		const { submitIrpfContact } = await import("./actions");
+		await submitIrpfContact(validFormData());
 
 		expect(limitMock).toHaveBeenCalledWith("7.7.7.7");
 	});
@@ -238,8 +226,8 @@ describe("createLead action", () => {
 		headersMock.mockImplementationOnce(
 			async () => new Headers({ "x-forwarded-for": "1.1.1.1, 2.2.2.2" }),
 		);
-		const { createLead } = await import("./actions");
-		await createLead(validFormData());
+		const { submitIrpfContact } = await import("./actions");
+		await submitIrpfContact(validFormData());
 
 		expect(limitMock).toHaveBeenCalledWith("1.1.1.1");
 	});
@@ -247,22 +235,22 @@ describe("createLead action", () => {
 	it("rejects name with CRLF as validation error (email header injection guard)", async () => {
 		const fd = validFormData();
 		fd.set("name", "Atacante\r\nBcc: victim@example.com");
-		const { createLead } = await import("./actions");
-		const result = await createLead(fd);
+		const { submitIrpfContact } = await import("./actions");
+		const result = await submitIrpfContact(fd);
 
 		expect(result.success).toBe(false);
 		if (!result.success && result.reason === "validation") {
 			expect(result.errors.name).toBeDefined();
 		}
-		expect(leadUpsertMock).not.toHaveBeenCalled();
+		expect(contactUpsertMock).not.toHaveBeenCalled();
 		expect(emailSendMock).not.toHaveBeenCalled();
 	});
 
 	it("truncates oversized raw input before zod (big-string guard)", async () => {
 		const fd = validFormData();
 		fd.set("name", "x".repeat(10_000));
-		const { createLead } = await import("./actions");
-		const result = await createLead(fd);
+		const { submitIrpfContact } = await import("./actions");
+		const result = await submitIrpfContact(fd);
 
 		expect(result.success).toBe(false);
 		if (!result.success && result.reason === "validation") {
