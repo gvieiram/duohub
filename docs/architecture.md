@@ -608,7 +608,7 @@ início da contagem (dia do envio vs próximo dia útil), hora exata de expiraç
 
 ### Env vars
 
-- `.env.local` nunca commitado.
+- `.env` nunca commitado.
 - `.env.example` commitado com todas as chaves (valores vazios ou dummy).
 - Validação via `@t3-oss/env-nextjs` com separação server/client para impedir
 leak no bundle.
