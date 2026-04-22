@@ -49,30 +49,30 @@ describe("getSiteUrl", () => {
 		expect(getSiteUrl()).toBe("https://duohubcontabil.com.br");
 	});
 
-	it("falls back to VERCEL_PROJECT_PRODUCTION_URL when override is missing", async () => {
+	it("prefers VERCEL_URL over VERCEL_PROJECT_PRODUCTION_URL when override is missing", async () => {
 		process.env = {
 			...originalEnv,
 			...baseServerEnv,
 			NEXT_PUBLIC_SITE_URL: undefined,
 			VERCEL_PROJECT_PRODUCTION_URL: "duohubcontabil.com.br",
-			VERCEL_URL: "preview.example.com",
-		};
-
-		const { getSiteUrl } = await import("./site-url");
-		expect(getSiteUrl()).toBe("https://duohubcontabil.com.br");
-	});
-
-	it("falls back to VERCEL_URL when no production URL is set", async () => {
-		process.env = {
-			...originalEnv,
-			...baseServerEnv,
-			NEXT_PUBLIC_SITE_URL: undefined,
-			VERCEL_PROJECT_PRODUCTION_URL: undefined,
 			VERCEL_URL: "duohub-git-feat-xyz.vercel.app",
 		};
 
 		const { getSiteUrl } = await import("./site-url");
 		expect(getSiteUrl()).toBe("https://duohub-git-feat-xyz.vercel.app");
+	});
+
+	it("falls back to VERCEL_PROJECT_PRODUCTION_URL when VERCEL_URL is missing", async () => {
+		process.env = {
+			...originalEnv,
+			...baseServerEnv,
+			NEXT_PUBLIC_SITE_URL: undefined,
+			VERCEL_PROJECT_PRODUCTION_URL: "duohubcontabil.com.br",
+			VERCEL_URL: undefined,
+		};
+
+		const { getSiteUrl } = await import("./site-url");
+		expect(getSiteUrl()).toBe("https://duohubcontabil.com.br");
 	});
 
 	it("falls back to localhost when no Vercel env is available", async () => {

@@ -25,6 +25,7 @@ export const company = {
 		city: "Florianópolis",
 		state: "SC",
 		country: "BR",
+		address: "Rua João Bernadino da Rosa, Pedra Branca, Palhoça/SC, 88137-010",
 	},
 	social: {
 		instagramUserName,
@@ -33,4 +34,5 @@ export const company = {
 	links: {
 		whatsappUrl,
 	},
+	cnpj: "58.333.395/0001-24",
 } as const;

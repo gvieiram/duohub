@@ -1,11 +1,11 @@
 import "server-only";
 
+import { InternalNotificationEmail } from "@/emails/leads/internal-notification";
+import { LeadConfirmationEmail } from "@/emails/leads/lead-confirmation";
 import { env } from "@/lib/env";
 import { LEAD_FROM_ADDRESS, LEAD_REPLY_TO, resend } from "@/lib/resend";
 import type { LeadPayload } from "../types";
 import { whatsappLink } from "../utils";
-import { InternalNotificationEmail } from "./internal-notification";
-import { LeadConfirmationEmail } from "./lead-confirmation";
 
 const DUOHUB_WHATSAPP = "5548992467107";
 
@@ -35,7 +35,7 @@ export async function sendLeadEmails(payload: LeadPayload): Promise<void> {
 			from: LEAD_FROM_ADDRESS,
 			to: env.INTERNAL_LEADS_EMAIL,
 			replyTo: payload.email,
-			subject: `Novo lead IR 2026 — ${payload.name}`,
+			subject: `Novo cliente interessado — IRPF 2026 · ${payload.name}`,
 			react: InternalNotificationEmail({
 				name: payload.name,
 				email: payload.email,
@@ -44,9 +44,6 @@ export async function sendLeadEmails(payload: LeadPayload): Promise<void> {
 				complexity: payload.complexity,
 				moment: payload.moment,
 				whatsappHref: internalWhatsappHref,
-				utmSource: payload.utmSource,
-				utmMedium: payload.utmMedium,
-				utmCampaign: payload.utmCampaign,
 			}),
 		}),
 	]);
