@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { defineConfig, env } from "prisma/config";
+import { defineConfig } from "prisma/config";
 
 export default defineConfig({
 	schema: "prisma/schema.prisma",
@@ -9,6 +9,9 @@ export default defineConfig({
 	datasource: {
 		// DIRECT_URL is required by Prisma Migrate (DDL on Neon needs a non-pooled connection).
 		// Runtime code uses DATABASE_URL (pooled) via a driver adapter in src/lib/db.ts.
-		url: env("DIRECT_URL"),
+		// Uses process.env (lazy) instead of the `env()` helper (eager) to avoid
+		// failing during `prisma generate` in contexts where DIRECT_URL is absent
+		// (e.g. GitHub Actions running postinstall before env vars are sourced).
+		url: process.env.DIRECT_URL,
 	},
 });
