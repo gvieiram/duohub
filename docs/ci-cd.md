@@ -66,6 +66,28 @@ O job **Lint & Type Check** é um status check obrigatório — PRs não podem s
 
 **Secrets obrigatórios no repositório:** `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `GH_PAT`.
 
+### Limitações conhecidas
+
+#### Tag órfã quando o deploy falha
+
+O workflow faz o push da tag **antes** do deploy na Vercel. Se o deploy falhar (erro de migration, build, etc.), a tag já está no remote e não é removida automaticamente.
+
+**Sintomas:**
+
+- Ao re-rodar o workflow com a mesma versão, falha com `fatal: tag 'vX.Y.Z' already exists`.
+- Forçar o re-run exige bumpar para a próxima versão (ex: `v1.0.0` falha → precisa rodar `v1.1.0`), deixando gaps no histórico.
+
+**Workaround manual:**
+
+1. Deletar a tag no remote: `git push origin --delete vX.Y.Z`
+2. Deletar a GitHub Release (se tiver sido criada) em Releases → draft/published
+3. Reverter o commit `release: vX.Y.Z` na `main` (via PR ou direto com admin bypass)
+4. Re-rodar o workflow com a versão original
+
+**Solução definitiva (futuro):**
+
+Refatorar o workflow para criar tag e commit **apenas em memória** (localmente no runner) durante a execução, e só fazer o push no último step, depois do deploy bem-sucedido. Isso garante o padrão "tudo ou nada": se algo falhar, nada é pushado e o estado do repo fica intacto.
+
 ### Guia de versionamento (Semantic Versioning)
 
 O projeto segue [semver](https://semver.org/lang/pt-BR/) — `MAJOR.MINOR.PATCH`.
