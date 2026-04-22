@@ -95,12 +95,16 @@ jobs:
 
       - run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Apply production migrations
+      - name: Export production env vars
         run: |
-          set -a
-          source .vercel/.env.production.local
-          set +a
-          pnpm prisma migrate deploy
+          if [ ! -f .vercel/.env.production.local ]; then
+            echo "::error::.vercel/.env.production.local not found"
+            exit 1
+          fi
+          grep -E '^(DATABASE_URL|DIRECT_URL)=' .vercel/.env.production.local >> "$GITHUB_ENV"
+
+      - name: Apply production migrations
+        run: pnpm prisma migrate deploy
 
       - run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
