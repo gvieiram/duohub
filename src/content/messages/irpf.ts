@@ -112,7 +112,7 @@ export const irpf = {
 			{
 				title: "Especialistas dedicados ao seu caso",
 				description:
-					"Sem bot, sem fila, sem atendimento genérico. Quem te atende é quem faz a sua declaração.",
+					"Sem robôs, sem fila, sem atendimento genérico. Quem te atende é quem faz a sua declaração.",
 			},
 			{
 				title: "Revisão ativa das deduções",
@@ -309,7 +309,7 @@ export const irpf = {
 			{
 				question: "Como funciona o atendimento da DuoHub?",
 				answer:
-					"Você fala diretamente com especialistas dedicados pelo WhatsApp. Quem te atende é a mesma pessoa que faz a sua declaração — sem protocolo, sem fila, sem bot.",
+					"Você fala diretamente com especialistas dedicados pelo WhatsApp. Quem te atende é a mesma pessoa que faz a sua declaração — sem protocolo, sem fila, sem robôs.",
 			},
 		],
 	},
