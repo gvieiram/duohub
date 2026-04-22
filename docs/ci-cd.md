@@ -163,7 +163,32 @@ Rodar `prisma migrate deploy` a cada build significaria aplicar migrations em to
 Migrations acontecem apenas em momentos controlados:
 
 - **Dev**: você aplica conscientemente com `pnpm db:migrate` enquanto desenvolve.
-- **Prod**: o Release workflow puxa o `DATABASE_URL` de produção via `vercel pull` e roda `prisma migrate deploy` antes de buildar — garantindo que o schema de produção está sincronizado antes do código ir para o ar.
+- **Prod**: o Release workflow lê `DATABASE_URL`/`DIRECT_URL` dos GitHub Secrets e roda `prisma migrate deploy` antes de buildar — garantindo que o schema de produção está sincronizado antes do código ir para o ar.
+
+### ⚠️ Credenciais do banco: defesa em profundidade
+
+`DATABASE_URL` e `DIRECT_URL` são armazenadas em **dois lugares**:
+
+1. **Vercel → Project Settings → Environment Variables** (marcadas como **Sensitive**) — usadas em runtime pelo Next.js na Vercel.
+2. **GitHub → Repository Secrets** — usadas pelo workflow Release para rodar `prisma migrate deploy` no CI.
+
+**Por que duplicar?**
+
+Marcar as credenciais como **Sensitive** na Vercel impede que elas sejam baixadas via `vercel pull` ou API — só são injetadas nos processos de runtime. Isso protege contra exfiltração caso o `VERCEL_TOKEN` vaze. O trade-off é que o CI não consegue ler esses valores via `vercel pull`, então precisamos mantê-los também nos GitHub Secrets.
+
+**🚨 IMPORTANTE — sincronização manual:**
+
+Sempre que rotacionar ou alterar `DATABASE_URL` ou `DIRECT_URL`, **atualize nos dois lugares**:
+
+1. Vercel → Project (`duohub`) → Settings → Environment Variables → Edit
+2. GitHub → Repository → Settings → Secrets and variables → Actions → Update secret
+
+Se atualizar apenas em um lugar, um dos cenários quebra:
+
+- Atualizou só na Vercel → runtime funciona, mas `prisma migrate deploy` falha no próximo release (CI ainda usa a credencial antiga).
+- Atualizou só no GitHub → migrations rodam, mas o app em produção falha ao conectar no banco (runtime usa credencial antiga).
+
+**Quando rotacionar credenciais do Neon:** atualize em ambos os lugares **antes** de disparar qualquer release.
 
 ## Dependabot
 
@@ -206,5 +231,9 @@ Deploys de **produção** ocorrem somente via Vercel CLI no GitHub Actions (work
 | `VERCEL_ORG_ID` | ID da organização/conta na Vercel (Settings → General) |
 | `VERCEL_PROJECT_ID` | ID do projeto na Vercel (Settings → General) |
 | `GH_PAT` | Classic PAT com scope `repo` (usado para bypass do ruleset ao pushar o commit de version bump) |
+| `DATABASE_URL` | Connection string pooled do Neon (production). **Deve espelhar** o valor na Vercel |
+| `DIRECT_URL` | Connection string direct do Neon (production). **Deve espelhar** o valor na Vercel |
 
-Usados pelo workflow Release para fazer deploy via Vercel CLI e pushar o commit de version bump na `main`.
+Usados pelo workflow Release para fazer deploy via Vercel CLI, pushar o commit de version bump na `main` e aplicar migrations de produção.
+
+> Ver seção **"Credenciais do banco: defesa em profundidade"** acima para detalhes sobre a sincronização obrigatória entre Vercel e GitHub.
