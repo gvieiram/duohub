@@ -44,7 +44,6 @@ next-env.d.ts
 docs/plans/**
 docs/assets/**
 docs/design/**
-.env*.local
 
 .cursor/previews
 
