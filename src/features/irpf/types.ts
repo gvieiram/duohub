@@ -1,25 +1,22 @@
 // biome-ignore-all lint/style/useNamingConvention: keys mirror the Prisma enums
-import type { LeadComplexity, LeadMoment, LeadSituation } from "./schemas";
+import type { IrpfComplexity, IrpfMoment, IrpfSituation } from "./schemas";
 
-export type CreateLeadResult =
+export type SubmitIrpfContactResult =
 	| { success: true }
 	| { success: false; reason: "rate_limit" }
 	| { success: false; reason: "validation"; errors: Record<string, string[]> }
 	| { success: false; reason: "server_error" };
 
-export type LeadPayload = {
+export type IrpfContactPayload = {
 	name: string;
 	email: string;
 	whatsapp: string;
-	situation: LeadSituation | null;
-	complexity: LeadComplexity[];
-	moment: LeadMoment | null;
-	utmSource?: string | null;
-	utmMedium?: string | null;
-	utmCampaign?: string | null;
+	situation: IrpfSituation | null;
+	complexity: IrpfComplexity[];
+	moment: IrpfMoment | null;
 };
 
-export const SITUATION_LABELS: Record<LeadSituation, string> = {
+export const SITUATION_LABELS: Record<IrpfSituation, string> = {
 	CLT: "CLT",
 	AUTONOMO: "Autônomo ou PJ",
 	INVESTIDOR: "Investidor",
@@ -29,7 +26,7 @@ export const SITUATION_LABELS: Record<LeadSituation, string> = {
 	NAO_SEI: "Não sei",
 };
 
-export const COMPLEXITY_LABELS: Record<LeadComplexity, string> = {
+export const COMPLEXITY_LABELS: Record<IrpfComplexity, string> = {
 	ALUGUEL: "Recebeu aluguel",
 	VENDA_IMOVEL: "Comprou ou vendeu imóvel",
 	DEPENDENTES: "Tem dependentes",
@@ -42,7 +39,7 @@ export const COMPLEXITY_LABELS: Record<LeadComplexity, string> = {
 	NAO_SEI: "Não sei / prefiro conversar",
 };
 
-export const MOMENT_LABELS: Record<LeadMoment, string> = {
+export const MOMENT_LABELS: Record<IrpfMoment, string> = {
 	PRIMEIRO_ANO: "Nunca declarei — primeiro ano obrigatório",
 	MALHA_FINA: "Estou com pendência ou na malha fina",
 	JA_DECLAREI: "Já declarei em anos anteriores",

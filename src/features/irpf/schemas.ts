@@ -2,14 +2,14 @@ import { z } from "zod";
 
 const WHATSAPP_DIGITS = /^\d{10,11}$/;
 
-export const leadSituationSchema = z.enum(
+export const irpfSituationSchema = z.enum(
 	["CLT", "AUTONOMO", "INVESTIDOR", "MEI", "APOSENTADO", "MULTIPLO", "NAO_SEI"],
 	{ error: "Selecione uma situação" },
 );
 
-export type LeadSituation = z.infer<typeof leadSituationSchema>;
+export type IrpfSituation = z.infer<typeof irpfSituationSchema>;
 
-export const leadComplexitySchema = z.enum([
+export const irpfComplexitySchema = z.enum([
 	"ALUGUEL",
 	"VENDA_IMOVEL",
 	"DEPENDENTES",
@@ -22,20 +22,20 @@ export const leadComplexitySchema = z.enum([
 	"NAO_SEI",
 ]);
 
-export type LeadComplexity = z.infer<typeof leadComplexitySchema>;
+export type IrpfComplexity = z.infer<typeof irpfComplexitySchema>;
 
-export const leadMomentSchema = z.enum([
+export const irpfMomentSchema = z.enum([
 	"PRIMEIRO_ANO",
 	"MALHA_FINA",
 	"JA_DECLAREI",
 ]);
 
-export type LeadMoment = z.infer<typeof leadMomentSchema>;
+export type IrpfMoment = z.infer<typeof irpfMomentSchema>;
 
 // biome-ignore lint/suspicious/noControlCharactersInRegex: guarding against email header injection requires matching control chars explicitly
 const noControlChars = (v: string) => !/[\r\n\u0000-\u001f\u007f]/.test(v);
 
-export const createLeadSchema = z.object({
+export const submitIrpfContactSchema = z.object({
 	name: z
 		.string()
 		.trim()
@@ -57,20 +57,16 @@ export const createLeadSchema = z.object({
 			message: "WhatsApp inválido",
 		}),
 
-	situation: leadSituationSchema.nullish(),
+	situation: irpfSituationSchema.nullish(),
 
-	complexity: z.array(leadComplexitySchema).default([]),
+	complexity: z.array(irpfComplexitySchema).default([]),
 
-	moment: leadMomentSchema.nullish(),
+	moment: irpfMomentSchema.nullish(),
 
 	consent: z.boolean().refine((v) => v === true, {
 		message: "É necessário aceitar a política de privacidade",
 	}),
-
-	utmSource: z.string().max(80).nullable().optional(),
-	utmMedium: z.string().max(80).nullable().optional(),
-	utmCampaign: z.string().max(80).nullable().optional(),
 });
 
-export type CreateLeadInput = z.input<typeof createLeadSchema>;
-export type CreateLeadOutput = z.output<typeof createLeadSchema>;
+export type SubmitIrpfContactInput = z.input<typeof submitIrpfContactSchema>;
+export type SubmitIrpfContactOutput = z.output<typeof submitIrpfContactSchema>;

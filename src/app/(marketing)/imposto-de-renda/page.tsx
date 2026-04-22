@@ -44,26 +44,7 @@ export const metadata: Metadata = {
 	},
 };
 
-// biome-ignore-start lint/style/useNamingConvention: UTM params follow the standard snake_case convention
-type SearchParams = {
-	utm_source?: string;
-	utm_medium?: string;
-	utm_campaign?: string;
-};
-// biome-ignore-end lint/style/useNamingConvention: UTM params follow the standard snake_case convention
-
-export default async function IrPage({
-	searchParams,
-}: {
-	searchParams: Promise<SearchParams>;
-}) {
-	const sp = await searchParams;
-	const utm = {
-		source: sp.utm_source ?? null,
-		medium: sp.utm_medium ?? null,
-		campaign: sp.utm_campaign ?? null,
-	};
-
+export default function IrPage() {
 	return (
 		<>
 			<IrJsonLd siteUrl={getSiteUrl()} />
@@ -80,7 +61,7 @@ export default async function IrPage({
 			<Faq />
 			<FinalCta />
 			<Footer />
-			<IrpfModal utm={utm} />
+			<IrpfModal />
 		</>
 	);
 }

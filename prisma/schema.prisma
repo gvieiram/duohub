@@ -7,29 +7,31 @@ datasource db {
   provider = "postgresql"
 }
 
-model Lead {
-  id          String           @id @default(cuid())
-  name        String
-  email       String           @unique
-  whatsapp    String
-  situation   LeadSituation?
-  complexity  LeadComplexity[]
-  moment      LeadMoment?
-  source      String           @default("ir-page")
-  utmSource   String?
-  utmMedium   String?
-  utmCampaign String?
-  status      LeadStatus       @default(NEW)
-  notes       String?
-  consentAt   DateTime
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+model Contact {
+  id         String           @id @default(cuid())
+  name       String
+  email      String           @unique
+  whatsapp   String
+  service    ContactService   @default(IRPF)
+  situation  IrpfSituation?
+  complexity IrpfComplexity[]
+  moment     IrpfMoment?
+  status     ContactStatus    @default(NEW)
+  notes      String?
+  consentAt  DateTime
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
 
   @@index([status])
   @@index([createdAt])
+  @@index([service])
 }
 
-enum LeadSituation {
+enum ContactService {
+  IRPF
+}
+
+enum IrpfSituation {
   CLT
   AUTONOMO
   INVESTIDOR
@@ -39,7 +41,7 @@ enum LeadSituation {
   NAO_SEI
 }
 
-enum LeadComplexity {
+enum IrpfComplexity {
   ALUGUEL
   VENDA_IMOVEL
   DEPENDENTES
@@ -52,13 +54,13 @@ enum LeadComplexity {
   NAO_SEI
 }
 
-enum LeadMoment {
+enum IrpfMoment {
   PRIMEIRO_ANO
   MALHA_FINA
   JA_DECLAREI
 }
 
-enum LeadStatus {
+enum ContactStatus {
   NEW
   CONTACTED
   QUALIFIED

@@ -9,15 +9,15 @@ import {
 } from "@react-email/components";
 import type { ReactNode } from "react";
 import type {
-	LeadComplexity,
-	LeadMoment,
-	LeadSituation,
-} from "@/features/leads/schemas";
+	IrpfComplexity,
+	IrpfMoment,
+	IrpfSituation,
+} from "@/features/irpf/schemas";
 import {
 	COMPLEXITY_LABELS,
 	MOMENT_LABELS,
 	SITUATION_LABELS,
-} from "@/features/leads/types";
+} from "@/features/irpf/types";
 import { EmailButton } from "../_components/email-button";
 import { EmailLayoutStack } from "../_components/email-layout";
 
@@ -25,9 +25,9 @@ type Props = {
 	name: string;
 	email: string;
 	whatsapp: string;
-	situation: LeadSituation | null;
-	complexity: LeadComplexity[];
-	moment: LeadMoment | null;
+	situation: IrpfSituation | null;
+	complexity: IrpfComplexity[];
+	moment: IrpfMoment | null;
 	whatsappHref: string;
 };
 
@@ -145,9 +145,9 @@ function QualificationCard({
 	moment,
 	complexityList,
 }: {
-	situation: LeadSituation | null;
-	moment: LeadMoment | null;
-	complexityList: LeadComplexity[];
+	situation: IrpfSituation | null;
+	moment: IrpfMoment | null;
+	complexityList: IrpfComplexity[];
 }) {
 	const complexityLabels = complexityList
 		.map((item) => COMPLEXITY_LABELS[item] ?? item)

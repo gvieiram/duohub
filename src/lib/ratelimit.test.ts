@@ -4,7 +4,7 @@
 
 import { beforeEach, describe, expect, it } from "vitest";
 
-describe("leadRatelimit", () => {
+describe("contactRatelimit", () => {
 	beforeEach(() => {
 		process.env.SKIP_ENV_VALIDATION = "true";
 		process.env.UPSTASH_REDIS_REST_URL = "https://fake.upstash.io";
@@ -12,14 +12,14 @@ describe("leadRatelimit", () => {
 	});
 
 	it("exports a ratelimit instance with a limit function", async () => {
-		const { leadRatelimit } = await import("./ratelimit");
-		expect(leadRatelimit).toBeDefined();
-		expect(typeof leadRatelimit.limit).toBe("function");
+		const { contactRatelimit } = await import("./ratelimit");
+		expect(contactRatelimit).toBeDefined();
+		expect(typeof contactRatelimit.limit).toBe("function");
 	});
 
 	it("reuses the same instance across imports (singleton)", async () => {
-		const { leadRatelimit: first } = await import("./ratelimit");
-		const { leadRatelimit: second } = await import("./ratelimit");
+		const { contactRatelimit: first } = await import("./ratelimit");
+		const { contactRatelimit: second } = await import("./ratelimit");
 		expect(first).toBe(second);
 	});
 });
