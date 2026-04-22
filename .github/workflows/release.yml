@@ -95,15 +95,13 @@ jobs:
 
       - run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Export production env vars
-        run: |
-          if [ ! -f .vercel/.env.production.local ]; then
-            echo "::error::.vercel/.env.production.local not found"
-            exit 1
-          fi
-          grep -E '^(DATABASE_URL|DIRECT_URL)=' .vercel/.env.production.local >> "$GITHUB_ENV"
-
       - name: Apply production migrations
+        env:
+          # DATABASE_URL and DIRECT_URL are marked as Sensitive on Vercel, so
+          # `vercel pull` returns empty values for them. We source them directly
+          # from GitHub Secrets instead. Keep both in sync (see docs/ci-cd.md).
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
         run: pnpm prisma migrate deploy
 
       - run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
