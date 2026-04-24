@@ -2,6 +2,17 @@ import createWithVercelToolbar from "@vercel/toolbar/plugins/next";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+	// Expose Vercel's server-side `VERCEL_ENV` to the client bundle as
+	// `NEXT_PUBLIC_VERCEL_ENV`. Used by `instrumentation-client.ts` to gate
+	// PostHog analytics capture (off outside production) while keeping the
+	// SDK initialized everywhere so feature flags still work.
+	// In local dev `VERCEL_ENV` is `undefined`; the client code falls back
+	// to `"development"`.
+	env: {
+		// biome-ignore lint/style/useNamingConvention: Next.js requires SCREAMING_SNAKE_CASE for env keys
+		NEXT_PUBLIC_VERCEL_ENV: process.env.VERCEL_ENV,
+	},
+
 	images: {
 		remotePatterns: [
 			{
