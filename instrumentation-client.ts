@@ -10,6 +10,26 @@ import posthog from "posthog-js";
  * avoids the short window where the app renders before analytics boots, which
  * would miss the very first $pageview of fresh loads.
  *
+ * Environment gating (single PostHog project, free plan):
+ * - The SDK is always initialized when a token exists, so feature flags can be
+ *   evaluated in every environment (dev, preview, prod).
+ * - Outside production, `opt_out_capturing_by_default: true` silences analytics
+ *   capture AND session recording (recording piggybacks on the opt-in state)
+ *   to keep the project's data clean of dev/preview noise.
+ * - When capture is opted-in for debugging, every event carries:
+ *     • `environment` — our own super-property (useful for ad-hoc HogQL filters)
+ *     • `$internal_or_test_user: true` — PostHog's **reserved** super-property
+ *       that the built-in "Internal & test users" cohort matches on. This is
+ *       the canonical way to flag non-prod traffic: the cohort is pre-wired
+ *       into the project's Test Account Filters with a positive `in` operator,
+ *       which sidesteps a long-standing bug where `is_not` event-property
+ *       filters produce inverted SQL (see GitHub posthog/posthog#3668).
+ * - Outside production we expose `window.posthog` (omitted in prod to avoid
+ *   leaking the SDK instance). To enable capture in preview/dev, open DevTools
+ *   and run `posthog.opt_in_capturing()` once — PostHog persists the choice in
+ *   localStorage, so subsequent reloads capture `$pageview` from the first
+ *   render. Use `posthog.opt_out_capturing()` to go back to silence.
+ *
  * Notes on config:
  * - `defaults: "2026-01-30"` opts into PostHog's "Jan 30 2026" recommended preset,
  *   which includes history-change based $pageview capture, $pageleave, $web_vitals,
@@ -22,14 +42,28 @@ import posthog from "posthog-js";
  *   needed.
  */
 
-if (process.env.NEXT_PUBLIC_POSTHOG_TOKEN) {
-	posthog.init(process.env.NEXT_PUBLIC_POSTHOG_TOKEN, {
+const token = process.env.NEXT_PUBLIC_POSTHOG_TOKEN;
+const environment = process.env.NEXT_PUBLIC_VERCEL_ENV ?? "development";
+const isProduction = environment === "production";
+
+if (token) {
+	posthog.init(token, {
 		api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "/ingest",
 		ui_host: "https://us.posthog.com",
 		defaults: "2026-01-30",
 		person_profiles: "always",
+		opt_out_capturing_by_default: !isProduction,
 		session_recording: {
 			maskAllInputs: true,
 		},
 	});
+
+	posthog.register({
+		environment,
+		$internal_or_test_user: !isProduction,
+	});
+
+	if (!isProduction && typeof window !== "undefined") {
+		(window as unknown as { posthog: typeof posthog }).posthog = posthog;
+	}
 }

@@ -16,6 +16,9 @@ export const env = createEnv({
 		NEXT_PUBLIC_SITE_URL: z.string().url().optional(),
 		NEXT_PUBLIC_POSTHOG_TOKEN: z.string().min(1).optional(),
 		NEXT_PUBLIC_POSTHOG_HOST: z.string().url().optional(),
+		NEXT_PUBLIC_VERCEL_ENV: z
+			.enum(["production", "preview", "development"])
+			.optional(),
 	},
 	runtimeEnv: {
 		DATABASE_URL: process.env.DATABASE_URL,
@@ -27,6 +30,7 @@ export const env = createEnv({
 		NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
 		NEXT_PUBLIC_POSTHOG_TOKEN: process.env.NEXT_PUBLIC_POSTHOG_TOKEN,
 		NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+		NEXT_PUBLIC_VERCEL_ENV: process.env.NEXT_PUBLIC_VERCEL_ENV,
 	},
 	skipValidation: !!process.env.SKIP_ENV_VALIDATION,
 	emptyStringAsUndefined: true,
