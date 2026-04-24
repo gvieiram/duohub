@@ -16,8 +16,14 @@ import posthog from "posthog-js";
  * - Outside production, `opt_out_capturing_by_default: true` silences analytics
  *   capture AND session recording (recording piggybacks on the opt-in state)
  *   to keep the project's data clean of dev/preview noise.
- * - All events get an `environment` super-property via `register()` so the
- *   `Test account filter` in PostHog can hide non-production traffic globally.
+ * - When capture is opted-in for debugging, every event carries:
+ *     • `environment` — our own super-property (useful for ad-hoc HogQL filters)
+ *     • `$internal_or_test_user: true` — PostHog's **reserved** super-property
+ *       that the built-in "Internal & test users" cohort matches on. This is
+ *       the canonical way to flag non-prod traffic: the cohort is pre-wired
+ *       into the project's Test Account Filters with a positive `in` operator,
+ *       which sidesteps a long-standing bug where `is_not` event-property
+ *       filters produce inverted SQL (see GitHub posthog/posthog#3668).
  * - Outside production we expose `window.posthog` (omitted in prod to avoid
  *   leaking the SDK instance). To enable capture in preview/dev, open DevTools
  *   and run `posthog.opt_in_capturing()` once — PostHog persists the choice in
@@ -52,7 +58,10 @@ if (token) {
 		},
 	});
 
-	posthog.register({ environment });
+	posthog.register({
+		environment,
+		$internal_or_test_user: !isProduction,
+	});
 
 	if (!isProduction && typeof window !== "undefined") {
 		(window as unknown as { posthog: typeof posthog }).posthog = posthog;
