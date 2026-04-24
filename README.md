@@ -6,7 +6,7 @@
 
 Built with Next.js 16 · React 19 · Tailwind CSS v4 · Framer Motion
 
-[![CI](https://github.com/gvieiram/accounting/actions/workflows/ci.yml/badge.svg)](https://github.com/gvieiram/accounting/actions/workflows/ci.yml)
+[![CI](https://github.com/gvieiram/duohub/actions/workflows/ci.yml/badge.svg)](https://github.com/gvieiram/duohub/actions/workflows/ci.yml)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
 ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?logo=tailwindcss&logoColor=white)
@@ -85,8 +85,8 @@ src/
 
 ```bash
 # Clone
-git clone git@github.com:gvieiram/accounting.git
-cd accounting
+git clone git@github.com:gvieiram/duohub.git
+cd duohub
 
 # Install dependencies
 pnpm install
