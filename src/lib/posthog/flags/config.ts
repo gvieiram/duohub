@@ -24,8 +24,10 @@ export const socialProofType = defineConfigFlag({
 
 /**
  * IRPF 2026 promotional banner. The payload from PostHog is a JSON
- * object validated by `bannerConfigSchema`, which collapses inactive
- * banners and out-of-window dates into `null`.
+ * object validated by `bannerConfigSchema`, which collapses
+ * out-of-window dates into `null`. Activation is controlled by the
+ * `enabled` toggle on the PostHog flag itself (no `active` field
+ * in the JSON).
  */
 export const irpfBanner = defineConfigFlag({
 	key: "irpf-banner",

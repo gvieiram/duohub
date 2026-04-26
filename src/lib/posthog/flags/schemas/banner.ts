@@ -11,7 +11,6 @@ const bannerCtaSchema = z
 	});
 
 const bannerConfigBaseSchema = z.object({
-	active: z.boolean(),
 	startDate: z.string().optional(),
 	endDate: z.string().optional(),
 	title: z.string(),
@@ -25,8 +24,8 @@ const bannerConfigBaseSchema = z.object({
 
 /**
  * The "raw" parsed shape — what the JSON payload from PostHog looks like
- * before we filter for active status and date windows. Exported for
- * callers that need to introspect the original config (rare).
+ * before we filter for the optional date window. Exported for callers
+ * that need to introspect the original config (rare).
  */
 export type BannerConfig = z.infer<typeof bannerConfigBaseSchema>;
 
@@ -36,18 +35,24 @@ export type BannerCtaConfig = z.infer<typeof bannerCtaSchema>;
  * Schema applied to the IRPF banner payload coming from PostHog.
  *
  * The flag value can be:
- *   - `null` — the flag isn't configured / payload absent
- *   - the parsed shape — but only "valid" when `active` is true and `now`
- *     is inside the optional `[startDate, endDate]` window (BRT/UTC-3)
+ *   - `null` — the flag is disabled in PostHog (no payload returned),
+ *     not configured, or `now` is outside the optional date window
+ *   - the parsed shape — flag is enabled AND inside the date window
  *
- * The `.transform()` collapses both "inactive" and "outside window" into
- * `null` so consumers only need to handle two states: `null` (don't show)
- * or `BannerConfig` (show it).
+ * The `enabled` toggle on the PostHog flag itself is the source of
+ * truth for activation: when it's off, `posthog-node` doesn't return
+ * any payload for the flag, so `resolveAll()` falls back to the
+ * `defaultValue` of `null`. We don't duplicate that switch as an
+ * `active` field on the JSON payload.
+ *
+ * The `.transform()` collapses "outside window" into `null` so
+ * consumers only need to handle two states: `null` (don't show) or
+ * `BannerConfig` (show it).
  */
 export const bannerConfigSchema = bannerConfigBaseSchema
 	.nullable()
 	.transform((config): BannerConfig | null => {
-		if (!config?.active) return null;
+		if (!config) return null;
 
 		const now = new Date();
 

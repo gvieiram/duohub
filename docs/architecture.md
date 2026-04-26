@@ -328,8 +328,10 @@ A/B testing client-side.
 
 - Toda flag declara um schema Zod em `src/lib/posthog/flags/config.ts`.
 - O schema do banner (`src/lib/posthog/flags/schemas/banner.ts`) inclui um
-  `.transform()` que absorve a lógica de `active` + janela de datas (BRT). O
-  consumidor recebe `BannerConfig | null` direto.
+  `.transform()` que absorve a janela de datas (BRT). Ativação on/off é
+  controlada exclusivamente pelo toggle `enabled` da flag no PostHog — quando
+  desligada, `posthog-node` não retorna payload e `resolveAll()` cai no
+  default `null`. O consumidor recebe `BannerConfig | null` direto.
 
 **Flags futuras planejadas (F0+):**
 
