@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@flags-sdk/vercel':
-        specifier: ^1.2.1
-        version: 1.2.1(flags@4.0.5(@opentelemetry/api@1.9.1)(next@16.2.1(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(next@16.2.1(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.72.1(react@19.2.4))
@@ -50,9 +47,6 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      flags:
-        specifier: ^4.0.5
-        version: 4.0.5(@opentelemetry/api@1.9.1)(next@16.2.1(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       framer-motion:
         specifier: ^12.38.0
         version: 12.38.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -332,10 +326,6 @@ packages:
     resolution: {integrity: sha512-QxULHAm7cNu72w97JUNCBFODFaXpbDg+dP8b/oWFAZ2MTRppA3U00Y2L1HqaS4J6yBqxwa/Y3nMBaxVKbB/NsA==}
     engines: {node: '>=20.19.0'}
 
-  '@edge-runtime/cookies@5.0.2':
-    resolution: {integrity: sha512-Sd8LcWpZk/SWEeKGE8LT6gMm5MGfX/wm+GPnh1eBEtCpya3vYqn37wYknwAHw92ONoyyREl1hJwxV/Qx2DWNOg==}
-    engines: {node: '>=16'}
-
   '@electric-sql/pglite-socket@0.1.1':
     resolution: {integrity: sha512-p2hoXw3Z3LQHwTeikdZNsFBOvXGqKY2hk51BBw+8NKND8eoH+8LFOtW9Z8CQKmTJ2qqGYu82ipqiyFZOTTXNfw==}
     hasBin: true
@@ -526,11 +516,6 @@ packages:
     peerDependenciesMeta:
       '@noble/hashes':
         optional: true
-
-  '@flags-sdk/vercel@1.2.1':
-    resolution: {integrity: sha512-k/0inU3Ly9PD5BIPICGZNv7kXH0fHs3tIiLB6MISK+PC/s1Y/z9m4ED3ROZiNNJqlSj4mNpwbNRkxWba2Qhisw==}
-    peerDependencies:
-      flags: '*'
 
   '@floating-ui/core@1.7.5':
     resolution: {integrity: sha512-1Ih4WTWyw0+lKyFMcBHGbb5U5FtuHJuujoyyr5zTaWS5EYMeT6Jb2AuDeftsCsEuchO+mM2ij5+q9crhydzLhQ==}
@@ -2195,30 +2180,6 @@ packages:
   '@upstash/redis@1.37.0':
     resolution: {integrity: sha512-LqOJ3+XWPLSZ2rGSed5DYG3ixybxb8EhZu3yQqF7MdZX1wLBG/FRcI6xcUZXHy/SS7mmXWyadrud0HJHkOc+uw==}
 
-  '@vercel/flags-core@1.3.1':
-    resolution: {integrity: sha512-tLFn7O0o5Tq90anusBA2ShR/KSMTcj5rW6lfaYnEB3NArUeVaIb4eZRGVkqFtCi97J4G7hIGNmVtBLKCeWoqDw==}
-    peerDependencies:
-      '@openfeature/server-sdk': 1.18.0
-      next: '*'
-    peerDependenciesMeta:
-      '@openfeature/server-sdk':
-        optional: true
-      next:
-        optional: true
-
-  '@vercel/functions@3.4.3':
-    resolution: {integrity: sha512-kA14KIUVgAY6VXbhZ5jjY+s0883cV3cZqIU3WhrSRxuJ9KvxatMjtmzl0K23HK59oOUjYl7HaE/eYMmhmqpZzw==}
-    engines: {node: '>= 20'}
-    peerDependencies:
-      '@aws-sdk/credential-provider-web-identity': '*'
-    peerDependenciesMeta:
-      '@aws-sdk/credential-provider-web-identity':
-        optional: true
-
-  '@vercel/oidc@3.2.0':
-    resolution: {integrity: sha512-UycprH3T6n3jH0k44NHMa7pnFHGu/N05MjojYr+Mc6I7obkoLIJujSWwin1pCvdy/eOxrI/l3uDLQsmcrOb4ug==}
-    engines: {node: '>= 20'}
-
   '@vercel/speed-insights@2.0.0':
     resolution: {integrity: sha512-jwkNcrTeafWxjmWq4AHBaptSqZiJkYU5adLC9QBSqeim0GcqDMgN5Ievh8OG1rJ6W3A4l1oiP7qr9CWxGuzu3w==}
     peerDependencies:
@@ -2620,26 +2581,6 @@ packages:
   fflate@0.4.8:
     resolution: {integrity: sha512-FJqqoDBR00Mdj9ppamLa/Y7vxm+PRmNWA67N846RvsoYVMKB4q3y/de5PA7gUmRMYK/8CMz2GDZQmCRN1wBcWA==}
 
-  flags@4.0.5:
-    resolution: {integrity: sha512-SRah0wf4wMT9TTqt0ac5HikBKl2fM0W8q8xKL+p91UpItWg2C5SiRkzvCrgYJgKhZIuEnCFb6pxeLv+Fg+jT6A==}
-    peerDependencies:
-      '@opentelemetry/api': ^1.7.0
-      '@sveltejs/kit': '*'
-      next: '*'
-      react: '*'
-      react-dom: '*'
-    peerDependenciesMeta:
-      '@opentelemetry/api':
-        optional: true
-      '@sveltejs/kit':
-        optional: true
-      next:
-        optional: true
-      react:
-        optional: true
-      react-dom:
-        optional: true
-
   foreground-child@3.3.1:
     resolution: {integrity: sha512-gIXjKqtFuWEgzFRJA9WCQeSJLZDjgJUOMCMzxtvFq/37KojM1BFGufqsCy0r4qSQmYLsZYMeyRqzIWOMup03sw==}
     engines: {node: '>=14'}
@@ -2760,18 +2701,8 @@ packages:
     resolution: {integrity: sha512-ekilCSN1jwRvIbgeg/57YFh8qQDNbwDb9xT/qu2DAHbFFZUicIl4ygVaAvzveMhMVr3LnpSKTNnwt8PoOfmKhQ==}
     hasBin: true
 
-  jose@5.10.0:
-    resolution: {integrity: sha512-s+3Al/p9g32Iq+oqXxkW//7jk2Vig6FF1CFqzVXoTUXt2qz89YWbL+OwS17NFYEvxC35n0FKeGO2LGYSxeM2Gg==}
-
-  jose@5.2.1:
-    resolution: {integrity: sha512-qiaQhtQRw6YrOaOj0v59h3R6hUY9NvxBmmnMfKemkqYmBB0tEc97NbLP7ix44VP5p9/0YHG8Vyhzuo5YBNwviA==}
-
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
-
-  js-xxhash@4.0.0:
-    resolution: {integrity: sha512-3Q2eIqG6s1KEBBmkj9tGM9lef8LJbuRyTVBdI3GpTnrvtytunjLPO0wqABp5qhtMzfA32jYn1FlnIV7GH1RAHQ==}
-    engines: {node: '>=18.0.0'}
 
   jsdom@29.0.2:
     resolution: {integrity: sha512-9VnGEBosc/ZpwyOsJBCQ/3I5p7Q5ngOY14a9bf5btenAORmZfDse1ZEheMiWcJ3h81+Fv7HmJFdS0szo/waF2w==}
@@ -3881,8 +3812,6 @@ snapshots:
 
   '@csstools/css-tokenizer@4.0.0': {}
 
-  '@edge-runtime/cookies@5.0.2': {}
-
   '@electric-sql/pglite-socket@0.1.1(@electric-sql/pglite@0.4.1)':
     dependencies:
       '@electric-sql/pglite': 0.4.1
@@ -3993,15 +3922,6 @@ snapshots:
     optional: true
 
   '@exodus/bytes@1.15.0': {}
-
-  '@flags-sdk/vercel@1.2.1(flags@4.0.5(@opentelemetry/api@1.9.1)(next@16.2.1(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(next@16.2.1(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))':
-    dependencies:
-      '@vercel/flags-core': 1.3.1(next@16.2.1(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))
-      flags: 4.0.5(@opentelemetry/api@1.9.1)(next@16.2.1(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-    transitivePeerDependencies:
-      - '@aws-sdk/credential-provider-web-identity'
-      - '@openfeature/server-sdk'
-      - next
 
   '@floating-ui/core@1.7.5':
     dependencies:
@@ -5557,22 +5477,6 @@ snapshots:
     dependencies:
       uncrypto: 0.1.3
 
-  '@vercel/flags-core@1.3.1(next@16.2.1(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))':
-    dependencies:
-      '@vercel/functions': 3.4.3
-      jose: 5.2.1
-      js-xxhash: 4.0.0
-    optionalDependencies:
-      next: 16.2.1(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-    transitivePeerDependencies:
-      - '@aws-sdk/credential-provider-web-identity'
-
-  '@vercel/functions@3.4.3':
-    dependencies:
-      '@vercel/oidc': 3.2.0
-
-  '@vercel/oidc@3.2.0': {}
-
   '@vercel/speed-insights@2.0.0(next@16.2.1(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)':
     optionalDependencies:
       next: 16.2.1(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -5939,16 +5843,6 @@ snapshots:
 
   fflate@0.4.8: {}
 
-  flags@4.0.5(@opentelemetry/api@1.9.1)(next@16.2.1(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
-    dependencies:
-      '@edge-runtime/cookies': 5.0.2
-      jose: 5.10.0
-    optionalDependencies:
-      '@opentelemetry/api': 1.9.1
-      next: 16.2.1(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
-
   foreground-child@3.3.1:
     dependencies:
       cross-spawn: 7.0.6
@@ -6052,13 +5946,7 @@ snapshots:
 
   jiti@2.6.1: {}
 
-  jose@5.10.0: {}
-
-  jose@5.2.1: {}
-
   js-tokens@4.0.0: {}
-
-  js-xxhash@4.0.0: {}
 
   jsdom@29.0.2:
     dependencies:

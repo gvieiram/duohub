@@ -25,7 +25,6 @@
 		"db:reset": "prisma migrate reset"
 	},
 	"dependencies": {
-		"@flags-sdk/vercel": "^1.2.1",
 		"@hookform/resolvers": "^5.2.2",
 		"@icons-pack/react-simple-icons": "^13.13.0",
 		"@neondatabase/serverless": "^1.1.0",
@@ -39,7 +38,6 @@
 		"@vercel/speed-insights": "^2.0.0",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
-		"flags": "^4.0.5",
 		"framer-motion": "^12.38.0",
 		"lucide-react": "^1.7.0",
 		"next": "16.2.1",
