@@ -40,11 +40,13 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# prisma
+/src/generated/prisma
+
 # docs
 docs/plans/**
 docs/assets/**
 docs/design/**
 
 .cursor/previews
-
-/src/generated/prisma
+.previews/**
