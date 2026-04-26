@@ -3,7 +3,6 @@
 import { motion, type Variants } from "framer-motion";
 import { company } from "@/content/company";
 import { cn } from "@/lib/utils";
-import { useFlag } from "@/stores/use-flags-store";
 
 const EASING: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
 
@@ -100,6 +99,12 @@ type LogoProps = {
 	subtitleClassName?: string;
 	showSubtitle?: boolean;
 	animated?: boolean;
+	/**
+	 * Centers the brand text vertically with the icon. Driven by a
+	 * config flag resolved on the server (see `resolveAll()` in
+	 * `@/lib/posthog/flags`).
+	 */
+	isCentered?: boolean;
 };
 
 export function Logo({
@@ -108,9 +113,9 @@ export function Logo({
 	subtitleClassName,
 	showSubtitle = true,
 	animated = true,
+	isCentered = false,
 }: LogoProps) {
 	const { logo, text, subtitle } = SIZE_PRESETS[size];
-	const { isLogoTextCentered } = useFlag();
 
 	return (
 		<motion.div
@@ -122,9 +127,7 @@ export function Logo({
 			<motion.div variants={logoVariants}>
 				<LogoIcon size={logo} />
 			</motion.div>
-			<div
-				className={cn("flex flex-col", isLogoTextCentered && "items-center")}
-			>
+			<div className={cn("flex flex-col", isCentered && "items-center")}>
 				<motion.div variants={textRevealVariants} className="overflow-hidden">
 					<span
 						className={cn(
