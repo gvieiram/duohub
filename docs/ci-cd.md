@@ -22,7 +22,7 @@ Feature branch → PR → CI (GitHub Actions) + Vercel Preview → Merge em main
 | Preview (PR) | `duohub-<hash>-<scope>.vercel.app`        | PR aberta/atualizada   | branches de feature |
 | Produção     | `www.duohubcontabil.com.br`               | push/merge em `main`   | `main`              |
 
-> O alias `duohub-dev.vercel.app` que apontava para deploys de `main` foi descontinuado quando `main` virou Production Branch. Caso seja necessário um ambiente de staging dedicado no futuro, criar uma branch (ex: `staging`) e configurar deploys de Preview com domínio fixo.
+> Não há ambiente de staging dedicado. Para revisar uma mudança antes de mergear, use a Preview URL automática que a Vercel cria por PR (comentada pelo bot da Vercel no próprio PR). Se um dia for preciso um domínio fixo de pré-produção, crie uma branch (ex: `staging`), configure-a como ambiente de Preview na Vercel e plugue um domínio nela.
 
 ## Pipeline de CI (GitHub Actions)
 
@@ -110,9 +110,17 @@ Para rotacionar `DATABASE_URL`, `DIRECT_URL` ou qualquer outra credencial: atual
 
 ## Configuração na Vercel
 
-**Project Settings → Git:**
+**Project Settings → Environments → Production:**
 
-- **Production Branch:** `main`
+- **Branch Tracking:** `main`
+- **Automatically promote successful deployments:** Enabled (sem isso, o push em `main` builda mas não vira o deploy ativo)
+
+**Project Settings → Environments → Preview:**
+
+- **Branch Tracking:** `All unassigned git branches`
+
+**Project Settings → Git → Connected Git Repository:**
+
 - **Pull Request Comments:** Enabled
 - **deployment_status Events:** Enabled
 
@@ -127,6 +135,8 @@ Para rotacionar `DATABASE_URL`, `DIRECT_URL` ou qualquer outra credencial: atual
 
 - `www.duohubcontabil.com.br` → Production (`main`)
 - `duohubcontabil.com.br` → Redirect 307 → `www.duohubcontabil.com.br`
+
+> O domínio `duohub-dev.vercel.app` foi removido. Cada PR já recebe uma Preview URL única gerada automaticamente pela Vercel (e comentada no próprio PR pelo bot da Vercel) — esse é o canal padrão para revisar mudanças antes do merge.
 
 ## Dependabot
 
