@@ -100,9 +100,9 @@ type LogoProps = {
 	showSubtitle?: boolean;
 	animated?: boolean;
 	/**
-	 * Centers the brand text vertically with the icon. Driven by a
-	 * config flag resolved on the server (see `resolveAll()` in
-	 * `@/lib/posthog/flags`).
+	 * When true, vertically centers the brand text with the icon.
+	 * Typically driven by a server-resolved flag (see `resolveAll()` in
+	 * `@/lib/posthog/flags`), but any boolean works.
 	 */
 	isCentered?: boolean;
 };
