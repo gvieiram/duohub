@@ -17,7 +17,7 @@ import { Header } from "@/components/header";
 import { company } from "@/content/company";
 import { messages } from "@/content/messages";
 import { getBannerIcon } from "@/lib/banner-icons";
-import { resolveAll, resolveBanner } from "@/lib/flags";
+import { resolveAll } from "@/lib/posthog/flags";
 import {
 	getLocalBusinessSchema,
 	getWebSiteSchema,
@@ -92,8 +92,8 @@ export default async function RootLayout({
 }>) {
 	const shouldInjectToolbar = process.env.NODE_ENV === "development";
 
-	const flagValues = await resolveAll();
-	const banner = resolveBanner(flagValues.irpfBanner);
+	const flags = await resolveAll();
+	const banner = flags.irpfBanner;
 
 	return (
 		<html lang="pt-BR" suppressHydrationWarning>
@@ -105,8 +105,8 @@ export default async function RootLayout({
 				suppressHydrationWarning
 				className={`${plusJakartaSans.variable} ${marcellus.variable} ${jetbrainsMono.variable} ${playfairDisplay.variable} ${inter.variable} antialiased`}
 			>
-				<Providers flags={flagValues}>
-					<Header />
+				<Providers>
+					<Header isLogoCentered={flags.isLogoTextCentered} />
 					{children}
 					{banner && (
 						<Banner
