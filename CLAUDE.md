@@ -21,7 +21,26 @@ pnpm lint      # Biome check with safe autofixes
 pnpm format    # Biome format
 ```
 
-No test runner is configured. If one is added, use **Jest** with tests co-located next to the source file (e.g., `provider.tsx` → `provider.test.tsx` in the same directory).
+### Testing
+
+Tests run via **Vitest** with the React + Testing Library + jsdom stack:
+
+```bash
+pnpm test           # single run (CI mode)
+pnpm test:watch     # watch mode
+pnpm test:coverage  # coverage report (text + html)
+```
+
+Configuration lives in `vitest.config.ts`:
+
+- Environment: `jsdom`
+- Globals enabled (`describe` / `it` / `expect` available without imports)
+- Path alias `@/*` resolves via `vite-tsconfig-paths`
+- Setup file: `src/test/setup.ts` (loads `@testing-library/jest-dom` matchers)
+- Test discovery: `src/**/*.{test,spec}.{ts,tsx}` — co-located next to the source file (e.g., `actions.ts` → `actions.test.ts` in the same directory)
+- Coverage scope: `src/features/**` and `src/lib/**`
+
+Existing tests cover env validation, rate limiting, the IRPF feature (schemas, actions, utils), the IRPF modal stores, and infrastructure modules (`db`, `resend`, `site-url`).
 
 ## Tech Stack
 
