@@ -1,0 +1,44 @@
+import { z } from "zod";
+import { defineConfigFlag } from "./define";
+import { bannerConfigSchema } from "./schemas/banner";
+
+/**
+ * Centralizes the logo text vertically. Boolean visual variant.
+ */
+export const isLogoTextCentered = defineConfigFlag({
+	key: "logo-text-centered",
+	description: "Centraliza o texto do logo verticalmente",
+	schema: z.boolean(),
+	defaultValue: false,
+});
+
+/**
+ * Variant of the social proof section on the homepage.
+ */
+export const socialProofType = defineConfigFlag({
+	key: "social-proof-type",
+	description: "Variante da seção de prova social",
+	schema: z.enum(["clients", "credentials", "statement"]),
+	defaultValue: "credentials",
+});
+
+/**
+ * IRPF 2026 promotional banner. The payload from PostHog is a JSON
+ * object validated by `bannerConfigSchema`, which collapses inactive
+ * banners and out-of-window dates into `null`.
+ */
+export const irpfBanner = defineConfigFlag({
+	key: "irpf-banner",
+	description: "Banner promocional do IRPF 2026 (JSON payload)",
+	schema: bannerConfigSchema,
+	defaultValue: null,
+	payload: true,
+});
+
+export const allFlags = {
+	isLogoTextCentered,
+	socialProofType,
+	irpfBanner,
+} as const;
+
+export type AllFlagsMap = typeof allFlags;
