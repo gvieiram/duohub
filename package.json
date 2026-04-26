@@ -10,6 +10,7 @@
 		"dev": "next dev",
 		"postinstall": "prisma generate",
 		"build": "next build",
+		"vercel-build": "bash scripts/vercel-build.sh",
 		"start": "next start",
 		"lint": "biome check --write",
 		"format": "biome format --write",

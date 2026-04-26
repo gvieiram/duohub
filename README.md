@@ -155,9 +155,8 @@ Feature branch → PR → CI (lint + typecheck) + Vercel Preview → Merge to ma
 
 - **CI** runs on every PR and push to `main` — lint and type check
 - **Preview deployments** are created automatically for every open PR via Vercel
-- **Dev deploy** happens automatically on push to `main` (`duohub-dev.vercel.app`)
-- **Prod deploy** is triggered manually via Release workflow (patch / minor / major) using Vercel CLI
-- **Branch protection** enforces PR-only merges with required status checks
+- **Prod deploy** is automatic on merge to `main` — Vercel runs `scripts/vercel-build.sh` which applies Prisma migrations only when `VERCEL_ENV=production`
+- **Branch protection** enforces PR-only merges with required status checks (no admin bypass)
 - **Dependabot** keeps dependencies fresh weekly
 
 For the full deployment guide, versioning reference, and infrastructure details, see **[docs/ci-cd.md](docs/ci-cd.md)**.
