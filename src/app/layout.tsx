@@ -1,5 +1,4 @@
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { VercelToolbar } from "@vercel/toolbar/next";
 
 import type { Metadata } from "next";
 import {
@@ -90,8 +89,6 @@ export default async function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	const shouldInjectToolbar = process.env.NODE_ENV === "development";
-
 	const flags = await resolveAll();
 	const banner = flags.irpfBanner;
 
@@ -134,7 +131,6 @@ export default async function RootLayout({
 						/>
 					)}
 				</Providers>
-				{shouldInjectToolbar && <VercelToolbar />}
 				<SpeedInsights />
 			</body>
 		</html>
