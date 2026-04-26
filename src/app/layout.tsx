@@ -1,5 +1,4 @@
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { VercelToolbar } from "@vercel/toolbar/next";
 
 import type { Metadata } from "next";
 import {
@@ -17,7 +16,7 @@ import { Header } from "@/components/header";
 import { company } from "@/content/company";
 import { messages } from "@/content/messages";
 import { getBannerIcon } from "@/lib/banner-icons";
-import { resolveAll, resolveBanner } from "@/lib/flags";
+import { resolveAll } from "@/lib/posthog/flags";
 import {
 	getLocalBusinessSchema,
 	getWebSiteSchema,
@@ -90,10 +89,8 @@ export default async function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	const shouldInjectToolbar = process.env.NODE_ENV === "development";
-
-	const flagValues = await resolveAll();
-	const banner = resolveBanner(flagValues.irpfBanner);
+	const flags = await resolveAll();
+	const banner = flags.irpfBanner;
 
 	return (
 		<html lang="pt-BR" suppressHydrationWarning>
@@ -105,8 +102,8 @@ export default async function RootLayout({
 				suppressHydrationWarning
 				className={`${plusJakartaSans.variable} ${marcellus.variable} ${jetbrainsMono.variable} ${playfairDisplay.variable} ${inter.variable} antialiased`}
 			>
-				<Providers flags={flagValues}>
-					<Header />
+				<Providers>
+					<Header isLogoCentered={flags.isLogoTextCentered} />
 					{children}
 					{banner && (
 						<Banner
@@ -134,7 +131,6 @@ export default async function RootLayout({
 						/>
 					)}
 				</Providers>
-				{shouldInjectToolbar && <VercelToolbar />}
 				<SpeedInsights />
 			</body>
 		</html>

@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { ResponsiveDialog } from "@/components/responsive-dialog";
 import { submitIrpfContact } from "@/features/irpf/actions";
-import { posthog } from "@/lib/posthog";
+import { posthog } from "@/lib/posthog/client";
 import { useMessages } from "@/stores/use-content-store";
 import { useIrpfModalPersistence } from "@/stores/use-irpf-modal-persistence";
 import {

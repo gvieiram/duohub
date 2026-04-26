@@ -8,7 +8,7 @@
 
 Hoje a aplicação é uma **landing page institucional estática** em Next.js 16
 (App Router, React 19, Tailwind v4, shadcn/ui, Framer Motion, Zustand, Biome,
-feature flags Vercel). Sem banco, sem autenticação, sem storage.
+feature flags PostHog). Sem banco, sem autenticação, sem storage.
 
 A partir da F1, vira **aplicação com estado** com área administrativa interna,
 áreas públicas dinâmicas (proposta por link) e, eventualmente, portal do cliente.
@@ -300,9 +300,40 @@ layout (server component).
 | `/propostas/[token]` | `robots: { index: false, follow: false }` + `Cache-Control: no-store` | Excluído                |
 
 
-### Feature flags
+### Feature Flags
 
-A infra existente (`src/lib/flags/`) continua sendo usada. Flags novas previstas:
+Usamos **PostHog Feature Flags** como única fonte de verdade pra config flags
+(`logo-text-centered`, `social-proof-type`, `irpf-banner`) e, futuramente,
+A/B testing client-side.
+
+**Server (config flags globais):**
+
+- `posthog-node` em `src/lib/posthog/server.ts` (singleton, modo remote evaluation).
+- `resolveAll()` em `src/lib/posthog/flags/resolve.ts` busca todas as flags com
+  `getAllFlagsAndPayloads("anonymous-marketing-visitor")`, validando cada valor
+  com Zod (`.safeParse`) e caindo no `defaultValue` em caso de falha.
+- O fetch é envolvido em `unstable_cache(revalidate: 60, tags: ["posthog-flags"])`,
+  o que mantém a landing pública estática (ISR) e limita o tráfego ao PostHog
+  a no máximo uma chamada por minuto.
+
+**Client (preparação pra A/B testing futuro):**
+
+- `<PostHogProvider>` em `src/components/providers.tsx` envolve a árvore.
+- Hooks de `@posthog/react` (`useFeatureFlagVariantKey`, etc.) ficam disponíveis
+  pra qualquer client component.
+- Ainda não há experiment flags em uso — a infra existe, mas a primeira flag
+  desse tipo só será criada quando houver um teste real planejado.
+
+**Validação de payloads:**
+
+- Toda flag declara um schema Zod em `src/lib/posthog/flags/config.ts`.
+- O schema do banner (`src/lib/posthog/flags/schemas/banner.ts`) inclui um
+  `.transform()` que absorve a janela de datas (BRT). Ativação on/off é
+  controlada exclusivamente pelo toggle `enabled` da flag no PostHog — quando
+  desligada, `posthog-node` não retorna payload e `resolveAll()` cai no
+  default `null`. O consumidor recebe `BannerConfig | null` direto.
+
+**Flags futuras planejadas (F0+):**
 
 - `irPageEnabled` (F0)
 - `adminEnabled` (F1)
@@ -310,6 +341,14 @@ A infra existente (`src/lib/flags/`) continua sendo usada. Flags novas previstas
 - `appEnabled` (F4)
 
 Permite soft launch em produção.
+
+**Por que não Vercel Flags / Feature Flags SDK:**
+
+- O time já paga por PostHog (analytics + session replay); ter dois sistemas
+  de flags era desnecessário.
+- O setup customizado anterior (Zustand pra hidratar flags no cliente) era
+  legal-mas-frágil: agora todo state vive no server e só o que vira variante
+  visual é passado como prop.
 
 ## Segurança
 
