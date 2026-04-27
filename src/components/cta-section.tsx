@@ -1,8 +1,9 @@
 "use client";
 
 import { SiWhatsapp } from "@icons-pack/react-simple-icons";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { useReducedMotionSafe } from "@/hooks/use-reduced-motion-safe";
 import { useCompany, useMessages } from "@/stores/use-content-store";
 
 const STAGGER_DELAY = 0.15;
@@ -27,7 +28,7 @@ export function CtaSection() {
 	const company = useCompany();
 	const cta = messages.home.cta;
 	const whatsappUrl = company.links.whatsappUrl(cta.whatsappText);
-	const shouldReduceMotion = useReducedMotion() ?? false;
+	const shouldReduceMotion = useReducedMotionSafe();
 
 	const hidden = shouldReduceMotion
 		? { opacity: 1, y: 0 }
