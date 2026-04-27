@@ -57,51 +57,51 @@ Lista canônica dos eventos emitidos pelo código. Toda nova captura PRECISA est
 - **PII**: nenhuma no payload. O `distinctId` é um ID interno opaco.
 - **Best-effort**: erros na captura PostHog são engolidos. O contato já foi persistido — não vamos retornar erro ao usuário só porque a observabilidade falhou.
 
-## Funil F0 — IRPF 2026
+## Dashboard "F0 — IR 2026"
 
-Este é o funil oficial de conversão da página de IR. Todo número que circula em decisão de produto (CTR, conversão por canal, etc.) deve sair daqui.
+Dashboard oficial do funil. Pinned no projeto (api id `1516256`).
 
-### Definição
+URL: https://us.posthog.com/project/395893/dashboard/1516256
+
+| Insight | Tipo | API id | Short id |
+|---------|------|--------|----------|
+| `F0 — Funil IRPF 2026` | Funnel | `8216578` | [`xVnai0cT`](https://us.posthog.com/project/395893/insights/xVnai0cT) |
+| `F0 — Falhas de email (operacional)` | Trends (breakdown `kind`) | `8216580` | [`Jf8u1SE4`](https://us.posthog.com/project/395893/insights/Jf8u1SE4) |
+| `F0 — Submissions por origem (UTM)` | Trends (breakdown `$initial_utm_source`) | `8216582` | [`IB58PSjP`](https://us.posthog.com/project/395893/insights/IB58PSjP) |
+| `F0 — Submissions diárias` | Trends (line) | `8216583` | [`RMlIq9eP`](https://us.posthog.com/project/395893/insights/RMlIq9eP) |
+
+Os insights foram criados automaticamente via MCP user-posthog (ver memória `project_duohub_observabilidade`). Para recriar do zero ou reproduzir em outro projeto, as queries JSON estão salvas no próprio insight — abra cada um no PostHog → **⋯** → **Edit query** para inspecionar / copiar.
+
+### Funil F0 — definição
 
 | Passo | Evento | Filtro |
 |-------|--------|--------|
-| 1. Visualizou a página | `$pageview` | `pathname = "/imposto-de-renda"` |
+| 1. Visualizou a página | `$pageview` | `$pathname = "/imposto-de-renda"` |
 | 2. Abriu o modal | `irpf_modal_opened` | — |
 | 3. Submeteu o formulário | `irpf_contact_submitted` | — |
 
 Janela de conversão: **24h** (o lead pode ler a página, voltar mais tarde e converter).
 
-### Como criar no PostHog
-
-1. PostHog → **Product analytics** → **+ New insight** → **Funnels**
-2. Adicionar os 3 passos acima na ordem
-3. Em **Conversion window**: 24 hours
-4. **Visualization**: "Steps" (vertical) — mostra a queda em cada etapa
-5. Salvar com nome **`F0 — Funil IRPF 2026`** e adicionar ao dashboard `My App Dashboard` (ou criar um novo dashboard `F0 — IR 2026`)
-
-### Insights complementares
-
-| Insight | Tipo | O que mede |
-|---------|------|-----------|
-| `F0 — Falhas de email (operacional)` | Trends — `irpf_email_send_failed` por dia, breakdown `kind` | Saúde do envio de email |
-| `F0 — Submissions por origem` | Trends — `irpf_contact_submitted` breakdown `$initial_utm_source` | De onde vêm os leads |
-| `F0 — Submissions por situação` | Trends — `irpf_contact_submitted` breakdown `hadSituation` | Quanto do funil completa o step de qualificação |
-
 ## Alerta operacional — `irpf_email_send_failed`
 
 Crítico porque, hoje, o front sempre retorna `success: true` mesmo quando o e-mail de confirmação falha. Sem alerta, um lead pode nunca receber confirmação e a equipe da DuoHub não fica sabendo.
 
-### Configuração no PostHog
+### Configuração atual
 
-1. PostHog → **Product analytics** → **+ New insight** → **Trends**
-2. Métrica: `irpf_email_send_failed`, agregação **Total count**, intervalo **Hour**
-3. Salvar como `F0 — Alert · email failures`
-4. Abrir o insight → menu **⋯** (três pontos) → **Subscribe**
-5. **Frequency**: por evento (alert when count > 0 in last hour)
-6. **Destination**: e-mail (preencher com a inbox interna da DuoHub) ou webhook do Slack se/quando configurarmos
-7. **Subject sugerido**: `[DuoHub] irpf_email_send_failed disparou — verificar Resend`
+Alert configurado via PostHog (id interno `019dd026-62ce-0000-e20f-4e3c954d946c`):
 
-> A subscription do PostHog (free tier) tem granularidade mínima horária. Pra alerta sub-minuto seria preciso webhook + workflow externo (não vale o esforço enquanto o volume estiver baixo).
+- **Insight**: `F0 — Falhas de email (operacional)` (`Jf8u1SE4`)
+- **Condição**: `absolute_value` com `upper bound = 0` → dispara quando o count cruza 1+ em qualquer intervalo
+- **Calculation interval**: `hourly` (granularidade mínima do free tier)
+- **`check_ongoing_interval`**: `true` — também checa o intervalo em curso, não só os fechados
+- **Subscribed users**: `duohubcontabil@gmail.com` (email da conta dona do projeto)
+- **Skip weekend**: `false` — leads chegam no fim de semana também durante a temporada de IR
+
+Editar/desabilitar: PostHog → o insight → menu **⋯** → **Manage alerts**.
+
+### Sobre subscriptions (digest periódico)
+
+O free tier do PostHog **não inclui Subscriptions** (POST `/api/projects/.../subscriptions/` retorna `402 Payment Required`). Se no futuro quisermos um digest semanal/mensal (segunda de manhã com snapshot do dashboard), exige upgrade do plano. O alert acima já cobre o caso operacional crítico (notificação imediata por email quando há falha).
 
 ### Runbook quando o alerta dispara
 
