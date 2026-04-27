@@ -34,8 +34,15 @@ export function IrpfModal() {
 	useIrpfModalPersistence();
 
 	useEffect(() => {
-		if (!isOpen) setConsentError(undefined);
-	}, [isOpen]);
+		if (!isOpen) {
+			setConsentError(undefined);
+			return;
+		}
+		posthog.capture("irpf_modal_opened", {
+			variant: "modal",
+			submittedInSession: submitted,
+		});
+	}, [isOpen, submitted]);
 
 	const handleOpenChange = (nextOpen: boolean) => {
 		if (!nextOpen) close();
