@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const limitMock = vi.fn();
 const contactUpsertMock = vi.fn();
 const emailSendMock = vi.fn();
+const posthogCaptureMock = vi.fn();
 
 vi.mock("@/lib/db", () => ({
 	db: { contact: { upsert: contactUpsertMock } },
@@ -24,6 +25,10 @@ vi.mock("@/lib/resend", () => ({
 
 vi.mock("@/lib/env", () => ({
 	env: { INTERNAL_CONTACT_EMAIL: "contato@duohubcontabil.com.br" },
+}));
+
+vi.mock("@/lib/posthog/server", () => ({
+	getServerPostHog: () => ({ capture: posthogCaptureMock }),
 }));
 
 const headersMock = vi.fn(
@@ -111,6 +116,53 @@ describe("submitIrpfContact action", () => {
 
 		expect(result).toEqual({ success: true });
 		expect(contactUpsertMock).toHaveBeenCalledOnce();
+	});
+
+	it("captures `irpf_email_send_failed` to PostHog when an email rejects (with sanitised payload)", async () => {
+		emailSendMock
+			.mockRejectedValueOnce(new Error("resend rate limit hit"))
+			.mockResolvedValueOnce({ data: { id: "mail_2" }, error: null });
+
+		const { submitIrpfContact } = await import("./actions");
+		const result = await submitIrpfContact(validFormData());
+
+		expect(result).toEqual({ success: true });
+		expect(posthogCaptureMock).toHaveBeenCalledOnce();
+
+		const captureArgs = posthogCaptureMock.mock.calls[0][0];
+		expect(captureArgs.event).toBe("irpf_email_send_failed");
+		expect(captureArgs.distinctId).toBe("contact_1");
+		expect(captureArgs.properties.kind).toBe("contact");
+		expect(captureArgs.properties.errorMessage).toBe("resend rate limit hit");
+		// PII guard: lead email/whatsapp/CPF must never appear in the event
+		const serialized = JSON.stringify(captureArgs);
+		expect(serialized).not.toContain("joao@example.com");
+		expect(serialized).not.toContain("99246-7107");
+	});
+
+	it("captures `irpf_email_send_failed` for each rejected email (contact + internal)", async () => {
+		emailSendMock
+			.mockRejectedValueOnce(new Error("contact bounce"))
+			.mockRejectedValueOnce(new Error("internal bounce"));
+
+		const { submitIrpfContact } = await import("./actions");
+		const result = await submitIrpfContact(validFormData());
+
+		expect(result).toEqual({ success: true });
+		expect(posthogCaptureMock).toHaveBeenCalledTimes(2);
+
+		const kinds = posthogCaptureMock.mock.calls.map(
+			(call) => call[0].properties.kind,
+		);
+		expect(kinds).toEqual(expect.arrayContaining(["contact", "internal"]));
+	});
+
+	it("does not capture PostHog event when both emails succeed", async () => {
+		const { submitIrpfContact } = await import("./actions");
+		const result = await submitIrpfContact(validFormData());
+
+		expect(result).toEqual({ success: true });
+		expect(posthogCaptureMock).not.toHaveBeenCalled();
 	});
 
 	it("upserts when email already exists (dedupe)", async () => {

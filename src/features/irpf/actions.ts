@@ -5,6 +5,7 @@ import "server-only";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { getServerPostHog } from "@/lib/posthog/server";
 import { contactRatelimit } from "@/lib/ratelimit";
 import { sendIrpfContactEmails } from "./emails/dispatch";
 import { irpfComplexitySchema, submitIrpfContactSchema } from "./schemas";
@@ -100,13 +101,59 @@ async function persistAndNotify(
 		moment,
 	};
 
-	try {
-		await sendIrpfContactEmails(payload);
-	} catch (err) {
+	const results = await sendIrpfContactEmails(payload);
+
+	for (const result of results) {
+		if (result.status !== "rejected") continue;
+
 		console.error("[submitIrpfContact] email dispatch failed", {
 			contactId: contact.id,
-			err,
+			kind: result.kind,
+			error: result.error,
 		});
+
+		captureEmailFailure({
+			contactId: contact.id,
+			kind: result.kind,
+			errorMessage: result.error,
+		});
+	}
+}
+
+/**
+ * Sends `irpf_email_send_failed` to PostHog so we can:
+ *   - alert when Resend (or our wiring) is broken in production
+ *   - graph a trend of failures over time on the F0 dashboard
+ *
+ * The `distinctId` is the freshly-created `contactId` instead of the lead's
+ * email — the event must not carry PII (LGPD + repo security policy).
+ *
+ * Captures are best-effort: any error here is swallowed so the user-facing
+ * Server Action keeps returning `{ success: true }` (the contact is already
+ * persisted; we just lost an observability signal).
+ */
+function captureEmailFailure({
+	contactId,
+	kind,
+	errorMessage,
+}: {
+	contactId: string;
+	kind: "contact" | "internal";
+	errorMessage?: string;
+}): void {
+	try {
+		const posthog = getServerPostHog();
+		posthog.capture({
+			distinctId: contactId,
+			event: "irpf_email_send_failed",
+			properties: {
+				kind,
+				errorMessage: errorMessage?.slice(0, 500),
+				$set: { lastEmailFailureAt: new Date().toISOString() },
+			},
+		});
+	} catch (err) {
+		console.error("[submitIrpfContact] posthog capture failed", err);
 	}
 }
 

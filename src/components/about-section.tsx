@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import {
 	CheckIcon,
 	Compass,
@@ -10,6 +10,7 @@ import {
 	Zap,
 } from "lucide-react";
 import type { messages } from "@/content/messages";
+import { useReducedMotionSafe } from "@/hooks/use-reduced-motion-safe";
 import { cn } from "@/lib/utils";
 import { useMessages } from "@/stores/use-content-store";
 
@@ -245,7 +246,7 @@ function ValuesBlock({
 export function AboutSection() {
 	const messages = useMessages();
 	const about = messages.home.about;
-	const shouldReduceMotion = useReducedMotion() ?? false;
+	const shouldReduceMotion = useReducedMotionSafe();
 
 	return (
 		<section
