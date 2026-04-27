@@ -2,8 +2,12 @@ import "server-only";
 
 import { IrpfContactConfirmationEmail } from "@/emails/irpf/contact-confirmation";
 import { InternalNotificationEmail } from "@/emails/irpf/internal-notification";
-import { env } from "@/lib/env";
-import { EMAIL_FROM_ADDRESS, EMAIL_REPLY_TO, resend } from "@/lib/resend";
+import {
+	EMAIL_FROM_ADDRESS,
+	EMAIL_REPLY_TO,
+	getInternalRecipient,
+	resend,
+} from "@/lib/resend";
 import type { IrpfContactPayload } from "../types";
 import { whatsappLink } from "../utils";
 
@@ -35,7 +39,7 @@ export async function sendIrpfContactEmails(
 		}),
 		resend.emails.send({
 			from: EMAIL_FROM_ADDRESS,
-			to: env.INTERNAL_CONTACT_EMAIL,
+			to: getInternalRecipient(),
 			replyTo: payload.email,
 			subject: `Novo cliente interessado — IRPF 2026 · ${payload.name}`,
 			react: InternalNotificationEmail({

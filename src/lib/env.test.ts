@@ -16,6 +16,7 @@ describe("env", () => {
 			INTERNAL_CONTACT_EMAIL: "",
 			UPSTASH_REDIS_REST_URL: "",
 			UPSTASH_REDIS_REST_TOKEN: "",
+			VERCEL_ENV: "",
 			NEXT_PUBLIC_SITE_URL: "",
 			NEXT_PUBLIC_POSTHOG_TOKEN: "",
 			NEXT_PUBLIC_POSTHOG_HOST: "",
@@ -95,6 +96,49 @@ describe("env", () => {
 			UPSTASH_REDIS_REST_URL: "https://example.upstash.io",
 			UPSTASH_REDIS_REST_TOKEN: "token",
 			NEXT_PUBLIC_VERCEL_ENV: "staging",
+			SKIP_ENV_VALIDATION: undefined,
+		};
+
+		await expect(async () => {
+			await import("./env");
+		}).rejects.toThrow();
+
+		process.env = original;
+	});
+
+	it("loads VERCEL_ENV when set to a valid value", async () => {
+		vi.resetModules();
+		const original = process.env;
+		process.env = {
+			...original,
+			DATABASE_URL: "postgresql://u:p@h/d?sslmode=require",
+			DIRECT_URL: "postgresql://u:p@h/d?sslmode=require",
+			RESEND_API_KEY: "re_test_key",
+			INTERNAL_CONTACT_EMAIL: "contato@example.com",
+			UPSTASH_REDIS_REST_URL: "https://example.upstash.io",
+			UPSTASH_REDIS_REST_TOKEN: "token",
+			VERCEL_ENV: "preview",
+			SKIP_ENV_VALIDATION: undefined,
+		};
+
+		const mod = await import("./env");
+		expect(mod.env.VERCEL_ENV).toBe("preview");
+
+		process.env = original;
+	});
+
+	it("rejects an invalid VERCEL_ENV value", async () => {
+		vi.resetModules();
+		const original = process.env;
+		process.env = {
+			...original,
+			DATABASE_URL: "postgresql://u:p@h/d?sslmode=require",
+			DIRECT_URL: "postgresql://u:p@h/d?sslmode=require",
+			RESEND_API_KEY: "re_test_key",
+			INTERNAL_CONTACT_EMAIL: "contato@example.com",
+			UPSTASH_REDIS_REST_URL: "https://example.upstash.io",
+			UPSTASH_REDIS_REST_TOKEN: "token",
+			VERCEL_ENV: "staging",
 			SKIP_ENV_VALIDATION: undefined,
 		};
 

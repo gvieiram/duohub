@@ -11,6 +11,7 @@ export const env = createEnv({
 		INTERNAL_CONTACT_EMAIL: z.string().email(),
 		UPSTASH_REDIS_REST_URL: z.string().url(),
 		UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
+		VERCEL_ENV: z.enum(["production", "preview", "development"]).optional(),
 	},
 	client: {
 		NEXT_PUBLIC_SITE_URL: z.string().url().optional(),
@@ -27,6 +28,7 @@ export const env = createEnv({
 		INTERNAL_CONTACT_EMAIL: process.env.INTERNAL_CONTACT_EMAIL,
 		UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
 		UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+		VERCEL_ENV: process.env.VERCEL_ENV,
 		NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
 		NEXT_PUBLIC_POSTHOG_TOKEN: process.env.NEXT_PUBLIC_POSTHOG_TOKEN,
 		NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,

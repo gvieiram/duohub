@@ -20,10 +20,14 @@ vi.mock("@/lib/resend", () => ({
 	resend: { emails: { send: emailSendMock } },
 	EMAIL_FROM_ADDRESS: "DuoHub <contato@duohubcontabil.com.br>",
 	EMAIL_REPLY_TO: "contato@duohubcontabil.com.br",
+	getInternalRecipient: () => "contato@duohubcontabil.com.br",
 }));
 
 vi.mock("@/lib/env", () => ({
-	env: { INTERNAL_CONTACT_EMAIL: "contato@duohubcontabil.com.br" },
+	env: {
+		INTERNAL_CONTACT_EMAIL: "contato@duohubcontabil.com.br",
+		VERCEL_ENV: "production",
+	},
 }));
 
 const headersMock = vi.fn(
