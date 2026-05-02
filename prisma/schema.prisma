@@ -86,8 +86,10 @@ model User {
   updatedAt     DateTime  @updatedAt
   revokedAt     DateTime?
 
-  accounts Account[]
-  sessions Session[]
+  accounts    Account[]
+  sessions    Session[]
+  userClients UserClient[]
+  auditLogs   AuditLog[]   @relation("AuditLogActor")
 
   @@index([email])
   @@index([revokedAt])
@@ -195,10 +197,73 @@ model Client {
   updatedAt  DateTime  @updatedAt
   archivedAt DateTime?
 
+  userClients UserClient[]
+
   @@index([type])
   @@index([taxRegime])
   @@index([status])
   @@index([archivedAt])
   @@index([legalName])
   @@index([parentClientId])
+}
+
+// === N:N preparado para F4 ===
+
+enum UserClientRole {
+  OWNER
+  VIEWER
+}
+
+model UserClient {
+  id        String         @id @default(cuid())
+  userId    String
+  clientId  String
+  role      UserClientRole @default(VIEWER)
+  createdAt DateTime       @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, clientId])
+  @@index([userId])
+  @@index([clientId])
+}
+
+// === Audit log (F1a) ===
+
+enum AuditAction {
+  USER_LOGIN_SUCCESS
+  USER_LOGIN_FAILED
+  USER_LOGOUT
+  MAGIC_LINK_SENT
+  MAGIC_LINK_USED
+  USER_INVITED
+  USER_REVOKED
+  CLIENT_CREATED
+  CLIENT_UPDATED
+  CLIENT_DELETED
+}
+
+model AuditLog {
+  id String @id @default(cuid())
+
+  actorId    String?
+  actorEmail String?
+
+  action       AuditAction
+  resourceType String?
+  resourceId   String?
+
+  metadata  Json?
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  actor User? @relation("AuditLogActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId, createdAt])
+  @@index([resourceType, resourceId])
+  @@index([action, createdAt])
+  @@index([createdAt])
 }
