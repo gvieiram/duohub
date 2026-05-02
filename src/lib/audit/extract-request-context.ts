@@ -1,3 +1,5 @@
+import "server-only";
+
 export type RequestContext = {
 	ipAddress: string | null;
 	userAgent: string | null;
