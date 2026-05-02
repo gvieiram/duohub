@@ -91,3 +91,30 @@ describe("auditLog.write — request context", () => {
 		expect(call?.data.userAgent).toBeNull();
 	});
 });
+
+describe("auditLog.write — error swallowing", () => {
+	it("does not throw when the database call fails", async () => {
+		auditLogCreateMock.mockReset();
+		auditLogCreateMock.mockRejectedValueOnce(new Error("connection refused"));
+
+		await expect(
+			auditLog.write({
+				action: "USER_LOGIN_FAILED",
+				actorEmail: "stranger@example.com",
+			}),
+		).resolves.toBeUndefined();
+	});
+
+	it("logs to console.error when DB fails (best-effort visibility)", async () => {
+		auditLogCreateMock.mockReset();
+		auditLogCreateMock.mockRejectedValueOnce(new Error("write timeout"));
+
+		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+		await auditLog.write({ action: "USER_LOGOUT" });
+
+		expect(errorSpy).toHaveBeenCalledTimes(1);
+		expect(errorSpy.mock.calls[0]?.[0]).toMatch(/audit/);
+		errorSpy.mockRestore();
+	});
+});

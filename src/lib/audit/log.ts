@@ -17,18 +17,23 @@ export type AuditWriteInput = {
 async function write(input: AuditWriteInput): Promise<void> {
 	const { ipAddress, userAgent } = extractRequestContext(input.request);
 
-	await db.auditLog.create({
-		data: {
-			action: input.action,
-			actorId: input.actorId ?? null,
-			actorEmail: input.actorEmail ?? null,
-			resourceType: input.resourceType,
-			resourceId: input.resourceId,
-			metadata: input.metadata as never,
-			ipAddress,
-			userAgent,
-		},
-	});
+	try {
+		await db.auditLog.create({
+			data: {
+				action: input.action,
+				actorId: input.actorId ?? null,
+				actorEmail: input.actorEmail ?? null,
+				resourceType: input.resourceType,
+				resourceId: input.resourceId,
+				metadata: input.metadata as never,
+				ipAddress,
+				userAgent,
+			},
+		});
+	} catch (error) {
+		const message = error instanceof Error ? error.message : String(error);
+		console.error(`[audit] failed to write ${input.action}: ${message}`);
+	}
 }
 
 export const auditLog = { write };
