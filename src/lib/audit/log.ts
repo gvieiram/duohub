@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { Prisma } from "@/generated/prisma/client";
 import type { AuditAction } from "@/generated/prisma/enums";
 import { db } from "@/lib/db";
 import { extractRequestContext } from "./extract-request-context";
@@ -25,7 +26,7 @@ async function write(input: AuditWriteInput): Promise<void> {
 				actorEmail: input.actorEmail ?? null,
 				resourceType: input.resourceType,
 				resourceId: input.resourceId,
-				metadata: input.metadata as never,
+				metadata: input.metadata as Prisma.InputJsonValue,
 				ipAddress,
 				userAgent,
 			},

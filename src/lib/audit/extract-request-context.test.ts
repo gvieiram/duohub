@@ -43,4 +43,18 @@ describe("extractRequestContext", () => {
 		});
 		expect(extractRequestContext(req).ipAddress).toBe("203.0.113.1");
 	});
+
+	it("returns null when x-forwarded-for is whitespace only", () => {
+		const req = new Request("https://example.com", {
+			headers: { "x-forwarded-for": "   " },
+		});
+		expect(extractRequestContext(req).ipAddress).toBeNull();
+	});
+
+	it("returns null when the first hop in x-forwarded-for is empty", () => {
+		const req = new Request("https://example.com", {
+			headers: { "x-forwarded-for": ", 10.0.0.1" },
+		});
+		expect(extractRequestContext(req).ipAddress).toBeNull();
+	});
 });
