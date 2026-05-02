@@ -53,3 +53,41 @@ describe("auditLog.write — happy path", () => {
 		expect(call?.data.metadata).toEqual({ legalName: "ACME LTDA" });
 	});
 });
+
+describe("auditLog.write — request context", () => {
+	beforeEach(() => {
+		auditLogCreateMock.mockReset();
+		auditLogCreateMock.mockResolvedValue({ id: "log_2" });
+	});
+
+	it("extracts IP and User-Agent from request and persists them", async () => {
+		const request = new Request("https://example.com", {
+			headers: {
+				"x-forwarded-for": "203.0.113.7",
+				"user-agent": "DuoHub-Tests/1.0",
+			},
+		});
+
+		await auditLog.write({
+			action: "MAGIC_LINK_SENT",
+			actorEmail: "admin@duohubcontabil.com.br",
+			request,
+		});
+
+		const call = auditLogCreateMock.mock.calls[0]?.[0];
+		expect(call?.data.ipAddress).toBe("203.0.113.7");
+		expect(call?.data.userAgent).toBe("DuoHub-Tests/1.0");
+	});
+
+	it("persists null IP/UA when no request is provided", async () => {
+		await auditLog.write({
+			action: "USER_LOGOUT",
+			actorId: "user_1",
+			actorEmail: "admin@duohubcontabil.com.br",
+		});
+
+		const call = auditLogCreateMock.mock.calls[0]?.[0];
+		expect(call?.data.ipAddress).toBeNull();
+		expect(call?.data.userAgent).toBeNull();
+	});
+});
