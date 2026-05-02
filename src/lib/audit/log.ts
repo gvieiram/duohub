@@ -36,4 +36,15 @@ async function write(input: AuditWriteInput): Promise<void> {
 	}
 }
 
+/**
+ * Write an audit log entry for sensitive operations.
+ *
+ * Best-effort: never throws. If the database write fails, the error is logged
+ * to `console.error` and the calling action proceeds normally. This trade-off
+ * is intentional — losing an occasional audit row beats failing user-visible
+ * actions because of a transient audit issue.
+ *
+ * Use `request` to capture IP + User-Agent (typically the `Request` argument
+ * from a Server Action or route handler).
+ */
 export const auditLog = { write };
