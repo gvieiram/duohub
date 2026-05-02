@@ -134,3 +134,71 @@ model Verification {
   @@index([identifier])
   @@index([expiresAt])
 }
+
+// === Client (F1a) ===
+
+enum ClientType {
+  PF
+  PJ
+}
+
+enum TaxRegime {
+  MEI
+  SIMPLES_NACIONAL
+  LUCRO_PRESUMIDO
+  LUCRO_REAL
+}
+
+enum ClientStatus {
+  ACTIVE
+  PROSPECT
+  INACTIVE
+  CHURNED
+}
+
+model Client {
+  id String @id @default(cuid())
+
+  type      ClientType
+  legalName String
+  tradeName String?
+  document  String     @unique // CPF (PF) ou CNPJ (PJ), só dígitos
+
+  taxRegime         TaxRegime?
+  stateRegistration String?
+  cityRegistration  String?
+
+  segment String?
+
+  primaryEmail String
+  primaryPhone String
+  contactName  String
+
+  zipCode      String?
+  street       String?
+  number       String?
+  complement   String?
+  neighborhood String?
+  city         String?
+  state        String?
+
+  additionalContacts Json?
+
+  parentClientId String?
+  parentClient   Client?  @relation("ClientBranches", fields: [parentClientId], references: [id], onDelete: Restrict)
+  branches       Client[] @relation("ClientBranches")
+
+  status        ClientStatus @default(ACTIVE)
+  internalNotes String?
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  archivedAt DateTime?
+
+  @@index([type])
+  @@index([taxRegime])
+  @@index([status])
+  @@index([archivedAt])
+  @@index([legalName])
+  @@index([parentClientId])
+}
