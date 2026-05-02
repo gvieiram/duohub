@@ -32,8 +32,17 @@ async function write(input: AuditWriteInput): Promise<void> {
 			},
 		});
 	} catch (error) {
-		const message = error instanceof Error ? error.message : String(error);
-		console.error(`[audit] failed to write ${input.action}: ${message}`);
+		const errorName =
+			error instanceof Error ? error.constructor.name : "Unknown";
+		const errorCode =
+			error && typeof error === "object" && "code" in error
+				? String((error as { code: unknown }).code)
+				: undefined;
+		console.error(
+			`[audit] failed to write ${input.action}: ${errorName}${
+				errorCode ? ` (${errorCode})` : ""
+			}`,
+		);
 	}
 }
 
