@@ -1,6 +1,6 @@
 // @vitest-environment node
 
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const auditLogCreateMock = vi.fn();
 
@@ -93,8 +93,18 @@ describe("auditLog.write — request context", () => {
 });
 
 describe("auditLog.write — error swallowing", () => {
-	it("does not throw when the database call fails", async () => {
+	let errorSpy: ReturnType<typeof vi.spyOn>;
+
+	beforeEach(() => {
 		auditLogCreateMock.mockReset();
+		errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+	});
+
+	afterEach(() => {
+		errorSpy.mockRestore();
+	});
+
+	it("does not throw when the database call fails", async () => {
 		auditLogCreateMock.mockRejectedValueOnce(new Error("connection refused"));
 
 		await expect(
@@ -106,15 +116,11 @@ describe("auditLog.write — error swallowing", () => {
 	});
 
 	it("logs to console.error when DB fails (best-effort visibility)", async () => {
-		auditLogCreateMock.mockReset();
 		auditLogCreateMock.mockRejectedValueOnce(new Error("write timeout"));
-
-		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
 		await auditLog.write({ action: "USER_LOGOUT" });
 
 		expect(errorSpy).toHaveBeenCalledTimes(1);
 		expect(errorSpy.mock.calls[0]?.[0]).toMatch(/audit/);
-		errorSpy.mockRestore();
 	});
 });
