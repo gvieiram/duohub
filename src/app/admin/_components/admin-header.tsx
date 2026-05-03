@@ -1,4 +1,4 @@
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { AdminSidebarTrigger } from "./admin-sidebar-trigger";
 import { AdminUserMenu } from "./admin-user-menu";
 
 type Props = {
@@ -8,7 +8,7 @@ type Props = {
 export function AdminHeader({ user }: Props) {
 	return (
 		<header className="flex h-16 items-center justify-between border-b bg-background/95 px-6 backdrop-blur">
-			<SidebarTrigger />
+			<AdminSidebarTrigger />
 			<div className="flex items-center gap-2">
 				<AdminUserMenu user={user} />
 			</div>
