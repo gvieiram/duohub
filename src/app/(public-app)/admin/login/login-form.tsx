@@ -41,9 +41,14 @@ function resolveErrorMessage(
 			return errors.invalidToken;
 		case "ATTEMPTS_EXCEEDED":
 			return errors.attemptsExceeded;
-		// Emitted when the email isn't registered and `disableSignUp: true`.
+		// `new_user_signup_disabled` is intentionally folded into the generic
+		// branch: distinguishing it would let an attacker enumerate which
+		// emails exist by reading the error message. In our flow it's also
+		// unreachable today — `sendMagicLink` suppresses emails for unknown
+		// users so no token ever lands on /magic-link/verify. Defence in
+		// depth: never differentiate "user exists" from "user doesn't" in
+		// any client-visible response.
 		case "new_user_signup_disabled":
-			return errors.notAuthorized;
 		case "failed_to_create_user":
 			return errors.generic;
 		default:

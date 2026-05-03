@@ -12,8 +12,6 @@ export const auth = {
 		errors: {
 			forbidden:
 				"Este email não tem permissão para acessar a área administrativa.",
-			notAuthorized:
-				"Este email não está cadastrado para acesso. Fale com o administrador.",
 			sessionInvalidated: "Sua sessão foi encerrada. Entre novamente.",
 			expiredToken: "Este link expirou. Solicite um novo abaixo.",
 			invalidToken: "Link inválido. Solicite um novo abaixo.",
