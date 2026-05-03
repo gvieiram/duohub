@@ -9,10 +9,7 @@ import { z } from "zod";
 // file at that point.
 export const loginSchema = z.object({
 	email: z
-		.string({
-			// biome-ignore lint/style/useNamingConvention: Zod option key
-			required_error: "Informe seu e-mail.",
-		})
+		.string()
 		.min(1, "Informe seu e-mail.")
 		.email("Informe um e-mail válido.")
 		.max(254, "E-mail muito longo (máximo 254 caracteres)."),
