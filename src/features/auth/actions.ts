@@ -32,6 +32,12 @@ export async function sendLoginMagicLinkAction(
 			body: {
 				email: parsed.data.email,
 				callbackURL: parsed.data.next ?? "/admin",
+				// Without `errorCallbackURL`, Better Auth appends `?error=...` to
+				// `callbackURL`, which would land users with an expired/invalid
+				// link on `/admin?error=EXPIRED_TOKEN` — a route they can't reach
+				// without a session. Sending them back to `/admin/login` lets
+				// the form surface the error and request a fresh link.
+				errorCallbackURL: "/admin/login",
 				metadata: { ipAddress, userAgent },
 			},
 			headers: reqHeaders,
