@@ -12,7 +12,15 @@ export const auth = {
 		errors: {
 			forbidden:
 				"Este email não tem permissão para acessar a área administrativa.",
+			notAuthorized:
+				"Este email não está cadastrado para acesso. Fale com o administrador.",
 			sessionInvalidated: "Sua sessão foi encerrada. Entre novamente.",
+			expiredToken: "Este link expirou. Solicite um novo abaixo.",
+			invalidToken: "Link inválido. Solicite um novo abaixo.",
+			attemptsExceeded:
+				"Este link não pode mais ser usado. Solicite um novo abaixo.",
+			generic:
+				"Não foi possível validar seu link de acesso. Solicite um novo abaixo.",
 		},
 	},
 	email: {
@@ -21,8 +29,5 @@ export const auth = {
 		cta: "Entrar no DuoHub",
 		expiry: "O link expira em 15 minutos.",
 		notRequested: "Se você não solicitou este link, ignore este email.",
-	},
-	verify: {
-		loading: "Validando seu link…",
 	},
 } as const;
