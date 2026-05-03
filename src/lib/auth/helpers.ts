@@ -2,6 +2,7 @@ import "server-only";
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 
 import { auth } from "@/lib/auth/auth";
 import { db } from "@/lib/db";
@@ -15,7 +16,15 @@ export async function getSession() {
 	return auth.api.getSession({ headers: await headers() });
 }
 
-export async function requireAdmin() {
+/**
+ * Guard for admin-only Server Components.
+ *
+ * Wrapped in `React.cache` so the layout, page, and any nested Server
+ * Component can call `requireAdmin()` without paying multiple
+ * `db.user.findUnique` round-trips per request — React deduplicates the
+ * call within the same render tree.
+ */
+export const requireAdmin = cache(async () => {
 	const session = await auth.api.getSession({ headers: await headers() });
 
 	if (!session) {
@@ -36,4 +45,4 @@ export async function requireAdmin() {
 	}
 
 	return session;
-}
+});

@@ -5,7 +5,9 @@ export default async function AdminDashboardPage() {
 	const session = await requireAdmin();
 	const { admin } = messages;
 
-	const firstName = session.user.name?.split(" ")[0] ?? "admin";
+	const trimmedName = session.user.name?.trim();
+	const firstName =
+		trimmedName && trimmedName.length > 0 ? trimmedName.split(" ")[0] : "admin";
 
 	return (
 		<div className="space-y-6">
