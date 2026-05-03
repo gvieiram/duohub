@@ -3,17 +3,30 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const signInMagicLinkMock = vi.fn();
+const signOutMock = vi.fn();
+const getSessionMock = vi.fn();
+const auditWriteMock = vi.fn();
 let mockHeaders = new Headers();
 
 vi.mock("@/lib/auth/auth", () => ({
-	auth: { api: { signInMagicLink: signInMagicLinkMock } },
+	auth: {
+		api: {
+			signInMagicLink: signInMagicLinkMock,
+			signOut: signOutMock,
+			getSession: getSessionMock,
+		},
+	},
+}));
+
+vi.mock("@/lib/audit/log", () => ({
+	auditLog: { write: auditWriteMock },
 }));
 
 vi.mock("next/headers", () => ({
 	headers: async () => mockHeaders,
 }));
 
-const { sendLoginMagicLinkAction } = await import("./actions");
+const { sendLoginMagicLinkAction, logoutAction } = await import("./actions");
 
 describe("sendLoginMagicLinkAction", () => {
 	beforeEach(() => {
@@ -93,5 +106,59 @@ describe("sendLoginMagicLinkAction", () => {
 			ipAddress: null,
 			userAgent: null,
 		});
+	});
+});
+
+describe("logoutAction", () => {
+	beforeEach(() => {
+		signOutMock.mockReset();
+		signOutMock.mockResolvedValue({});
+		getSessionMock.mockReset();
+		auditWriteMock.mockReset();
+		auditWriteMock.mockResolvedValue(undefined);
+		mockHeaders = new Headers();
+	});
+
+	it("writes USER_LOGOUT audit row before signOut when session exists", async () => {
+		getSessionMock.mockResolvedValue({
+			user: { id: "user-123", email: "admin@duohub.com" },
+		});
+		mockHeaders = new Headers({
+			"x-forwarded-for": "203.0.113.42",
+			"user-agent": "Mozilla/5.0 (Test)",
+		});
+
+		const r = await logoutAction();
+
+		expect(r).toEqual({ ok: true });
+		expect(auditWriteMock).toHaveBeenCalledWith({
+			action: "USER_LOGOUT",
+			actorId: "user-123",
+			actorEmail: "admin@duohub.com",
+			ipAddress: "203.0.113.42",
+			userAgent: "Mozilla/5.0 (Test)",
+		});
+		expect(signOutMock).toHaveBeenCalledTimes(1);
+	});
+
+	it("skips audit write when no session is found", async () => {
+		getSessionMock.mockResolvedValue(null);
+
+		const r = await logoutAction();
+
+		expect(r).toEqual({ ok: true });
+		expect(auditWriteMock).not.toHaveBeenCalled();
+		expect(signOutMock).toHaveBeenCalledTimes(1);
+	});
+
+	it("returns ok:true even when signOut throws (uniform response)", async () => {
+		getSessionMock.mockResolvedValue({
+			user: { id: "user-123", email: "admin@duohub.com" },
+		});
+		signOutMock.mockRejectedValueOnce(new Error("network"));
+
+		const r = await logoutAction();
+
+		expect(r).toEqual({ ok: true });
 	});
 });

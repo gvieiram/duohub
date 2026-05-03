@@ -6,7 +6,6 @@ export const admin = {
 	},
 	shell: {
 		logout: "Sair",
-		profile: "Meu perfil",
 		toggleSidebar: "Alternar menu lateral",
 		loading: "Carregando",
 	},
@@ -20,5 +19,6 @@ export const admin = {
 		pageBoundaryDescription:
 			"Tente novamente. Se persistir, contate o suporte.",
 		retry: "Tentar de novo",
+		logoutFailed: "Não foi possível encerrar sua sessão. Tente novamente.",
 	},
 } as const;
