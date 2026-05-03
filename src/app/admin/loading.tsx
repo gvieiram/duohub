@@ -2,7 +2,11 @@ import { messages } from "@/content/messages";
 
 export default function AdminLoading() {
 	return (
-		<div className="flex h-full items-center justify-center py-12">
+		<div
+			aria-busy="true"
+			aria-live="polite"
+			className="flex h-full items-center justify-center py-12"
+		>
 			<div
 				role="status"
 				aria-label={messages.admin.shell.loading}

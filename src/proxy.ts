@@ -1,5 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+// Better Auth derives the session cookie name from `auth.context.authCookies
+// .sessionToken.name`. We hardcode it here because the proxy runs at the Edge
+// runtime and cannot import the auth instance (which pulls Prisma, Resend,
+// etc.). If the cookie configuration ever changes (e.g. enabling cross-domain
+// cookies which adds a `__Secure-` prefix), update both places.
 const SESSION_COOKIE_NAME = "better-auth.session_token";
 
 export function proxy(request: NextRequest) {

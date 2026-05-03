@@ -16,6 +16,13 @@ const ADMIN_CSP = [
 	"font-src 'self' data:",
 	"connect-src 'self' https://us.i.posthog.com",
 	"frame-ancestors 'none'",
+	// Defence-in-depth directives with no Next.js cost:
+	// - object-src: blocks Flash/PDF embed XSS
+	// - base-uri: prevents <base> injection from rerouting relative URLs
+	// - form-action: pins form submissions to first-party + auth endpoints
+	"object-src 'none'",
+	"base-uri 'self'",
+	"form-action 'self'",
 ].join("; ");
 
 const ADMIN_HEADERS = [
