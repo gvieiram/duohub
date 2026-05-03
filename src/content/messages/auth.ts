@@ -20,6 +20,24 @@ export const auth = {
 			generic:
 				"Não foi possível validar seu link de acesso. Solicite um novo para entrar.",
 		},
+		chooser: {
+			title: "Bem-vindo de volta",
+			subtitle: "Escolha como deseja entrar",
+			magicLinkButton: "Entrar com link de acesso",
+			appleButton: "Entrar com Apple",
+			googleButton: "Entrar com Google",
+		},
+		magicLink: {
+			title: "Link de acesso",
+			subtitle: "Receba um link de acesso por email",
+			switchMethod: "Escolha outro método de login",
+		},
+		terms: {
+			agreement: "Ao continuar, você concorda com nossos",
+			termsOfService: "Termos de Serviço",
+			privacyPolicy: "Política de Privacidade",
+			and: "e",
+		},
 	},
 	email: {
 		subject: "Seu link de acesso ao DuoHub",
