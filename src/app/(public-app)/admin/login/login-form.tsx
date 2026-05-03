@@ -82,14 +82,22 @@ export function LoginForm({ searchParamsPromise }: Props) {
 		const message = resolveErrorMessage(params.error, auth.login.errors);
 		if (!message) return;
 
-		toast.error(message, {
-			duration: 8000,
-			id: `login-error-${params.error}`,
-		});
+		// Defer to the next tick so the global <Toaster /> has time to subscribe
+		// to sonner's ToastState. Without this, toasts fired during the first
+		// render are silently dropped because no subscriber is listening yet.
+		// See https://github.com/emilkowalski/sonner/issues/168 (and #341, #723).
+		const timer = setTimeout(() => {
+			toast.error(message, {
+				duration: 8000,
+				id: `login-error-${params.error}`,
+			});
+		}, 0);
 
 		const url = new URL(window.location.href);
 		url.searchParams.delete("error");
 		window.history.replaceState({}, "", url.toString());
+
+		return () => clearTimeout(timer);
 	}, [params.error, auth.login.errors]);
 
 	async function onSubmit(values: LoginInput) {
