@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { use, useEffect, useRef, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -69,25 +69,28 @@ export function LoginForm({ searchParamsPromise }: Props) {
 		},
 	});
 
-	// Surface verification/auth errors from the URL via toast (visual) AND
-	// react-hook-form's setError (assertive announcement to screen readers via
-	// FormMessage). Strip `?error=` from the URL so refresh doesn't re-trigger.
-	// `firedRef` guards against StrictMode's double-effect in dev.
-	const setError = form.setError;
-	const firedRef = useRef(false);
+	// Surface verification/auth errors from the URL via toast. We deliberately
+	// don't pipe these into `form.setError` — the errors aren't about the
+	// field's value (the user hasn't typed anything yet) so flagging the input
+	// as invalid would be misleading. Sonner announces toasts with
+	// `aria-live="polite"`, which is appropriate for informational auth
+	// feedback. Strip `?error=` from the URL so refresh/back doesn't
+	// re-trigger. The empty dep array + reading `params.error` once is safe
+	// because the params come from `use(searchParamsPromise)` which only
+	// resolves once per render cycle.
 	useEffect(() => {
-		if (firedRef.current) return;
 		const message = resolveErrorMessage(params.error, auth.login.errors);
 		if (!message) return;
 
-		firedRef.current = true;
-		toast.error(message);
-		setError("email", { type: "server", message });
+		toast.error(message, {
+			duration: 8000,
+			id: `login-error-${params.error}`,
+		});
 
 		const url = new URL(window.location.href);
 		url.searchParams.delete("error");
 		window.history.replaceState({}, "", url.toString());
-	}, [params.error, auth.login.errors, setError]);
+	}, [params.error, auth.login.errors]);
 
 	async function onSubmit(values: LoginInput) {
 		await sendLoginMagicLinkAction(values);
