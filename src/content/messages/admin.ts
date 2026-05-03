@@ -1,8 +1,10 @@
 export const admin = {
 	nav: {
+		sectionLabel: "Geral",
 		dashboard: "Dashboard",
 		clients: "Clientes",
 		users: "Usuários",
+		settings: "Configurações",
 	},
 	shell: {
 		logout: "Sair",
@@ -13,6 +15,16 @@ export const admin = {
 		title: "Dashboard",
 		welcome: (firstName: string) => `Olá, ${firstName}`,
 		placeholder: "Em breve: indicadores e atividade recente.",
+	},
+	breadcrumb: {
+		root: "Dashboard",
+		segments: {
+			clients: "Clientes",
+			users: "Usuários",
+			settings: "Configurações",
+			new: "Novo",
+			edit: "Editar",
+		},
 	},
 	errors: {
 		pageBoundary: "Algo deu errado",
