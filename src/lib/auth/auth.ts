@@ -11,11 +11,21 @@ import { sleepRandomMs } from "@/lib/auth/anti-timing";
 import { db } from "@/lib/db";
 import { env } from "@/lib/env";
 import { rateLimitMagicLink } from "@/lib/ratelimit";
+import { getSiteUrl } from "@/lib/site-url";
+
+// `getSiteUrl()` resolves at module-init time:
+//   - prod: NEXT_PUBLIC_SITE_URL (canonical) → VERCEL_PROJECT_PRODUCTION_URL
+//   - preview: VERCEL_URL (this preview's own URL) so magic links land where
+//     the deploy is actually serving requests, no per-preview env required
+//   - local: http://localhost:3000
+// This avoids hard-coding a `BETTER_AUTH_URL` env that we'd have to manage
+// per preview deploy.
+const siteUrl = getSiteUrl();
 
 export const auth = betterAuth({
 	database: prismaAdapter(db, { provider: "postgresql" }),
 	secret: env.BETTER_AUTH_SECRET,
-	baseURL: env.BETTER_AUTH_URL,
+	baseURL: siteUrl,
 	emailAndPassword: { enabled: false },
 	session: {
 		expiresIn: 60 * 60 * 24 * 7,
@@ -23,7 +33,7 @@ export const auth = betterAuth({
 		cookieCache: { enabled: true, maxAge: 60 * 5 },
 	},
 	experimental: { joins: true },
-	trustedOrigins: [env.BETTER_AUTH_URL],
+	trustedOrigins: [siteUrl],
 	plugins: [
 		magicLink({
 			expiresIn: 60 * 15,
