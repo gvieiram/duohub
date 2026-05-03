@@ -2,6 +2,7 @@
 
 import { SiWhatsapp } from "@icons-pack/react-simple-icons";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { MouseEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -63,7 +64,10 @@ type HeaderProps = {
 	isLogoCentered?: boolean;
 };
 
+const HIDDEN_PATH_PREFIXES = ["/admin", "/app"];
+
 export function Header({ isLogoCentered = false }: HeaderProps) {
+	const pathname = usePathname();
 	const messages = useMessages();
 	const company = useCompany();
 	const [open, setOpen] = useState(false);
@@ -71,6 +75,10 @@ export function Header({ isLogoCentered = false }: HeaderProps) {
 	const whatsappUrl = company.links.whatsappUrl(messages.home.cta.whatsappText);
 
 	const links = messages.home.header.links;
+
+	const isHidden = HIDDEN_PATH_PREFIXES.some((prefix) =>
+		pathname.startsWith(prefix),
+	);
 
 	const sectionIds = useMemo(
 		() =>
@@ -137,6 +145,10 @@ export function Header({ isLogoCentered = false }: HeaderProps) {
 			document.body.style.overflow = "";
 		};
 	}, [open]);
+
+	if (isHidden) {
+		return null;
+	}
 
 	return (
 		<header
