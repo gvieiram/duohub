@@ -8,6 +8,7 @@ export const admin = {
 		logout: "Sair",
 		profile: "Meu perfil",
 		toggleSidebar: "Alternar menu lateral",
+		loading: "Carregando",
 	},
 	dashboard: {
 		title: "Dashboard",
