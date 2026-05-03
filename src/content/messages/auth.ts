@@ -13,12 +13,12 @@ export const auth = {
 			forbidden:
 				"Este email não tem permissão para acessar a área administrativa.",
 			sessionInvalidated: "Sua sessão foi encerrada. Entre novamente.",
-			expiredToken: "Este link expirou. Solicite um novo abaixo.",
-			invalidToken: "Link inválido. Solicite um novo abaixo.",
+			expiredToken: "Este link expirou. Solicite um novo para entrar.",
+			invalidToken: "Link inválido. Solicite um novo para entrar.",
 			attemptsExceeded:
-				"Este link não pode mais ser usado. Solicite um novo abaixo.",
+				"Este link não pode mais ser usado. Solicite um novo para entrar.",
 			generic:
-				"Não foi possível validar seu link de acesso. Solicite um novo abaixo.",
+				"Não foi possível validar seu link de acesso. Solicite um novo para entrar.",
 		},
 	},
 	email: {
