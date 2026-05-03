@@ -22,4 +22,7 @@ export const auth = {
 		expiry: "O link expira em 15 minutos.",
 		notRequested: "Se você não solicitou este link, ignore este email.",
 	},
+	verify: {
+		loading: "Validando seu link…",
+	},
 } as const;
