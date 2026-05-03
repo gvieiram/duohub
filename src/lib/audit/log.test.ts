@@ -90,6 +90,40 @@ describe("auditLog.write — request context", () => {
 		expect(call?.data.ipAddress).toBeNull();
 		expect(call?.data.userAgent).toBeNull();
 	});
+
+	it("uses explicit ipAddress/userAgent inputs (Server Action path)", async () => {
+		await auditLog.write({
+			action: "MAGIC_LINK_SENT",
+			actorEmail: "admin@duohubcontabil.com.br",
+			ipAddress: "203.0.113.42",
+			userAgent: "Mozilla/5.0 (Test)",
+		});
+
+		const call = auditLogCreateMock.mock.calls[0]?.[0];
+		expect(call?.data.ipAddress).toBe("203.0.113.42");
+		expect(call?.data.userAgent).toBe("Mozilla/5.0 (Test)");
+	});
+
+	it("explicit inputs override request-derived values", async () => {
+		const request = new Request("https://example.com", {
+			headers: {
+				"x-forwarded-for": "10.0.0.1",
+				"user-agent": "from-request",
+			},
+		});
+
+		await auditLog.write({
+			action: "MAGIC_LINK_SENT",
+			actorEmail: "admin@duohubcontabil.com.br",
+			request,
+			ipAddress: "203.0.113.42",
+			userAgent: "from-input",
+		});
+
+		const call = auditLogCreateMock.mock.calls[0]?.[0];
+		expect(call?.data.ipAddress).toBe("203.0.113.42");
+		expect(call?.data.userAgent).toBe("from-input");
+	});
 });
 
 describe("auditLog.write — error swallowing", () => {

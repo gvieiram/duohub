@@ -29,10 +29,23 @@ export const auth = betterAuth({
 			expiresIn: 60 * 15,
 			disableSignUp: true,
 			storeToken: "hashed",
-			sendMagicLink: async ({ email, url }, ctx) => {
-				const request = ctx?.request as Request | undefined;
+			sendMagicLink: async ({ email, url, metadata: bodyMetadata }, ctx) => {
+				// `ctx.request` is undefined when the magic-link endpoint is invoked
+				// from a Server Action — Better Auth doesn't synthesise a `Request`
+				// in that path. Callers (see `sendLoginMagicLinkAction`) forward
+				// IP/UA through `body.metadata` so audit rows stay forensically useful.
+				const request = ctx?.request;
 				const ipAddress =
+					(typeof bodyMetadata?.ipAddress === "string"
+						? bodyMetadata.ipAddress
+						: null) ??
 					request?.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+					null;
+				const userAgent =
+					(typeof bodyMetadata?.userAgent === "string"
+						? bodyMetadata.userAgent
+						: null) ??
+					request?.headers.get("user-agent")?.trim() ??
 					null;
 
 				// Anti-timing: always sleep before any branching, so timing of
@@ -53,7 +66,8 @@ export const auth = betterAuth({
 							suppressed: true,
 							reason: !user ? "user_not_found" : "user_revoked",
 						},
-						request,
+						ipAddress,
+						userAgent,
 					});
 					return;
 				}
@@ -65,7 +79,8 @@ export const auth = betterAuth({
 						actorEmail: email,
 						actorId: user.id,
 						metadata: { suppressed: true, reason: "rate_limited" },
-						request,
+						ipAddress,
+						userAgent,
 					});
 					return;
 				}
@@ -80,7 +95,8 @@ export const auth = betterAuth({
 					action: "MAGIC_LINK_SENT",
 					actorEmail: email,
 					actorId: user.id,
-					request,
+					ipAddress,
+					userAgent,
 				});
 			},
 		}),
