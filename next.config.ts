@@ -1,5 +1,30 @@
 import type { NextConfig } from "next";
 
+// CSP applied only to /admin and /app (the authenticated areas).
+// Marketing pages are intentionally excluded — they have different needs
+// (third-party fonts, analytics scripts, etc.) and run under their own
+// security profile.
+//
+// `'unsafe-inline'` is allowed in script-src and style-src because Next.js 16
+// still emits inline runtime/styles. Tightening to nonce-based CSP is
+// deferred hardening (out of scope for F1a).
+const ADMIN_CSP = [
+	"default-src 'self'",
+	"script-src 'self' 'unsafe-inline' https://us-assets.i.posthog.com",
+	"style-src 'self' 'unsafe-inline'",
+	"img-src 'self' data: https:",
+	"font-src 'self' data:",
+	"connect-src 'self' https://us.i.posthog.com",
+	"frame-ancestors 'none'",
+].join("; ");
+
+const ADMIN_HEADERS = [
+	{ key: "Content-Security-Policy", value: ADMIN_CSP },
+	{ key: "X-Frame-Options", value: "DENY" },
+	{ key: "X-Content-Type-Options", value: "nosniff" },
+	{ key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+];
+
 const nextConfig: NextConfig = {
 	// Expose Vercel's server-side `VERCEL_ENV` to the client bundle as
 	// `NEXT_PUBLIC_VERCEL_ENV`. Used by `instrumentation-client.ts` to gate
@@ -40,6 +65,13 @@ const nextConfig: NextConfig = {
 				source: "/ingest/:path*",
 				destination: "https://us.i.posthog.com/:path*",
 			},
+		];
+	},
+
+	async headers() {
+		return [
+			{ source: "/admin/:path*", headers: ADMIN_HEADERS },
+			{ source: "/app/:path*", headers: ADMIN_HEADERS },
 		];
 	},
 };
