@@ -16,7 +16,7 @@ vi.mock("next/server", () => ({
 	},
 }));
 
-const { middleware } = await import("./middleware");
+const { proxy } = await import("./proxy");
 
 function makeRequest(pathname: string, hasCookie: boolean) {
 	const url = new URL(`http://localhost:3000${pathname}`);
@@ -29,36 +29,39 @@ function makeRequest(pathname: string, hasCookie: boolean) {
 	} as never;
 }
 
-describe("middleware", () => {
+describe("proxy", () => {
 	it("calls next() when cookie is present on /admin", () => {
 		redirectMock.mockClear();
-		middleware(makeRequest("/admin", true));
+		proxy(makeRequest("/admin", true));
 		expect(redirectMock).not.toHaveBeenCalled();
 	});
 
 	it("redirects to /admin/login when no cookie on /admin", () => {
 		redirectMock.mockClear();
-		middleware(makeRequest("/admin", false));
+		proxy(makeRequest("/admin", false));
 		expect(redirectMock).toHaveBeenCalledTimes(1);
 		expect(redirectMock.mock.calls[0]?.[0]).toContain("/admin/login");
+		// `/admin` exact must also carry next= so the user lands back on the
+		// intended page after login.
+		expect(redirectMock.mock.calls[0]?.[0]).toContain("next=%2Fadmin");
 	});
 
 	it("preserves the original path in ?next when redirecting", () => {
 		redirectMock.mockClear();
-		middleware(makeRequest("/admin/clients", false));
+		proxy(makeRequest("/admin/clients", false));
 		const target = redirectMock.mock.calls[0]?.[0] ?? "";
 		expect(target).toContain("next=%2Fadmin%2Fclients");
 	});
 
 	it("does not redirect /admin/login itself", () => {
 		redirectMock.mockClear();
-		middleware(makeRequest("/admin/login", false));
+		proxy(makeRequest("/admin/login", false));
 		expect(redirectMock).not.toHaveBeenCalled();
 	});
 
 	it("redirects to /admin/login when no cookie on /app", () => {
 		redirectMock.mockClear();
-		middleware(makeRequest("/app/dashboard", false));
+		proxy(makeRequest("/app/dashboard", false));
 		expect(redirectMock).toHaveBeenCalledTimes(1);
 		expect(redirectMock.mock.calls[0]?.[0]).toContain("/admin/login");
 		expect(redirectMock.mock.calls[0]?.[0]).toContain(
@@ -68,7 +71,7 @@ describe("middleware", () => {
 
 	it("calls next() when cookie is present on /app", () => {
 		redirectMock.mockClear();
-		middleware(makeRequest("/app/dashboard", true));
+		proxy(makeRequest("/app/dashboard", true));
 		expect(redirectMock).not.toHaveBeenCalled();
 	});
 });

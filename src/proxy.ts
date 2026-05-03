@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 const SESSION_COOKIE_NAME = "better-auth.session_token";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
 	// The matcher (config below) already excludes /admin/login, but a defensive
 	// check guards against accidental coverage changes — never redirect a login
 	// page back to itself.
@@ -20,5 +20,9 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-	matcher: ["/admin/((?!login).*)", "/app/:path*"],
+	// `/admin` (exact) needs to be listed separately because the regex
+	// `/admin/((?!login).*)` requires at least one char after `/admin/`,
+	// so the bare `/admin` would otherwise slip past the proxy and only be
+	// caught by the layout guard (which redirects without ?next=).
+	matcher: ["/admin", "/admin/((?!login).*)", "/app/:path*"],
 };
