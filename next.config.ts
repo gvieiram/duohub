@@ -8,13 +8,23 @@ import type { NextConfig } from "next";
 // `'unsafe-inline'` is allowed in script-src and style-src because Next.js 16
 // still emits inline runtime/styles. Tightening to nonce-based CSP is
 // deferred hardening (out of scope for F1a).
+//
+// PostHog: we use a same-origin reverse proxy at `/ingest` for normal
+// analytics/feature-flag traffic, so first-party `'self'` covers the SDK
+// happy path. The wildcard `https://*.posthog.com` entries below cover
+// the PostHog Toolbar (script/style/img/font/connect to `us.posthog.com`,
+// `eu.posthog.com`, etc.) which loads outside the proxy. We follow
+// PostHog's official recommendation to use a wildcard rather than
+// pinning specific subdomains because they may change over time.
+// Hedgehog mode would require `unsafe-eval` — intentionally not
+// granted here. See `docs/architecture.md`.
 const ADMIN_CSP = [
 	"default-src 'self'",
-	"script-src 'self' 'unsafe-inline' https://us-assets.i.posthog.com",
-	"style-src 'self' 'unsafe-inline'",
+	"script-src 'self' 'unsafe-inline' https://*.posthog.com",
+	"style-src 'self' 'unsafe-inline' https://*.posthog.com",
 	"img-src 'self' data: https:",
-	"font-src 'self' data:",
-	"connect-src 'self' https://us.i.posthog.com",
+	"font-src 'self' data: https://*.posthog.com",
+	"connect-src 'self' https://*.posthog.com",
 	"frame-ancestors 'none'",
 	// Defence-in-depth directives with no Next.js cost:
 	// - object-src: blocks Flash/PDF embed XSS
