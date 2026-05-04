@@ -21,7 +21,10 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
+	SidebarTrigger,
+	useSidebar,
 } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 import { useMessages } from "@/stores/use-content-store";
 
 type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
@@ -62,20 +65,11 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
 	};
 
 	return (
-		<Sidebar variant="inset" {...props}>
+		<Sidebar variant="inset" collapsible="icon" {...props}>
 			<SidebarHeader>
 				<SidebarMenu>
 					<SidebarMenuItem>
-						<SidebarMenuButton size="lg" asChild>
-							<Link href="/admin">
-								<Logo
-									animated={false}
-									showSubtitle={false}
-									size="sm"
-									className="gap-2"
-								/>
-							</Link>
-						</SidebarMenuButton>
+						<SidebarHeaderBrand />
 					</SidebarMenuItem>
 				</SidebarMenu>
 			</SidebarHeader>
@@ -87,5 +81,37 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
 				<NavUser user={user} />
 			</SidebarFooter>
 		</Sidebar>
+	);
+}
+
+/**
+ * Sidebar header that switches between two layouts:
+ * - expanded: logo (with wordmark) and the collapse trigger side by side
+ * - collapsed: icon-only logo with the trigger stacked below it
+ *
+ * The trigger lives inside the sidebar (not the page header) so it stays
+ * reachable in both states.
+ */
+function SidebarHeaderBrand() {
+	const { state } = useSidebar();
+	const isCollapsed = state === "collapsed";
+
+	return (
+		<div
+			className={cn("flex items-center gap-2", isCollapsed && "flex-col gap-1")}
+		>
+			<SidebarMenuButton size="lg" asChild className="flex-1">
+				<Link href="/admin">
+					<Logo
+						animated={false}
+						showSubtitle={false}
+						iconOnly={isCollapsed}
+						size="sm"
+						className="gap-2"
+					/>
+				</Link>
+			</SidebarMenuButton>
+			<SidebarTrigger className="size-8 shrink-0" />
+		</div>
 	);
 }
