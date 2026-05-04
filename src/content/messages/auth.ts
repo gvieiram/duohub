@@ -26,6 +26,7 @@ export const auth = {
 			magicLinkButton: "Entrar com link de acesso",
 			appleButton: "Entrar com Apple",
 			googleButton: "Entrar com Google",
+			comingSoon: "Em breve",
 		},
 		magicLink: {
 			title: "Link de acesso",

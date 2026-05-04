@@ -201,6 +201,7 @@ function ChooserView({
 		magicLinkButton: string;
 		appleButton: string;
 		googleButton: string;
+		comingSoon: string;
 	};
 }) {
 	return (
@@ -214,9 +215,18 @@ function ChooserView({
 				 * Apple/Google are intentionally rendered but `disabled` until OAuth
 				 * lands in F4 (client portal). Keeping them visible signals upcoming
 				 * options without misleading the user into clicking an inert
-				 * button.
+				 * button. The accessible name carries the "Em breve" suffix so
+				 * screen readers convey the disabled rationale (a `title` on a
+				 * `disabled` button is unreliable — many browsers skip focus on
+				 * disabled controls, so the tooltip never surfaces).
 				 */}
-				<Button variant="outline" type="button" disabled title="Em breve">
+				<Button
+					variant="outline"
+					type="button"
+					disabled
+					title={messages.comingSoon}
+					aria-label={`${messages.appleButton} — ${messages.comingSoon}`}
+				>
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 						<title>Apple</title>
 						<path
@@ -226,7 +236,13 @@ function ChooserView({
 					</svg>
 					{messages.appleButton}
 				</Button>
-				<Button variant="outline" type="button" disabled title="Em breve">
+				<Button
+					variant="outline"
+					type="button"
+					disabled
+					title={messages.comingSoon}
+					aria-label={`${messages.googleButton} — ${messages.comingSoon}`}
+				>
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 						<title>Google</title>
 						<path
