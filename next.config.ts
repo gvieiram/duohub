@@ -18,14 +18,34 @@ import type { NextConfig } from "next";
 // pinning specific subdomains because they may change over time.
 // Hedgehog mode would require `unsafe-eval` — intentionally not
 // granted here. See `docs/architecture.md`.
+//
+// Vercel Live (preview-only): Vercel injects a comments toolbar into
+// preview deployments that loads from `vercel.live`, fetches avatars
+// from `vercel.com`, and uses Pusher websockets for realtime
+// collaboration. We allow these origins ONLY when `VERCEL_ENV !==
+// "production"` so the production CSP stays minimal. `frame-ancestors`
+// is also relaxed to allow vercel.live to embed the page in its
+// commenting overlay; production keeps the strict `'none'`.
+// Ref: https://github.com/vercel/next.js/discussions/56562
+const isVercelPreview = process.env.VERCEL_ENV !== "production";
+const VERCEL_LIVE_SCRIPT = isVercelPreview ? " https://vercel.live" : "";
+const VERCEL_LIVE_STYLE = isVercelPreview ? " https://vercel.live" : "";
+const VERCEL_LIVE_FONT = isVercelPreview ? " https://vercel.live" : "";
+const VERCEL_LIVE_CONNECT = isVercelPreview
+	? " https://vercel.live https://*.pusher.com wss://*.pusher.com"
+	: "";
+const FRAME_ANCESTORS = isVercelPreview
+	? "frame-ancestors https://vercel.live"
+	: "frame-ancestors 'none'";
+
 const ADMIN_CSP = [
 	"default-src 'self'",
-	"script-src 'self' 'unsafe-inline' https://*.posthog.com",
-	"style-src 'self' 'unsafe-inline' https://*.posthog.com",
+	`script-src 'self' 'unsafe-inline' https://*.posthog.com${VERCEL_LIVE_SCRIPT}`,
+	`style-src 'self' 'unsafe-inline' https://*.posthog.com${VERCEL_LIVE_STYLE}`,
 	"img-src 'self' data: https:",
-	"font-src 'self' data: https://*.posthog.com",
-	"connect-src 'self' https://*.posthog.com",
-	"frame-ancestors 'none'",
+	`font-src 'self' data: https://*.posthog.com${VERCEL_LIVE_FONT}`,
+	`connect-src 'self' https://*.posthog.com${VERCEL_LIVE_CONNECT}`,
+	FRAME_ANCESTORS,
 	// Defence-in-depth directives with no Next.js cost:
 	// - object-src: blocks Flash/PDF embed XSS
 	// - base-uri: prevents <base> injection from rerouting relative URLs
@@ -37,7 +57,11 @@ const ADMIN_CSP = [
 
 const ADMIN_HEADERS = [
 	{ key: "Content-Security-Policy", value: ADMIN_CSP },
-	{ key: "X-Frame-Options", value: "DENY" },
+	// `X-Frame-Options` is the older, blunter cousin of CSP's
+	// `frame-ancestors`. We drop it in preview so vercel.live can embed
+	// the toolbar overlay; production keeps it as defence-in-depth on
+	// browsers that still honour XFO over frame-ancestors.
+	...(isVercelPreview ? [] : [{ key: "X-Frame-Options", value: "DENY" }]),
 	{ key: "X-Content-Type-Options", value: "nosniff" },
 	{ key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
 ];
