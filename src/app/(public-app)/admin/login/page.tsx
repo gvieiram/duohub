@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 import { LoginForm } from "@/components/login-form";
 import { Logo } from "@/components/logo";
+import { getSession } from "@/lib/auth/helpers";
+import { safeNext } from "@/lib/auth/safe-redirect";
 import { resolveAll } from "@/lib/posthog/flags";
 
 export const metadata: Metadata = {
@@ -16,6 +19,19 @@ export default async function LoginPage({
 }: {
 	searchParams: Promise<{ next?: string; error?: string }>;
 }) {
+	const params = await searchParams;
+
+	// If the request carries an `?error=...` (e.g. session_invalidated,
+	// forbidden, EXPIRED_TOKEN), the user must see the toast and re-login —
+	// skip the logged-in guard so we don't bounce them back to /admin
+	// immediately and create a redirect loop with `requireAdmin()`.
+	if (!params.error) {
+		const session = await getSession();
+		if (session) {
+			redirect(safeNext(params.next));
+		}
+	}
+
 	const flags = await resolveAll();
 
 	return (
