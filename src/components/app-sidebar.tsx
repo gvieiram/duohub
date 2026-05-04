@@ -9,6 +9,7 @@ import {
 import Link from "next/link";
 import type * as React from "react";
 
+import { AdminSidebarTrigger } from "@/app/admin/_components/admin-sidebar-trigger";
 import { Logo } from "@/components/logo";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
@@ -21,7 +22,6 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
-	SidebarTrigger,
 	useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
@@ -85,12 +85,14 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
 }
 
 /**
- * Sidebar header that switches between two layouts:
+ * Sidebar header that switches between two layouts on desktop:
  * - expanded: logo (with wordmark) and the collapse trigger side by side
  * - collapsed: icon-only logo with the trigger stacked below it
  *
- * The trigger lives inside the sidebar (not the page header) so it stays
- * reachable in both states.
+ * On mobile (`md:hidden` viewport) the in-sidebar trigger is hidden — the
+ * sidebar renders as a Sheet that is closed by default, so a trigger
+ * inside it would be unreachable. The page header renders its own
+ * mobile-only trigger; see `src/app/admin/layout.tsx`.
  */
 function SidebarHeaderBrand() {
 	const { state } = useSidebar();
@@ -111,7 +113,7 @@ function SidebarHeaderBrand() {
 					/>
 				</Link>
 			</SidebarMenuButton>
-			<SidebarTrigger className="size-8 shrink-0" />
+			<AdminSidebarTrigger className="hidden size-8 shrink-0 md:inline-flex" />
 		</div>
 	);
 }
