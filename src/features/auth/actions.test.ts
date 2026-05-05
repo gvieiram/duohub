@@ -64,7 +64,7 @@ describe("sendLoginMagicLinkAction", () => {
 		});
 		const arg = signInMagicLinkMock.mock.calls[0]?.[0];
 		expect(arg?.body?.callbackURL).toBe("/admin/clients");
-		expect(arg?.body?.errorCallbackURL).toBe("/admin/login");
+		expect(arg?.body?.errorCallbackURL).toBe("/login");
 	});
 
 	it("falls back to /admin when next is missing", async () => {
@@ -73,10 +73,10 @@ describe("sendLoginMagicLinkAction", () => {
 		expect(arg?.body?.callbackURL).toBe("/admin");
 	});
 
-	it("sends users back to /admin/login on verification errors", async () => {
+	it("sends users back to /login on verification errors", async () => {
 		await sendLoginMagicLinkAction({ email: "user@test.com" });
 		const arg = signInMagicLinkMock.mock.calls[0]?.[0];
-		expect(arg?.body?.errorCallbackURL).toBe("/admin/login");
+		expect(arg?.body?.errorCallbackURL).toBe("/login");
 	});
 
 	it("forwards client IP and User-Agent via body.metadata", async () => {

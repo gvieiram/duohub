@@ -38,13 +38,18 @@ export async function sendLoginMagicLinkAction(
 		await auth.api.signInMagicLink({
 			body: {
 				email: parsed.data.email,
+				// `callbackURL` stays as `/admin` by default. The action can't
+				// peek at the email's role here without leaking existence info
+				// (anti-enumeration), so the destination layout (`requireAdmin`)
+				// is what redirects mismatched roles to `/login?error=forbidden`.
+				// See spec §6.2 — this is intentional, not a leftover.
 				callbackURL: parsed.data.next ?? "/admin",
 				// Without `errorCallbackURL`, Better Auth appends `?error=...` to
 				// `callbackURL`, which would land users with an expired/invalid
 				// link on `/admin?error=EXPIRED_TOKEN` — a route they can't reach
-				// without a session. Sending them back to `/admin/login` lets
-				// the form surface the error and request a fresh link.
-				errorCallbackURL: "/admin/login",
+				// without a session. Sending them back to `/login` lets the
+				// form surface the error and request a fresh link.
+				errorCallbackURL: "/login",
 				metadata: { ipAddress, userAgent },
 			},
 			headers: reqHeaders,
