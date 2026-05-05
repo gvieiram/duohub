@@ -24,7 +24,17 @@ vi.mock("next/navigation", () => ({
 	redirect: (url: string) => redirectMock(url),
 }));
 
-const { requireAdmin } = await import("./helpers");
+const { defaultDestinationForRole, requireAdmin } = await import("./helpers");
+
+describe("defaultDestinationForRole", () => {
+	it("maps ADMIN to /admin", () => {
+		expect(defaultDestinationForRole("ADMIN")).toBe("/admin");
+	});
+
+	it("maps CLIENT to /app", () => {
+		expect(defaultDestinationForRole("CLIENT")).toBe("/app");
+	});
+});
 
 describe("requireAdmin", () => {
 	beforeEach(() => {
@@ -33,10 +43,10 @@ describe("requireAdmin", () => {
 		redirectMock.mockClear();
 	});
 
-	it("redirects to /admin/login when no session", async () => {
+	it("redirects to /login when no session", async () => {
 		getSessionMock.mockResolvedValueOnce(null);
 		await expect(requireAdmin()).rejects.toThrow("REDIRECT");
-		expect(redirectMock).toHaveBeenCalledWith("/admin/login");
+		expect(redirectMock).toHaveBeenCalledWith("/login");
 	});
 
 	it("redirects when session exists but user lookup is null (orphan session)", async () => {
@@ -47,7 +57,7 @@ describe("requireAdmin", () => {
 		findUniqueMock.mockResolvedValueOnce(null);
 		await expect(requireAdmin()).rejects.toThrow("REDIRECT");
 		expect(redirectMock).toHaveBeenCalledWith(
-			"/admin/login?error=session_invalidated",
+			"/login?error=session_invalidated",
 		);
 	});
 
@@ -62,7 +72,7 @@ describe("requireAdmin", () => {
 		});
 		await expect(requireAdmin()).rejects.toThrow("REDIRECT");
 		expect(redirectMock).toHaveBeenCalledWith(
-			"/admin/login?error=session_invalidated",
+			"/login?error=session_invalidated",
 		);
 	});
 
@@ -73,7 +83,7 @@ describe("requireAdmin", () => {
 		});
 		findUniqueMock.mockResolvedValueOnce({ role: "CLIENT", revokedAt: null });
 		await expect(requireAdmin()).rejects.toThrow("REDIRECT");
-		expect(redirectMock).toHaveBeenCalledWith("/admin/login?error=forbidden");
+		expect(redirectMock).toHaveBeenCalledWith("/login?error=forbidden");
 	});
 
 	it("returns the session when user is active admin", async () => {

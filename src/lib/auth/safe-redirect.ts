@@ -1,11 +1,16 @@
+import type { UserRole } from "@/generated/prisma/enums";
+
+import { defaultDestinationForRole } from "./role-destination";
+
 /**
  * Resolves a user-supplied `next` query param into a safe internal path
- * for post-login redirection.
+ * for post-login redirection — role-aware.
  *
  * Anti open-redirect: untrusted input must never produce a redirect to
  * an external origin. Only paths under `/admin/*` and `/app/*` (the
  * authenticated areas) are valid destinations. Everything else falls
- * back to `/admin`.
+ * back to the role's default destination (`/admin` for ADMIN, `/app`
+ * for CLIENT).
  *
  * Defends against:
  * - Absolute URLs (`https://evil.com`)
@@ -19,39 +24,43 @@
  *   We normalise via the `URL` constructor (with a fixed sentinel
  *   origin) before applying the allow-list.
  *
+ * Cross-role rejection (defence in depth):
+ * - role=ADMIN  + next sub-tree `/app/*`   → fallback `/admin`
+ * - role=CLIENT + next sub-tree `/admin/*` → fallback `/app`
+ *
  * Pure function — no I/O, safe to import in any runtime.
  */
-export function safeNext(next: string | undefined | null): string {
-	const FALLBACK = "/admin";
-	if (!next) return FALLBACK;
+export function safeNext(
+	next: string | undefined | null,
+	role: UserRole,
+): string {
+	const fallback = defaultDestinationForRole(role);
+	if (!next) return fallback;
 
-	// Reject absolute URLs (`https://...`) and protocol-relative URLs
-	// (`//...`) up front — `URL` would happily parse these as external.
-	if (next.includes("://") || next.startsWith("//")) return FALLBACK;
+	if (next.includes("://") || next.startsWith("//")) return fallback;
 
-	// Backslashes get normalised to `/` by some browsers/proxies, which
-	// can flip an apparently internal path into a protocol-relative one.
-	if (next.includes("\\")) return FALLBACK;
+	if (next.includes("\\")) return fallback;
 
-	// Resolve dot-segments and any percent-encoding against a fixed
-	// sentinel origin. If the result lands anywhere other than the
-	// sentinel, we know the input escaped the origin (e.g. via `..//`).
 	const SENTINEL_ORIGIN = "https://internal.invalid";
 	let resolved: URL;
 	try {
 		resolved = new URL(next, SENTINEL_ORIGIN);
 	} catch {
-		return FALLBACK;
+		return fallback;
 	}
-	if (resolved.origin !== SENTINEL_ORIGIN) return FALLBACK;
+	if (resolved.origin !== SENTINEL_ORIGIN) return fallback;
 
 	const path = resolved.pathname;
 	const isAdminPath = path === "/admin" || path.startsWith("/admin/");
 	const isAppPath = path === "/app" || path.startsWith("/app/");
-	if (!isAdminPath && !isAppPath) return FALLBACK;
+	if (!isAdminPath && !isAppPath) return fallback;
 
-	// Drop the fragment (browsers don't send it to the server anyway,
-	// and including it has no benefit). Preserve the query string so
-	// e.g. `/admin/clients?status=active` round-trips cleanly.
+	// Cross-role rejection: the role determines which sub-tree is allowed.
+	// An ADMIN with `?next=/app/...` falls back to `/admin`; a CLIENT with
+	// `?next=/admin/...` falls back to `/app`. Defence in depth — the
+	// destination layout's `requireAdmin` would also reject mismatches.
+	if (role === "ADMIN" && !isAdminPath) return fallback;
+	if (role === "CLIENT" && !isAppPath) return fallback;
+
 	return path + resolved.search;
 }

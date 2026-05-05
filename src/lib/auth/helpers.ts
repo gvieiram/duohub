@@ -7,6 +7,8 @@ import { cache } from "react";
 import { auth } from "@/lib/auth/auth";
 import { db } from "@/lib/db";
 
+export { defaultDestinationForRole } from "./role-destination";
+
 export async function getCurrentUser() {
 	const session = await auth.api.getSession({ headers: await headers() });
 	return session?.user ?? null;
@@ -28,7 +30,7 @@ export const requireAdmin = cache(async () => {
 	const session = await auth.api.getSession({ headers: await headers() });
 
 	if (!session) {
-		redirect("/admin/login");
+		redirect("/login");
 	}
 
 	const user = await db.user.findUnique({
@@ -37,11 +39,11 @@ export const requireAdmin = cache(async () => {
 	});
 
 	if (!user || user.revokedAt) {
-		redirect("/admin/login?error=session_invalidated");
+		redirect("/login?error=session_invalidated");
 	}
 
 	if (user.role !== "ADMIN") {
-		redirect("/admin/login?error=forbidden");
+		redirect("/login?error=forbidden");
 	}
 
 	return session;
