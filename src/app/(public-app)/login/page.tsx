@@ -54,11 +54,7 @@ export default async function LoginPage({
 	const flags = await resolveAll();
 
 	return (
-		// `theme-admin` swaps the brand palette for the stock shadcn neutral
-		// palette so the login screen feels like a tool rather than a brand
-		// expression. See `src/app/globals.css`. Will revisit when /app (F4)
-		// joins — clients may want the brand palette on their entry point.
-		<div className="theme-admin flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
+		<div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
 			<div className="flex w-full max-w-sm flex-col gap-6">
 				<a href="/" className="flex items-center gap-2 self-center font-medium">
 					<Logo animated={false} />
