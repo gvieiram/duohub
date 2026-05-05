@@ -70,3 +70,16 @@ describe("proxy", () => {
 		expect(redirectMock).not.toHaveBeenCalled();
 	});
 });
+
+// The matcher is what guarantees `/login` never reaches `proxy()` at the
+// Edge — but config is declarative and easy to break by accident. Pin it
+// here so a future refactor that drops `/login` outside the negative
+// space (e.g. switching to a catch-all) fails in CI rather than at
+// runtime.
+describe("proxy matcher", () => {
+	it("scopes the middleware to authenticated trees only", async () => {
+		const { config } = await import("./proxy");
+		expect(config.matcher).toEqual(["/admin", "/admin/:path*", "/app/:path*"]);
+		expect(config.matcher).not.toContain("/login");
+	});
+});

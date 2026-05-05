@@ -30,12 +30,12 @@ export default async function LoginPage({
 		const session = await getSession();
 		if (session) {
 			// Look up role here — `getSession()` returns the Better Auth
-			// session shape which doesn't include our app-level `role`. This
-			// is the only DB hit on the happy path (logged-in user hitting
-			// /login by mistake) and is acceptable. Acceptable because the
-			// case is rare (bookmark, tab swap) and we'd otherwise have to
-			// extend the Better Auth session payload, which leaks app schema
-			// into auth config.
+			// session shape which doesn't include our app-level `role`. The
+			// extra DB hit fires only on the rare path of a logged-in user
+			// hitting /login by mistake (bookmark, tab swap), so the cost
+			// is acceptable. The alternative would be extending the Better
+			// Auth session payload with our `role` field, which leaks app
+			// schema into auth config — worse trade-off for a rare hit.
 			const user = await db.user.findUnique({
 				where: { id: session.user.id },
 				select: { role: true, revokedAt: true },
