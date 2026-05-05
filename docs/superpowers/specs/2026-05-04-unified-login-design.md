@@ -712,3 +712,48 @@ Detalhamento step-by-step será produzido pela skill `writing-plans`. Visão ger
 - ✅ Defesa em profundidade: `requireAdmin` ainda rejeita CLIENT que chegue em `/admin` por bypass do trampolim.
 
 **Crédito:** correção identificada pelo usuário em revisão pós-smoke test, antes do merge da PR3. Lição: spec pode estar internamente consistente e ainda assim contradizer o objetivo declarado — é preciso revisitar premissas, não apenas validar coerência.
+
+### 2026-05-05 — Ajustes pós-segundo smoke test
+
+**Trigger:** segundo smoke test pelo usuário identificou três pontos UX/segurança que o spec original cobria parcialmente ou nada:
+
+1. **Header de marketing visível em `/login` e `/post-login`.** O `Header` (montado no `app/layout.tsx` raiz) já tinha lógica de auto-hide para `/admin` e `/app`, mas faltava cobrir as rotas de auth-flow.
+2. **Cross-role acessível com sessão válida.** ADMIN logado conseguia abrir `/app` (não existia ainda) — sem regra explícita pra barrar; CLIENT logado caía em `/login?error=forbidden` ao tentar `/admin` — UX hostil pra um cenário que é "errou a URL".
+3. **`/app` ainda não existia em código** — `safeNext` mandava CLIENT pra lá, mas o destino era 404.
+
+**Decisão final (após confirmação do usuário):**
+
+- **Cross-role com sessão válida = redirect silencioso pro destino correto.** Sem `auditLog`, sem `signOut`, sem toast. Tratado como "wrong door" UX, não como tentativa de bypass. A sessão continua válida, só o destino muda.
+- **`/app` placeholder agora.** Layout com `requireClient()` + page "em construção" + botão de logout. F4 substitui o conteúdo, o guard fica.
+
+**Mudanças no código:**
+
+- **`src/components/header.tsx`** + **`src/components/banner.tsx`:** lista `HIDDEN_PATH_PREFIXES` agora inclui `/login` e `/post-login`. Header e banner somem nas rotas de auth-flow.
+- **`src/lib/auth/helpers.ts`:** `requireAdmin` refatorado via `makeRoleGuard(role)` (factory privado). Comportamento de role mismatch passou de `audit + signOut + redirect /login?error=forbidden` para **redirect silencioso ao destino correto** (CLIENT em `/admin` → `/app`). `revokedAt` continua bouncing pra `/login?error=session_invalidated` — esse caso é estado inválido real, não wrong-door.
+- **Novo: `requireClient`** (espelho de `requireAdmin`). ADMIN visitando `/app` → redirect silencioso pra `/admin`.
+- **Novo: `src/app/app/layout.tsx`** chamando `requireClient()`, com metadata `noindex/nocache`.
+- **Novo: `src/app/app/page.tsx`** placeholder "em construção" com logo + texto + `AppLogoutButton`.
+- **Novo: `src/app/app/_components/app-logout-button.tsx`** (Client Component): reusa `logoutAction` + `authClient.signOut` + redirect pra `/login`. Evolui pra um menu completo na F4.
+- **Novo: `src/content/messages/app.ts`** com `metadata` + `placeholder` (eyebrow, title, description, logout label) — sem hardcode.
+- **`src/lib/auth/helpers.test.ts`:** removidos os testes de `audit/signOut` no role mismatch (comportamento não existe mais). Adicionado bloco de testes pra `requireClient` (mirror coverage). Total: 6 → 11 casos cobrindo ambos os guards.
+
+**Mudanças no spec:**
+
+- §6.4 (defesa em profundidade): atualizar pra refletir que `requireAdmin` ficou silencioso e o `requireClient` segue o mesmo padrão. O `auditLog` USER_ACCESS_DENIED não é mais escrito por bypass de role — fica disponível pra cenários genuinamente suspeitos no futuro (ex: tentativa de elevação de privilégio que não passa pelo trampolim, ainda a ser definido caso a caso).
+- §15 (fora do escopo): item "Criar `requireClient()` ou rota `/app`" → MOVIDO PRA DENTRO DO ESCOPO. Implementado como placeholder; F4 substitui conteúdo.
+
+**Decisão consciente — por que não auditar cross-role:**
+
+- Role mismatch no layout não é evidência de abuso. Um CLIENT chegando em `/admin` continua sendo CLIENT — não ganha nenhuma capability nova; só vê a tela errada por meio segundo antes do redirect.
+- O caso real de "elevação de privilégio" é alguém com cookie/token de admin acessando `/admin` direto (passando pelo `requireAdmin` happy-path). Esse caso não deixa rastro de cross-role porque não é cross-role — é acesso legítimo do ponto de vista do guard.
+- Auditar todo wrong-door inundaria o `AuditLog` com noise (bookmarks antigos, links compartilhados, refreshes de aba) e ofuscaria sinais reais.
+- Se no futuro surgir um vetor de ataque que efetivamente abuse de cross-role (não consigo enxergar um agora), reativamos audit nessa branch — fica como ponto de revisita.
+
+**Riscos validados:**
+
+- ✅ Header oculto em `/login`, `/post-login`, `/admin/*`, `/app/*` — verificado por `pnpm build`.
+- ✅ `/app` placeholder responde 200 pra CLIENT autenticado e redireciona ADMIN pra `/admin`.
+- ✅ `/login` continua redirecionando logged-in users via `safeNext` (item 2a do feedback) — comportamento herdado da implementação anterior, sem regressão.
+- ✅ Testes: 199/199 verdes, lint clean, build clean.
+
+**Crédito:** segundo smoke test do usuário; o ponto 2 ("CLIENT não pode acessar /admin, ADMIN não pode /app") só ficou visível na prática quando o guard antigo foi exercitado num cenário de role mismatch real. Bons feedbacks pós-smoke test continuam sendo o melhor sinal.

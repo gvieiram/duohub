@@ -3,9 +3,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const getSessionMock = vi.fn();
-const signOutMock = vi.fn();
 const findUniqueMock = vi.fn();
-const auditWriteMock = vi.fn();
 const redirectMock = vi.fn((_url: string) => {
 	throw new Error("REDIRECT");
 });
@@ -13,12 +11,8 @@ let mockHeaders = new Headers();
 
 vi.mock("@/lib/auth/auth", () => ({
 	auth: {
-		api: { getSession: getSessionMock, signOut: signOutMock },
+		api: { getSession: getSessionMock },
 	},
-}));
-
-vi.mock("@/lib/audit/log", () => ({
-	auditLog: { write: auditWriteMock },
 }));
 
 vi.mock("@/lib/db", () => ({
@@ -33,7 +27,9 @@ vi.mock("next/navigation", () => ({
 	redirect: (url: string) => redirectMock(url),
 }));
 
-const { defaultDestinationForRole, requireAdmin } = await import("./helpers");
+const { defaultDestinationForRole, requireAdmin, requireClient } = await import(
+	"./helpers"
+);
 
 describe("defaultDestinationForRole", () => {
 	it("maps ADMIN to /admin", () => {
@@ -48,11 +44,7 @@ describe("defaultDestinationForRole", () => {
 describe("requireAdmin", () => {
 	beforeEach(() => {
 		getSessionMock.mockReset();
-		signOutMock.mockReset();
-		signOutMock.mockResolvedValue(undefined);
 		findUniqueMock.mockReset();
-		auditWriteMock.mockReset();
-		auditWriteMock.mockResolvedValue(undefined);
 		redirectMock.mockClear();
 		mockHeaders = new Headers();
 	});
@@ -61,24 +53,22 @@ describe("requireAdmin", () => {
 		getSessionMock.mockResolvedValueOnce(null);
 		await expect(requireAdmin()).rejects.toThrow("REDIRECT");
 		expect(redirectMock).toHaveBeenCalledWith("/login");
-		expect(auditWriteMock).not.toHaveBeenCalled();
-		expect(signOutMock).not.toHaveBeenCalled();
 	});
 
-	it("redirects when session exists but user lookup is null (orphan session)", async () => {
+	it("redirects to session_invalidated when User row is missing (orphan session)", async () => {
 		getSessionMock.mockResolvedValueOnce({
 			user: { id: "u1", email: "a@b.com" },
 			session: { id: "s1" },
 		});
 		findUniqueMock.mockResolvedValueOnce(null);
+
 		await expect(requireAdmin()).rejects.toThrow("REDIRECT");
 		expect(redirectMock).toHaveBeenCalledWith(
 			"/login?error=session_invalidated",
 		);
-		expect(auditWriteMock).not.toHaveBeenCalled();
 	});
 
-	it("redirects with session_invalidated when user is revoked", async () => {
+	it("redirects to session_invalidated when user is revoked", async () => {
 		getSessionMock.mockResolvedValueOnce({
 			user: { id: "u1", email: "a@b.com" },
 			session: { id: "s1" },
@@ -87,18 +77,19 @@ describe("requireAdmin", () => {
 			role: "ADMIN",
 			revokedAt: new Date(),
 		});
+
 		await expect(requireAdmin()).rejects.toThrow("REDIRECT");
 		expect(redirectMock).toHaveBeenCalledWith(
 			"/login?error=session_invalidated",
 		);
-		expect(auditWriteMock).not.toHaveBeenCalled();
 	});
 
-	it("audits, signs out and redirects forbidden when role is not ADMIN", async () => {
-		mockHeaders = new Headers({
-			"x-forwarded-for": "203.0.113.42, 10.0.0.1",
-			"user-agent": "Mozilla/5.0 (Test)",
-		});
+	// Cross-role redirect is silent — typing /admin while logged as CLIENT
+	// is a "wrong door" UX event, not a security incident. The session
+	// itself is still valid; only the destination is wrong. We bounce to
+	// the role's correct subtree without writing audit logs or invalidating
+	// the session. See `makeRoleGuard` in `helpers.ts` for rationale.
+	it("silently redirects CLIENT visiting /admin to /app (no audit, no signOut)", async () => {
 		getSessionMock.mockResolvedValueOnce({
 			user: { id: "u1", email: "client@duohub.com" },
 			session: { id: "s1" },
@@ -106,31 +97,7 @@ describe("requireAdmin", () => {
 		findUniqueMock.mockResolvedValueOnce({ role: "CLIENT", revokedAt: null });
 
 		await expect(requireAdmin()).rejects.toThrow("REDIRECT");
-
-		expect(auditWriteMock).toHaveBeenCalledWith({
-			action: "USER_ACCESS_DENIED",
-			actorId: "u1",
-			actorEmail: "client@duohub.com",
-			metadata: { area: "admin", role: "CLIENT" },
-			ipAddress: "203.0.113.42",
-			userAgent: "Mozilla/5.0 (Test)",
-		});
-		expect(signOutMock).toHaveBeenCalledTimes(1);
-		expect(redirectMock).toHaveBeenCalledWith("/login?error=forbidden");
-	});
-
-	it("redirects forbidden even when signOut throws (best-effort cleanup)", async () => {
-		getSessionMock.mockResolvedValueOnce({
-			user: { id: "u1", email: "client@duohub.com" },
-			session: { id: "s1" },
-		});
-		findUniqueMock.mockResolvedValueOnce({ role: "CLIENT", revokedAt: null });
-		signOutMock.mockRejectedValueOnce(new Error("transient"));
-
-		await expect(requireAdmin()).rejects.toThrow("REDIRECT");
-
-		expect(auditWriteMock).toHaveBeenCalledTimes(1);
-		expect(redirectMock).toHaveBeenCalledWith("/login?error=forbidden");
+		expect(redirectMock).toHaveBeenCalledWith("/app");
 	});
 
 	it("returns the session when user is active admin", async () => {
@@ -140,10 +107,79 @@ describe("requireAdmin", () => {
 		};
 		getSessionMock.mockResolvedValueOnce(session);
 		findUniqueMock.mockResolvedValueOnce({ role: "ADMIN", revokedAt: null });
+
 		const result = await requireAdmin();
 		expect(result).toEqual(session);
 		expect(redirectMock).not.toHaveBeenCalled();
-		expect(auditWriteMock).not.toHaveBeenCalled();
-		expect(signOutMock).not.toHaveBeenCalled();
+	});
+});
+
+describe("requireClient", () => {
+	beforeEach(() => {
+		getSessionMock.mockReset();
+		findUniqueMock.mockReset();
+		redirectMock.mockClear();
+		mockHeaders = new Headers();
+	});
+
+	it("redirects to /login when no session", async () => {
+		getSessionMock.mockResolvedValueOnce(null);
+		await expect(requireClient()).rejects.toThrow("REDIRECT");
+		expect(redirectMock).toHaveBeenCalledWith("/login");
+	});
+
+	it("redirects to session_invalidated when User row is missing (orphan session)", async () => {
+		getSessionMock.mockResolvedValueOnce({
+			user: { id: "u2", email: "a@b.com" },
+			session: { id: "s2" },
+		});
+		findUniqueMock.mockResolvedValueOnce(null);
+
+		await expect(requireClient()).rejects.toThrow("REDIRECT");
+		expect(redirectMock).toHaveBeenCalledWith(
+			"/login?error=session_invalidated",
+		);
+	});
+
+	it("redirects to session_invalidated when user is revoked", async () => {
+		getSessionMock.mockResolvedValueOnce({
+			user: { id: "u2", email: "a@b.com" },
+			session: { id: "s2" },
+		});
+		findUniqueMock.mockResolvedValueOnce({
+			role: "CLIENT",
+			revokedAt: new Date(),
+		});
+
+		await expect(requireClient()).rejects.toThrow("REDIRECT");
+		expect(redirectMock).toHaveBeenCalledWith(
+			"/login?error=session_invalidated",
+		);
+	});
+
+	// Mirror of the admin guard behaviour: ADMIN typing /app gets bounced
+	// silently to /admin. No audit, no signOut.
+	it("silently redirects ADMIN visiting /app to /admin", async () => {
+		getSessionMock.mockResolvedValueOnce({
+			user: { id: "u1", email: "admin@duohub.com" },
+			session: { id: "s1" },
+		});
+		findUniqueMock.mockResolvedValueOnce({ role: "ADMIN", revokedAt: null });
+
+		await expect(requireClient()).rejects.toThrow("REDIRECT");
+		expect(redirectMock).toHaveBeenCalledWith("/admin");
+	});
+
+	it("returns the session when user is active client", async () => {
+		const session = {
+			user: { id: "u2", email: "client@duohub.com", name: "Client" },
+			session: { id: "s2" },
+		};
+		getSessionMock.mockResolvedValueOnce(session);
+		findUniqueMock.mockResolvedValueOnce({ role: "CLIENT", revokedAt: null });
+
+		const result = await requireClient();
+		expect(result).toEqual(session);
+		expect(redirectMock).not.toHaveBeenCalled();
 	});
 });

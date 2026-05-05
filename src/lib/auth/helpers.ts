@@ -4,9 +4,10 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 
-import { auditLog } from "@/lib/audit/log";
+import type { UserRole } from "@/generated/prisma/enums";
 import { auth } from "@/lib/auth/auth";
 import { db } from "@/lib/db";
+import { defaultDestinationForRole } from "./role-destination";
 
 export { defaultDestinationForRole } from "./role-destination";
 
@@ -19,76 +20,65 @@ export async function getSession() {
 	return auth.api.getSession({ headers: await headers() });
 }
 
-function extractClientContext(reqHeaders: Headers) {
-	const ipAddress =
-		reqHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-		reqHeaders.get("x-real-ip")?.trim() ??
-		null;
-	const userAgent = reqHeaders.get("user-agent")?.trim() ?? null;
-	return { ipAddress, userAgent };
-}
-
 /**
- * Guard for admin-only Server Components.
+ * Shared role-guard implementation backing `requireAdmin` and
+ * `requireClient`. Kept private so callers always go through the named
+ * helpers — simpler grep, simpler audit story.
  *
- * Wrapped in `React.cache` so the layout, page, and any nested Server
- * Component can call `requireAdmin()` without paying multiple
- * `db.user.findUnique` round-trips per request — React deduplicates the
- * call within the same render tree.
+ * Cross-role mismatch (e.g. ADMIN visiting `/app`) is treated as a
+ * "wrong door" UX event, not a security incident: we silently redirect
+ * to the role's correct destination. Rationale:
  *
- * On a role mismatch (CLIENT user reaching `/admin`) this guard is a
- * second line of defence — `/post-login` should already have routed CLIENT
- * to `/app`. Reaching here means the client bypassed the trampoline (URL
- * manipulation, stale tab, cookie passed across roles). We:
+ * - The `/post-login` trampoline already routes correctly after every
+ *   real authentication, so reaching the wrong layout means the user
+ *   typed the URL, used a stale bookmark, or bounced between tabs.
+ *   None of those are bypass attempts — bouncing them with a forbidden
+ *   error + audit + signOut would be hostile and noisy.
+ * - The session itself is still valid; only the destination is wrong.
+ *   No reason to nuke the cookie or write an `AuditLog` row.
+ * - `safeNext` already rejects cross-role `?next=` values, so the user
+ *   typing `/admin/x` while logged as CLIENT just lands here once and
+ *   gets bounced to `/app` cleanly.
  *
- *   1. Write a `USER_ACCESS_DENIED` audit row for incident review.
- *   2. Invalidate the session (Better Auth `signOut`) so the stale cookie
- *      can't drive subsequent requests. Best-effort — if signOut throws,
- *      the redirect still happens.
- *   3. Redirect to `/login?error=forbidden`.
+ * Failure modes that *do* warrant hard treatment stay hard:
  *
- * Audit + signOut run only on the role-mismatch branch — happy-path admins
- * pay zero overhead.
+ * - No session reaching the layout: shouldn't happen in practice (the
+ *   Edge proxy redirects unauthenticated traffic at the cookie check),
+ *   but if it slips through we send to `/login` so the user authenticates.
+ * - User row missing or revoked: legitimately invalid state — bounce to
+ *   `/login?error=session_invalidated` so the form surfaces it.
+ *
+ * Wrapped in `React.cache` so layout + page + any nested Server Component
+ * dedupes the `db.user.findUnique` within a single render.
  */
-export const requireAdmin = cache(async () => {
-	const reqHeaders = await headers();
-	const session = await auth.api.getSession({ headers: reqHeaders });
+function makeRoleGuard(expected: UserRole) {
+	return cache(async () => {
+		const reqHeaders = await headers();
+		const session = await auth.api.getSession({ headers: reqHeaders });
 
-	if (!session) {
-		redirect("/login");
-	}
-
-	const user = await db.user.findUnique({
-		where: { id: session.user.id },
-		select: { role: true, revokedAt: true },
-	});
-
-	if (!user || user.revokedAt) {
-		redirect("/login?error=session_invalidated");
-	}
-
-	if (user.role !== "ADMIN") {
-		const { ipAddress, userAgent } = extractClientContext(reqHeaders);
-
-		await auditLog.write({
-			action: "USER_ACCESS_DENIED",
-			actorId: session.user.id,
-			actorEmail: session.user.email,
-			metadata: { area: "admin", role: user.role },
-			ipAddress,
-			userAgent,
-		});
-
-		try {
-			await auth.api.signOut({ headers: reqHeaders });
-		} catch {
-			// Swallow — the redirect below still happens. The stale cookie is
-			// best-effort cleanup; even if it survives, every protected layout
-			// re-runs this guard on the next request.
+		if (!session) {
+			redirect("/login");
 		}
 
-		redirect("/login?error=forbidden");
-	}
+		const user = await db.user.findUnique({
+			where: { id: session.user.id },
+			select: { role: true, revokedAt: true },
+		});
 
-	return session;
-});
+		if (!user || user.revokedAt) {
+			redirect("/login?error=session_invalidated");
+		}
+
+		if (user.role !== expected) {
+			redirect(defaultDestinationForRole(user.role));
+		}
+
+		return session;
+	});
+}
+
+/** Guard for admin-only Server Components. See `makeRoleGuard`. */
+export const requireAdmin = makeRoleGuard("ADMIN");
+
+/** Guard for client-only Server Components. See `makeRoleGuard`. */
+export const requireClient = makeRoleGuard("CLIENT");
