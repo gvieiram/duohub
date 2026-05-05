@@ -45,8 +45,8 @@ export function Banner({
 	>("pending");
 	const scrolled = useScroll(10);
 
-	const isHiddenPath = ["/admin", "/app"].some((prefix) =>
-		pathname.startsWith(prefix),
+	const isHiddenPath = ["/admin", "/app", "/login", "/post-login"].some(
+		(prefix) => pathname.startsWith(prefix),
 	);
 	const isPathAllowed =
 		!isHiddenPath &&
