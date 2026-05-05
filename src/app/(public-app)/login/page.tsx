@@ -5,6 +5,7 @@ import { LoginForm } from "@/components/login-form";
 import { Logo } from "@/components/logo";
 import { getSession } from "@/lib/auth/helpers";
 import { safeNext } from "@/lib/auth/safe-redirect";
+import { db } from "@/lib/db";
 import { resolveAll } from "@/lib/posthog/flags";
 
 export const metadata: Metadata = {
@@ -21,14 +22,31 @@ export default async function LoginPage({
 }) {
 	const params = await searchParams;
 
-	// If the request carries an `?error=...` (e.g. session_invalidated,
-	// forbidden, EXPIRED_TOKEN), the user must see the toast and re-login —
-	// skip the logged-in guard so we don't bounce them back to /admin
-	// immediately and create a redirect loop with `requireAdmin()`.
+	// Skip the "already-logged-in" pre-check when an `?error=…` is present:
+	// the user must see the toast (e.g. EXPIRED_TOKEN, session_invalidated)
+	// and request a fresh magic link, otherwise we'd bounce them straight
+	// back into a protected area before the error is ever rendered.
 	if (!params.error) {
 		const session = await getSession();
 		if (session) {
-			redirect(safeNext(params.next));
+			// Look up role here — `getSession()` returns the Better Auth
+			// session shape which doesn't include our app-level `role`. This
+			// is the only DB hit on the happy path (logged-in user hitting
+			// /login by mistake) and is acceptable. Acceptable because the
+			// case is rare (bookmark, tab swap) and we'd otherwise have to
+			// extend the Better Auth session payload, which leaks app schema
+			// into auth config.
+			const user = await db.user.findUnique({
+				where: { id: session.user.id },
+				select: { role: true, revokedAt: true },
+			});
+
+			if (user && !user.revokedAt) {
+				redirect(safeNext(params.next, user.role));
+			}
+			// If the session is orphan/revoked, fall through to the form.
+			// The user will request a fresh magic link; subsequent
+			// `requireAdmin()` calls also catch this state.
 		}
 	}
 
@@ -37,7 +55,8 @@ export default async function LoginPage({
 	return (
 		// `theme-admin` swaps the brand palette for the stock shadcn neutral
 		// palette so the login screen feels like a tool rather than a brand
-		// expression. See `src/app/globals.css`.
+		// expression. See `src/app/globals.css`. Will revisit when /app (F4)
+		// joins — clients may want the brand palette on their entry point.
 		<div className="theme-admin flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
 			<div className="flex w-full max-w-sm flex-col gap-6">
 				<a href="/" className="flex items-center gap-2 self-center font-medium">

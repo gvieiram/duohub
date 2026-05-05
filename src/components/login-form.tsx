@@ -53,7 +53,12 @@ export function LoginForm({ showProviderChooser, searchParamsPromise }: Props) {
 		resolver: zodResolver(loginSchema),
 		defaultValues: {
 			email: "",
-			next: params.next?.startsWith("/") ? params.next : "/admin",
+			// Leave `next` undefined when the user lands without a `?next=`.
+			// The server (LoginPage + safeNext) resolves the destination
+			// based on the authenticated role at redirect time. Hardcoding
+			// `/admin` here would force every login to bounce through the
+			// admin tree even for future client users.
+			next: params.next?.startsWith("/") ? params.next : undefined,
 		},
 	});
 
@@ -94,7 +99,7 @@ export function LoginForm({ showProviderChooser, searchParamsPromise }: Props) {
 	function backToChooser() {
 		form.reset({
 			email: "",
-			next: params.next?.startsWith("/") ? params.next : "/admin",
+			next: params.next?.startsWith("/") ? params.next : undefined,
 		});
 		setSubmitted(false);
 		setView("chooser");

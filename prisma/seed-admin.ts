@@ -40,7 +40,7 @@ async function main() {
 	});
 
 	console.log(`✓ Created initial admin: ${user.email} (${user.id})`);
-	console.log(`→ Visit /admin/login and request a magic link to sign in.`);
+	console.log(`→ Visit /login and request a magic link to sign in.`);
 }
 
 main()

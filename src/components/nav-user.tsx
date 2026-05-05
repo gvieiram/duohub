@@ -55,7 +55,7 @@ export function NavUser({ user }: NavUserProps) {
 			// Defence-in-depth: even if the Server Action's signOut threw,
 			// wipe the client cookie before redirecting.
 			await authClient.signOut();
-			router.push("/admin/login");
+			router.push("/login");
 		} catch {
 			toast.error(messages.admin.errors.logoutFailed, {
 				duration: 8000,
