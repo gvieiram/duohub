@@ -1,5 +1,8 @@
 export const auth = {
 	login: {
+		metadata: {
+			title: "Entrar — DuoHub",
+		},
 		title: "Entrar no DuoHub",
 		subtitle: "Receba um link de acesso por email.",
 		emailLabel: "E-mail",

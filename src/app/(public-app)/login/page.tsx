@@ -3,13 +3,14 @@ import { redirect } from "next/navigation";
 
 import { LoginForm } from "@/components/login-form";
 import { Logo } from "@/components/logo";
+import { messages } from "@/content/messages";
 import { getSession } from "@/lib/auth/helpers";
 import { safeNext } from "@/lib/auth/safe-redirect";
 import { db } from "@/lib/db";
 import { resolveAll } from "@/lib/posthog/flags";
 
 export const metadata: Metadata = {
-	title: "Entrar — DuoHub",
+	title: messages.auth.login.metadata.title,
 	robots: { index: false, follow: false },
 };
 
