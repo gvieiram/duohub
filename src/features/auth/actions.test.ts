@@ -57,20 +57,29 @@ describe("sendLoginMagicLinkAction", () => {
 		expect(r).toEqual({ ok: true });
 	});
 
-	it("forwards next callback to better-auth", async () => {
+	it("routes the magic-link callback through /post-login with next encoded", async () => {
 		await sendLoginMagicLinkAction({
 			email: "user@test.com",
 			next: "/admin/clients",
 		});
 		const arg = signInMagicLinkMock.mock.calls[0]?.[0];
-		expect(arg?.body?.callbackURL).toBe("/admin/clients");
+		expect(arg?.body?.callbackURL).toBe("/post-login?next=%2Fadmin%2Fclients");
 		expect(arg?.body?.errorCallbackURL).toBe("/login");
 	});
 
-	it("falls back to /admin when next is missing", async () => {
+	it("routes to /post-login without query when next is missing", async () => {
 		await sendLoginMagicLinkAction({ email: "user@test.com" });
 		const arg = signInMagicLinkMock.mock.calls[0]?.[0];
-		expect(arg?.body?.callbackURL).toBe("/admin");
+		expect(arg?.body?.callbackURL).toBe("/post-login");
+	});
+
+	it("encodes a CLIENT-area next through /post-login (the trampoline sanitises it)", async () => {
+		await sendLoginMagicLinkAction({
+			email: "user@test.com",
+			next: "/app/dashboard",
+		});
+		const arg = signInMagicLinkMock.mock.calls[0]?.[0];
+		expect(arg?.body?.callbackURL).toBe("/post-login?next=%2Fapp%2Fdashboard");
 	});
 
 	it("sends users back to /login on verification errors", async () => {

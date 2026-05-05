@@ -18,6 +18,29 @@ function extractClientContext(reqHeaders: Headers) {
 	return { ipAddress, userAgent };
 }
 
+/**
+ * Build the magic-link callbackURL.
+ *
+ * After verify, Better Auth redirects the browser to this URL — we send the
+ * user through `/post-login`, which is a server-side trampoline that reads
+ * `user.role` from the DB and redirects to `/admin` or `/app` accordingly.
+ * The trampoline's job is documented in `src/app/(public-app)/post-login/page.tsx`.
+ *
+ * The optional `next` from the form is forwarded as a query param so the
+ * trampoline can honour it through `safeNext(next, role)` (which already
+ * blocks open-redirects and cross-role abuse).
+ *
+ * Anti-enumeration: this action runs without a session and cannot look up
+ * the email's role here without leaking existence/timing info. Centralising
+ * the role-aware redirect in the trampoline (post-session) is the only safe
+ * place to do it.
+ */
+function buildPostLoginCallbackUrl(next: string | undefined): string {
+	if (!next) return "/post-login";
+	const params = new URLSearchParams({ next });
+	return `/post-login?${params.toString()}`;
+}
+
 export async function sendLoginMagicLinkAction(
 	input: unknown,
 ): Promise<LoginActionResult> {
@@ -38,17 +61,12 @@ export async function sendLoginMagicLinkAction(
 		await auth.api.signInMagicLink({
 			body: {
 				email: parsed.data.email,
-				// `callbackURL` stays as `/admin` by default. The action can't
-				// peek at the email's role here without leaking existence info
-				// (anti-enumeration), so the destination layout (`requireAdmin`)
-				// is what redirects mismatched roles to `/login?error=forbidden`.
-				// See spec §6.2 — this is intentional, not a leftover.
-				callbackURL: parsed.data.next ?? "/admin",
+				callbackURL: buildPostLoginCallbackUrl(parsed.data.next),
 				// Without `errorCallbackURL`, Better Auth appends `?error=...` to
 				// `callbackURL`, which would land users with an expired/invalid
-				// link on `/admin?error=EXPIRED_TOKEN` — a route they can't reach
-				// without a session. Sending them back to `/login` lets the
-				// form surface the error and request a fresh link.
+				// link on `/post-login?error=EXPIRED_TOKEN` — but no session
+				// exists to drive the trampoline. Sending them back to `/login`
+				// lets the form surface the error and request a fresh link.
 				errorCallbackURL: "/login",
 				metadata: { ipAddress, userAgent },
 			},

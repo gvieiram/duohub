@@ -1,11 +1,11 @@
 # Design — Login unificado em `/login` com role-based redirect
 
 **Data:** 2026-05-04
-**Status:** Aprovado para implementação
-**Linear:** TBD (criar issue antes do plan; sugestão de título: "F1a · chore — unify login at /login with role-based redirect")
-**Fase do roadmap:** F1a (Fundação do Admin) — refator pós-merge da PR3 (DUO-48)
-**Branch base:** `feat/DUO-48/f1a-pr3-shell` (já em curso) ou nova branch derivada de `main` se a PR3 for mergeada antes
-**Escopo:** Mover o login interno de `/admin/login` para `/login`, com decisão de destino baseada em `role` (admin → `/admin`, cliente → `/app`). Nenhuma URL nova exposta para cliente ainda — `/app` chega na F4. A refator prepara a infra sem antecipar a F4.
+**Status:** Implementado em DUO-48 (revisado em 2026-05-05 após smoke test — ver §17)
+**Linear:** Implementado dentro do escopo de [DUO-48](https://linear.app/duohub/issue/DUO-48)
+**Fase do roadmap:** F1a (Fundação do Admin) — refator dentro da PR3 (DUO-48)
+**Branch base:** `feat/DUO-48/f1a-pr3-shell`
+**Escopo:** Mover o login interno de `/admin/login` para `/login`, com decisão de destino baseada em `role` (admin → `/admin`, cliente → `/app`). Roteamento role-aware ocorre num trampolim server-side em `/post-login`, garantindo que `/app` (F4) já seja o destino correto para CLIENT desde a primeira request — quando F4 entrar, nenhuma mudança em auth é necessária.
 
 ---
 
@@ -341,18 +341,27 @@ Alternativa avaliada: estender a session do Better Auth com `role` via plugin de
 
 ## 6. Action de login (`sendLoginMagicLinkAction`)
 
-### 6.1 Mudança mínima
+> **Atualização (2026-05-05):** as seções §6.1/§6.2 originais documentavam a "Opção A" (`callbackURL: "/admin"` fixo), aceitando que CLIENT passasse por `/admin` antes de ser bouncado pelo `requireAdmin`. Smoke test em CLIENT real revelou inconsistência: se a refator é "login unificado preparado para o futuro", o roteamento role-aware tinha que estar acoplado ao login, não embutido no guard de admin. Migramos para a "Opção B" (trampolim `/post-login`) descrita originalmente como "futuro" — agora implementada. As subseções abaixo refletem a implementação final; o histórico da Opção A está preservado em §17.
+
+### 6.1 Implementação final
 
 ```ts
 // src/features/auth/actions.ts (trecho)
+function buildPostLoginCallbackUrl(next: string | undefined): string {
+	if (!next) return "/post-login";
+	const params = new URLSearchParams({ next });
+	return `/post-login?${params.toString()}`;
+}
+
 await auth.api.signInMagicLink({
 	body: {
 		email: parsed.data.email,
-		callbackURL: parsed.data.next ?? "/admin",
-		// Sem errorCallbackURL, Better Auth anexa ?error=… ao callbackURL,
-		// jogando o usuário em /admin?error=EXPIRED_TOKEN (rota protegida —
-		// o requireAdmin redirecionaria, perdendo o toast). /login é a
-		// página correta para mostrar o erro e oferecer novo link.
+		callbackURL: buildPostLoginCallbackUrl(parsed.data.next),
+		// Sem errorCallbackURL, Better Auth anexa ?error=… ao callbackURL.
+		// Como o trampolim espera uma sessão recém-criada, mandar a flow de
+		// erro pra ele iria desviar para /login de qualquer jeito. Mais
+		// honesto pular direto: errorCallbackURL aponta para /login, onde
+		// o form surface o toast e oferece novo link.
 		errorCallbackURL: "/login",
 		metadata: { ipAddress, userAgent },
 	},
@@ -360,15 +369,79 @@ await auth.api.signInMagicLink({
 });
 ```
 
-### 6.2 Por que `callbackURL` permanece `"/admin"`
+O `next` original do form é preservado via query string. O `/post-login` consome via `searchParams` e passa por `safeNext(next, role)` (que já bloqueia open-redirect, dot-segment traversal e cross-role).
 
-A action **não pode** descobrir a role do email submetido — fazê-lo vazaria info de "usuário existe vs não existe" via timing (anti-enumeration; ver `auth.ts` `sendMagicLink` callback). Soluções:
+### 6.2 Trampolim `/post-login`
 
-- **Opção A (escolhida):** `callbackURL = "/admin"` por padrão. Quando o magic-link verify completa, Better Auth redireciona para `/admin`. Se o usuário for ADMIN ativo, `requireAdmin()` aprova. Se for CLIENT (impossível hoje, mas válido na F4), `requireAdmin()` redireciona para `/login?error=forbidden`. Funcional, com pequeno UX glitch para CLIENT (verá `/admin` na URL por 1 frame antes do redirect).
-- **Opção B (futuro):** criar rota `/post-login` que faz session lookup pós-verify e roteia. Limpa, mas over-engineering para 1 role. Adiar para F4.
-- **Opção C (rejeitada):** o cliente envia a role esperada no form. Vaza info ("role do email tal é tal") e abre vetor para enumeration.
+Server Component em `src/app/(public-app)/post-login/page.tsx`. Responsabilidade única: ler `user.role` do banco (canônico, não do payload da session) e redirecionar.
 
-Esta refator escolhe **Opção A** por simplicidade. `roadmap.md` ganha um item no F4 para reavaliar `/post-login` quando a segunda role entrar.
+```tsx
+// src/app/(public-app)/post-login/page.tsx
+export const dynamic = "force-dynamic";
+export const metadata = {
+	robots: { index: false, follow: false, nocache: true },
+};
+
+export default async function PostLoginPage({
+	searchParams,
+}: {
+	searchParams: Promise<{ next?: string }>;
+}) {
+	const params = await searchParams;
+	const session = await getSession();
+
+	if (!session) redirect("/login");
+
+	const user = await db.user.findUnique({
+		where: { id: session.user.id },
+		select: { role: true, revokedAt: true },
+	});
+
+	if (!user || user.revokedAt) {
+		redirect("/login?error=session_invalidated");
+	}
+
+	redirect(safeNext(params.next, user.role));
+}
+```
+
+**Modelo de segurança:**
+
+- 100% server-rendered. Zero client JS, zero HTML emitido — só um header `Location: 307`. Nada que o browser possa manipular.
+- `user.role` é lido do banco, não do cookie. Better Auth não armazena role no token de session (token é opaco; role é dado de aplicação).
+- `?next=` é sanitizado por `safeNext(next, role)` que já cobre absolute URLs, protocol-relative, backslash tricks, dot-segments traversal e cross-role rejection.
+- `requireAdmin()` no `/admin/layout.tsx` continua como **segunda camada**. Se algo escapar do trampolim (manipulação direta de URL, cookie roubado), o layout ainda barra. Defesa em profundidade — duas camadas independentes.
+
+**Por que isso é mais seguro que a Opção A:**
+
+| Aspecto | Opção A (descartada) | Opção B (atual) |
+|---|---|---|
+| CLIENT toca `/admin` antes de ser bouncado? | Sim — flicker visível | Não — vai direto para `/app` |
+| Lógica de roteamento role-aware | Espalhada (`actions.ts` + `requireAdmin` + cada layout futuro) | Centralizada em 1 arquivo de 30 linhas |
+| Quando F4 entrar | Refatorar `actions.ts` + criar `/app` + criar `requireClient` | Apenas criar `/app` + `requireClient`. Auth intacto. |
+| Audit trail de role mismatch | Apenas redirect (sem registro) | `USER_ACCESS_DENIED` no `AuditLog` quando `requireAdmin` é alcançado por bypass |
+
+### 6.3 `/app` ainda não existe — comportamento na transição
+
+Hoje (F1a) a única role criada na app é `ADMIN`. CLIENT só existe se um admin explicitamente alterar a coluna no banco para teste. Nesse cenário:
+
+1. CLIENT entra em `/login`, recebe magic link.
+2. Magic link verify → `callbackURL: /post-login`.
+3. `/post-login` lê `user.role = "CLIENT"` do banco.
+4. Faz `redirect(safeNext(undefined, "CLIENT"))` → `/app`.
+5. Browser segue 307 → **404** (rota não existe).
+
+Isso é **honest signal**: "essa parte não existe ainda" em vez de "você não tem permissão" (que seria mentira — o cliente *teria* permissão se F4 estivesse lá). Quando F4 entrar, o destino simplesmente passa a responder. Zero refator.
+
+### 6.4 Defesa em profundidade no `requireAdmin`
+
+Mesmo com `/post-login` roteando corretamente, o `requireAdmin()` precisa lidar com o cenário em que algum CLIENT chega em `/admin` por outro caminho (URL manipulation, cookie roubado de cross-tab, bug de roteamento futuro). Quando isso acontece, o guard:
+
+1. Escreve `USER_ACCESS_DENIED` no `AuditLog` com `actorId`, `actorEmail`, IP, UA e metadata `{ area: "admin", role: <role atual> }`. Evidência regulatória.
+2. Invalida a session via `auth.api.signOut()` (best-effort — se falhar, o redirect ainda acontece).
+3. Redireciona para `/login?error=forbidden`.
+
+Audit + signOut rodam **só na branch de role mismatch**. Happy-path admins pagam zero overhead.
 
 ---
 
@@ -585,20 +658,57 @@ Detalhamento step-by-step será produzido pela skill `writing-plans`. Visão ger
 
 ## 15. Fora do escopo
 
-- **Criar `requireClient()` ou rota `/app`.** F4 não está aberta.
-- **Rota `/post-login` intermediária para multi-role routing.** Avaliar quando a segunda role real entrar.
+- **Criar `requireClient()` ou rota `/app`.** F4 não está aberta. O `/post-login` já manda CLIENT para `/app`; quando F4 entrar, basta criar a rota e o helper.
 - **Renomear flag PostHog `isAdminLoginExtraProvidersEnabled` para algo neutro.** Ver §10.2.
-- **Estender session do Better Auth com `role` para evitar lookup extra no pre-check.** Ver §5.3.
+- **Estender session do Better Auth com `role` para evitar lookup extra no `/post-login`.** Avaliar se a F4 fizer N lookups parecidos por request.
 - **Suite E2E Robot Framework para o novo fluxo.** Vive em DUO-51, fora desta refator.
-- **Mudar `callbackURL` do Better Auth para algo dinâmico baseado em role.** Anti-enumeration impede; ver §6.2.
 - **Tematização do `/login` quando F4 chegar (dual-tema admin/cliente?).** Decisão de UX deixada para a fase F4.
 
 ---
 
 ## 16. Checklist pré-implementação
 
-- [ ] Criar issue no Linear (sugestão: "F1a · chore — unify login at /login with role-based redirect"). Linkar no topo deste spec.
-- [ ] Confirmar branch base (PR3 mergeada? Caso sim, sair de `main`).
-- [ ] Confirmar que não há tráfego real em `/admin/login` (analytics PostHog → eventos de pageview).
-- [ ] Aprovar este spec (ou marcar pontos a revisar).
-- [ ] Pedir à skill `writing-plans` o detalhamento PR-by-PR (provavelmente 1 PR só, dado o escopo contido).
+- [x] Issue Linear: incorporada ao escopo de [DUO-48](https://linear.app/duohub/issue/DUO-48).
+- [x] Branch: `feat/DUO-48/f1a-pr3-shell`.
+- [x] Tráfego em `/admin/login`: zero (app pre-produção).
+- [x] Spec aprovado.
+- [x] Implementado e revisto após smoke test (ver §17).
+
+---
+
+## 17. Changelog (post-implementation)
+
+### 2026-05-05 — Migração da Opção A para Opção B (`/post-login`)
+
+**Trigger:** smoke test em CLIENT real (admin manual alterado para `role: CLIENT` no banco) revelou que a Opção A original tinha uma inconsistência grave com o objetivo declarado da refator.
+
+**Inconsistência:** o spec original (§6.2 "Por que `callbackURL` permanece `/admin`") mantinha `callbackURL: "/admin"` hardcoded e empurrava a decisão de roteamento role-aware para o `requireAdmin()`. Resultado:
+- CLIENT logando passava por `/admin` antes de ser bouncado pelo guard.
+- A "preparação para F4" era apenas nominal — quando F4 entrasse, `actions.ts` precisaria refatorar de novo.
+- A lógica de "qual o destino do usuário" ficava espalhada (`actions.ts` + `requireAdmin` + cada layout futuro).
+
+**Decisão:** implementar a Opção B (rotulada originalmente como "futuro/over-engineering") agora.
+
+**Mudanças no código:**
+
+- **Novo:** `src/app/(public-app)/post-login/page.tsx` — Server Component trampolim que faz session lookup pós-verify e redireciona via `safeNext(next, role)`.
+- **Novo:** `src/app/(public-app)/post-login/page.test.tsx` — 11 casos cobrindo session ausente, órfã/revogada, role mismatch via `next`, open-redirect, e o invariante "DB role wins over session payload role".
+- **`src/features/auth/actions.ts`:** `callbackURL` agora aponta para `/post-login?next=<encoded>` via helper `buildPostLoginCallbackUrl`. `errorCallbackURL` continua `/login`.
+- **`src/lib/auth/helpers.ts` (`requireAdmin`):** virou segunda camada de defesa. No mismatch de role, escreve `USER_ACCESS_DENIED` no `AuditLog`, faz best-effort `signOut`, redireciona para `/login?error=forbidden`. Audit + signOut só rodam na branch de mismatch — happy-path inalterado.
+- **`prisma/schema.prisma`:** adicionada action `USER_ACCESS_DENIED` no enum `AuditAction` (migration `20260505203916_add_user_access_denied_audit_action`).
+
+**Mudanças no spec:**
+
+- §6.2 reescrita inteira: documenta o trampolim, o modelo de segurança e a comparação Opção A vs B.
+- §6.3 nova: comportamento na transição (CLIENT → 404 em `/app` honesto até F4 entrar).
+- §6.4 nova: defesa em profundidade no `requireAdmin` com audit + signOut.
+- §15: removido item "Rota `/post-login` intermediária para multi-role routing" (agora implementado) e item "Mudar `callbackURL`..." (agora implementado).
+
+**Riscos validados:**
+
+- ✅ Cross-role redirect: `safeNext("/admin/x", "CLIENT")` → `/app`, coberto por testes.
+- ✅ Session manipulation: `user.role` lido do banco, não do payload da session — coberto por teste explícito (`looks up role from the database, not from the session payload`).
+- ✅ Open-redirect: `?next=https://evil.com` rejeitado pelo `safeNext` — coberto por teste no `/post-login`.
+- ✅ Defesa em profundidade: `requireAdmin` ainda rejeita CLIENT que chegue em `/admin` por bypass do trampolim.
+
+**Crédito:** correção identificada pelo usuário em revisão pós-smoke test, antes do merge da PR3. Lição: spec pode estar internamente consistente e ainda assim contradizer o objetivo declarado — é preciso revisitar premissas, não apenas validar coerência.
