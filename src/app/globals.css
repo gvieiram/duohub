@@ -67,6 +67,68 @@
 	--whatsapp-foreground: hsl(0 0% 100%);
 }
 
+/*
+ * Admin theme — shadcn "neutral" palette (new-york v4).
+ *
+ * The marketing site uses the DuoHub brand palette (Dark Teal + Terracota).
+ * The admin area should look like a stock shadcn dashboard — neutral grays
+ * and blacks — so it feels like a tool rather than a brand expression.
+ *
+ * Apply to a wrapping element on every admin route (and the admin login):
+ *   <div className="theme-admin"> ... </div>
+ *
+ * Values are copied verbatim (oklch) from the canonical shadcn manual:
+ *   https://ui.shadcn.com/docs/installation/manual
+ * Do NOT translate to hsl — keeping oklch makes diffs against future
+ * shadcn upgrades trivial.
+ *
+ * The only addition beyond the canonical palette is `--highlight`, which
+ * is a DuoHub-specific variable consumed by the shared <Logo> component
+ * (the "Hub" letters use it). We fold it into the same neutral as
+ * `--primary` so the logo renders fully neutral inside the admin shell.
+ */
+.theme-admin {
+	--background: oklch(1 0 0);
+	--foreground: oklch(0.145 0 0);
+
+	--card: oklch(1 0 0);
+	--card-foreground: oklch(0.145 0 0);
+
+	--popover: oklch(1 0 0);
+	--popover-foreground: oklch(0.145 0 0);
+
+	--primary: oklch(0.205 0 0);
+	--primary-foreground: oklch(0.985 0 0);
+
+	--secondary: oklch(0.97 0 0);
+	--secondary-foreground: oklch(0.205 0 0);
+
+	--muted: oklch(0.97 0 0);
+	--muted-foreground: oklch(0.556 0 0);
+
+	--accent: oklch(0.97 0 0);
+	--accent-foreground: oklch(0.205 0 0);
+
+	/* DuoHub-only variable — see comment block above. */
+	--highlight: oklch(0.205 0 0);
+	--highlight-foreground: oklch(0.985 0 0);
+
+	--destructive: oklch(0.577 0.245 27.325);
+
+	--border: oklch(0.922 0 0);
+	--input: oklch(0.922 0 0);
+	--ring: oklch(0.708 0 0);
+
+	--sidebar: oklch(0.985 0 0);
+	--sidebar-foreground: oklch(0.145 0 0);
+	--sidebar-primary: oklch(0.205 0 0);
+	--sidebar-primary-foreground: oklch(0.985 0 0);
+	--sidebar-accent: oklch(0.97 0 0);
+	--sidebar-accent-foreground: oklch(0.205 0 0);
+	--sidebar-border: oklch(0.922 0 0);
+	--sidebar-ring: oklch(0.708 0 0);
+}
+
 .dark {
 	--background: hsl(173 30% 4%);
 	--foreground: hsl(11 15% 93%);
