@@ -81,7 +81,14 @@ describe("inviteUserAction", () => {
 		});
 
 		expect(r).toEqual({ success: true });
-		expect(createMock).toHaveBeenCalledOnce();
+		expect(createMock).toHaveBeenCalledWith({
+			data: {
+				email: "newadmin@x.com",
+				name: "New Admin",
+				emailVerified: true,
+				role: "ADMIN",
+			},
+		});
 		expect(auditWriteMock).toHaveBeenCalledOnce();
 		expect(auditWriteMock).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -93,7 +100,10 @@ describe("inviteUserAction", () => {
 				metadata: { email: "newadmin@x.com" },
 			}),
 		);
-		expect(signInMagicLinkMock).toHaveBeenCalledOnce();
+		expect(signInMagicLinkMock).toHaveBeenCalledWith({
+			body: { email: "newadmin@x.com", callbackURL: "/post-login" },
+			headers: expect.any(Headers),
+		});
 		expect(revalidatePathMock).toHaveBeenCalledWith("/admin/users");
 	});
 
@@ -174,11 +184,14 @@ describe("inviteUserAction", () => {
 			email: "newadmin@x.com",
 		});
 		signInMagicLinkMock.mockRejectedValueOnce(new Error("SMTP down"));
-		vi.spyOn(console, "error").mockImplementation(() => undefined);
+		const consoleSpy = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => undefined);
 
 		await inviteUserAction({ email: "newadmin@x.com" });
 
 		expect(revalidatePathMock).toHaveBeenCalledWith("/admin/users");
+		consoleSpy.mockRestore();
 	});
 });
 
@@ -268,5 +281,17 @@ describe("revokeUserAction", () => {
 				metadata: { email: null },
 			}),
 		);
+	});
+
+	it("propagates db.$transaction rejection without writing audit or revalidating", async () => {
+		findUniqueMock.mockResolvedValue({ email: "target@x.com" });
+		transactionMock.mockRejectedValueOnce(new Error("FK violation"));
+
+		await expect(revokeUserAction({ userId: "user_2" })).rejects.toThrow(
+			"FK violation",
+		);
+
+		expect(auditWriteMock).not.toHaveBeenCalled();
+		expect(revalidatePathMock).not.toHaveBeenCalled();
 	});
 });

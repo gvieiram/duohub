@@ -109,7 +109,10 @@ export async function revokeUserAction(input: unknown): Promise<ActionResult> {
 		};
 	}
 
-	// Best-effort lookup for audit metadata — still proceed if not found.
+	// Best-effort lookup for audit metadata. There's a tiny race between this
+	// read and the transaction below — acceptable at our scale; if we ever
+	// need stronger guarantees we'd move the email lookup inside the
+	// transaction.
 	const target = await db.user.findUnique({
 		where: { id: userId },
 		select: { email: true },
