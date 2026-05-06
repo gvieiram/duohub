@@ -33,4 +33,41 @@ export const admin = {
 		retry: "Tentar de novo",
 		logoutFailed: "Não foi possível encerrar sua sessão. Tente novamente.",
 	},
+	users: {
+		title: "Usuários",
+		subtitle: "Administradores com acesso ao painel.",
+		invite: "Convidar usuário",
+		columns: {
+			user: "Usuário",
+			status: "Status",
+			lastAccess: "Último acesso",
+			createdAt: "Cadastrado em",
+			actions: "Ações",
+		},
+		empty: {
+			title: "Nenhum usuário cadastrado",
+			description: "Convide o primeiro administrador.",
+		},
+		inviteDialog: {
+			title: "Convidar administrador",
+			description: "Vamos enviar um magic link para o e-mail informado.",
+			emailLabel: "E-mail",
+			nameLabel: "Nome",
+			submit: "Convidar",
+			success: "Convite enviado.",
+		},
+		revokeDialog: {
+			title: "Revogar acesso?",
+			description: (email: string) =>
+				`Isso impede que ${email} acesse o painel. Sessões ativas serão encerradas.`,
+			confirm: "Revogar acesso",
+			cancel: "Cancelar",
+			success: "Acesso revogado.",
+		},
+		errors: {
+			duplicateEmail: "Já existe um administrador com este e-mail.",
+			generic: "Não foi possível concluir. Tente novamente.",
+			selfRevoke: "Você não pode revogar seu próprio acesso.",
+		},
+	},
 } as const;
