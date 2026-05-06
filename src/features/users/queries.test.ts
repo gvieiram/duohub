@@ -33,7 +33,10 @@ describe("listUsers — query shape", () => {
 					take: 1,
 				},
 			},
-			orderBy: [{ revokedAt: "asc" }, { createdAt: "desc" }],
+			orderBy: [
+				{ revokedAt: { sort: "asc", nulls: "first" } },
+				{ createdAt: "desc" },
+			],
 		});
 	});
 });

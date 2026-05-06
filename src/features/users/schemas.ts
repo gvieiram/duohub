@@ -16,3 +16,5 @@ export type InviteUserInput = z.infer<typeof inviteUserSchema>;
 export const revokeUserSchema = z.object({
 	userId: z.string().min(1),
 });
+
+export type RevokeUserInput = z.infer<typeof revokeUserSchema>;

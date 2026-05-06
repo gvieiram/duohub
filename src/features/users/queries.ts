@@ -18,7 +18,10 @@ export async function listUsers(): Promise<UserListItem[]> {
 				take: 1,
 			},
 		},
-		orderBy: [{ revokedAt: "asc" }, { createdAt: "desc" }],
+		orderBy: [
+			{ revokedAt: { sort: "asc", nulls: "first" } },
+			{ createdAt: "desc" },
+		],
 	});
 
 	return users.map((u) => ({
