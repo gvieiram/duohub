@@ -64,7 +64,12 @@ type HeaderProps = {
 	isLogoCentered?: boolean;
 };
 
-const HIDDEN_PATH_PREFIXES = ["/admin", "/app"];
+// Auth-flow routes (login + post-login trampoline) deliberately render
+// without the marketing chrome — they're tool views, not institutional
+// pages. Keeping the chrome would also make `/login` look like a regular
+// landing page section and confuse users with brand nav while they're
+// trying to authenticate.
+const HIDDEN_PATH_PREFIXES = ["/admin", "/app", "/login", "/post-login"];
 
 export function Header({ isLogoCentered = false }: HeaderProps) {
 	const pathname = usePathname();
