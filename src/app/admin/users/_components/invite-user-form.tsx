@@ -38,10 +38,12 @@ export function InviteUserForm({ onSuccess }: InviteUserFormProps) {
 	async function onSubmit(values: InviteUserInput) {
 		const result = await inviteUserAction(values);
 		if (result.success) {
-			toast.success(inviteDialog.success);
+			toast.success(inviteDialog.success, { id: "invite-user-success" });
 			onSuccess?.();
 		} else {
-			toast.error(result.error || errors.generic);
+			toast.error(result.error || errors.generic, {
+				id: "invite-user-error",
+			});
 		}
 	}
 
@@ -63,6 +65,7 @@ export function InviteUserForm({ onSuccess }: InviteUserFormProps) {
 									type="email"
 									autoComplete="email"
 									maxLength={254}
+									disabled={form.formState.isSubmitting}
 									{...field}
 								/>
 							</FormControl>
@@ -82,7 +85,12 @@ export function InviteUserForm({ onSuccess }: InviteUserFormProps) {
 								</span>
 							</FormLabel>
 							<FormControl>
-								<Input type="text" maxLength={120} {...field} />
+								<Input
+									type="text"
+									maxLength={120}
+									disabled={form.formState.isSubmitting}
+									{...field}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>

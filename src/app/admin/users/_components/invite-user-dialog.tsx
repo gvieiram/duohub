@@ -33,10 +33,7 @@ export function InviteUserDialog({ triggerLabel }: InviteUserDialogProps) {
 					<DialogTitle>{inviteDialog.title}</DialogTitle>
 					<DialogDescription>{inviteDialog.description}</DialogDescription>
 				</DialogHeader>
-				<InviteUserForm
-					key={open ? "open" : "closed"}
-					onSuccess={() => setOpen(false)}
-				/>
+				<InviteUserForm onSuccess={() => setOpen(false)} />
 			</DialogContent>
 		</Dialog>
 	);

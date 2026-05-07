@@ -61,7 +61,7 @@ export function UsersTable({ users, currentUserId }: UsersTableProps) {
 					<TableRow key={user.id}>
 						<TableCell>
 							<div className="flex items-center gap-3">
-								<Avatar>
+								<Avatar aria-hidden="true">
 									<AvatarFallback>{resolveInitials(user)}</AvatarFallback>
 								</Avatar>
 								<div className="grid leading-tight">

@@ -32,9 +32,11 @@ export function RevokeUserButton({ user, disabled }: RevokeUserButtonProps) {
 		startTransition(async () => {
 			const result = await revokeUserAction({ userId: user.id });
 			if (result.success) {
-				toast.success(revokeDialog.success);
+				toast.success(revokeDialog.success, { id: "revoke-user-success" });
 			} else {
-				toast.error(result.error || errors.generic);
+				toast.error(result.error || errors.generic, {
+					id: "revoke-user-error",
+				});
 			}
 		});
 	}
