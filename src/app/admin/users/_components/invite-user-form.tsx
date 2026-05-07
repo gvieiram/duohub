@@ -65,8 +65,8 @@ export function InviteUserForm({ onSuccess }: InviteUserFormProps) {
 									type="email"
 									autoComplete="email"
 									maxLength={254}
-									disabled={form.formState.isSubmitting}
 									{...field}
+									disabled={form.formState.isSubmitting}
 								/>
 							</FormControl>
 							<FormMessage />
@@ -88,8 +88,8 @@ export function InviteUserForm({ onSuccess }: InviteUserFormProps) {
 								<Input
 									type="text"
 									maxLength={120}
-									disabled={form.formState.isSubmitting}
 									{...field}
+									disabled={form.formState.isSubmitting}
 								/>
 							</FormControl>
 							<FormMessage />
