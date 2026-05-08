@@ -6,7 +6,6 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { requireAdmin } from "@/lib/auth/helpers";
 import { AdminBreadcrumb } from "./_components/admin-breadcrumb";
 import { AdminSidebarTrigger } from "./_components/admin-sidebar-trigger";
-import { AdminThemeMount } from "./_components/admin-theme-mount";
 
 export const metadata: Metadata = {
 	robots: { index: false, follow: false, nocache: true },
@@ -28,14 +27,10 @@ export default async function AdminLayout({
 	};
 
 	return (
-		<>
-			{/*
-			 * `theme-admin` is mounted on <body> (not on a wrapping div) so
-			 * Radix portals — Sheet, Dialog, Dropdown, Popover — inherit the
-			 * admin palette. They mount under document.body, outside any
-			 * layout subtree. See `src/app/globals.css`.
-			 */}
-			<AdminThemeMount />
+		// `theme-admin` swaps the brand palette (Dark Teal + Terracota) for
+		// the stock shadcn neutral palette inside the admin shell. See
+		// `src/app/globals.css`.
+		<div className="theme-admin contents">
 			<SidebarProvider>
 				<AppSidebar user={user} />
 				<SidebarInset>
@@ -59,6 +54,6 @@ export default async function AdminLayout({
 					<div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>
 				</SidebarInset>
 			</SidebarProvider>
-		</>
+		</div>
 	);
 }
